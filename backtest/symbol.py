@@ -1,4 +1,3 @@
-import mysql.connector
 
 class SymbolDataSource(object):
     YAHOO = 5
@@ -7,46 +6,46 @@ class SymbolDataSource(object):
 
 class Symbol(object):
 
-    _symbolCache = {}
-    _dbConnection = mysql.connector.connect(user='root', database='BlackBox')
+    _symbolDataProvider = None
+    _symbolState = {}
 
     @staticmethod
-    def get(identifier):
-        try:
-            # first search our static cache
-            return Symbol._symbolCache[identifier]
-        except Exception,e:
-            # then the database
-            symbol = Symbol(identifier)
-            Symbol._symbolCache[identifier] = symbol
-            return symbol
+    def setDataProvider(cls, dataProvider):
+        cls._symbolDataProvider = dataProvider
 
     def __init__(self, identifier):
-        self.identifier = identifier
-        self.name = None
-        self.lookup = {}
-        self.spread = 1.0
+        if self._symbolDataProvider is None:
+            raise RuntimeError("Symbol data provider hasn't been set")
 
-        cursor = self._dbConnection.cursor(buffered=True)
-        cursor.callproc('SymbolInfo', [self.identifier, ])
-        for result in cursor.stored_results():
-            results = result.fetchall()
-            if len(results) == 0:
-                raise LookupError("Symbol: '{0}' Not Found".format(self.identifier))
-            for result in results:
-                self.spread = result[4]
-        cursor.close()
+        if identifier in self._symbolState:
+            self.__dict__ = self._symbolState[identifier]
+        else:
+            self.identifier = identifier
+            self.name = None
+            self.lookup = {}
+            self.spread = 1.0
+            self._symbolState[identifier] = self.__dict__
 
-        cursor = self._dbConnection.cursor(buffered=True)
-        cursor.callproc('GetSymbol', [self.identifier, ])
-        for result in cursor.stored_results():
-            results = result.fetchall()
-            if len(results) == 0:
-                raise LookupError("Symbol: '{0}' Not Found".format(self.identifier))
-            for result in results:
-                self.name = result[1]
-                self.lookup[result[2]] = result[3]
-        cursor.close()
+        # cursor = self._dbConnection.cursor(buffered=True)
+        # cursor.callproc('SymbolInfo', [self.identifier, ])
+        # for result in cursor.stored_results():
+        #     results = result.fetchall()
+        #     if len(results) == 0:
+        #         raise LookupError("Symbol: '{0}' Not Found".format(self.identifier))
+        #     for result in results:
+        #         self.spread = result[4]
+        # cursor.close()
+        #
+        # cursor = self._dbConnection.cursor(buffered=True)
+        # cursor.callproc('GetSymbol', [self.identifier, ])
+        # for result in cursor.stored_results():
+        #     results = result.fetchall()
+        #     if len(results) == 0:
+        #         raise LookupError("Symbol: '{0}' Not Found".format(self.identifier))
+        #     for result in results:
+        #         self.name = result[1]
+        #         self.lookup[result[2]] = result[3]
+        # cursor.close()
 
     def referenceSymbol(self, dataSource):
         return self.lookup[dataSource]

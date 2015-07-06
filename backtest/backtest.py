@@ -1,9 +1,7 @@
-from datetime import datetime, timedelta
 import logging
 import sys
 from BackTestFramework import BackTestFramework
 from DataProvider.MySQLBackTestDataProvider import MySQLBackTestDataProvider
-from ResultsProcessors.MYSQLResults import MySQLResults
 import argparse
 
 def processBacktestRequest(algoId):
@@ -53,9 +51,6 @@ if __name__ == '__main__':
         level = logging.WARN
     logging.basicConfig(format='%(levelname)s: %(message)s', level=level)
 
-    _dbConnection = mysql.connector.connect(user='root', database='BlackBox')
-    cursor = _dbConnection.cursor(buffered=True)
-
     successful = True
 
     # log_capture_string = StringIO.StringIO()
@@ -66,7 +61,7 @@ if __name__ == '__main__':
 
     try:
         processBacktestRequest(args.algo)
-    except Exception, e:
+    except Exception as e:
         logging.exception(e)
         successful = False
 
@@ -74,6 +69,4 @@ if __name__ == '__main__':
     # log_capture_string.close()
     # logger.removeHandler(ch)
 
-    cursor.close()
-    _dbConnection.commit()
     logging.debug('...all done')

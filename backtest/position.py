@@ -1,36 +1,22 @@
+from enum import Enum
 import uuid
 
-class PositionDirection(object):
-    LONG = 0
-    SHORT = 1
-
-class PositionStopType(object):
-    FIXED = 0
-    TRAILING = 1
-
-class PositionExitReason(object):
-    NOT_CLOSED = 0
-    SIGNAL = 1
-    STOP_LOSS = 2
-    TAKE_PROFIT = 3
-
 class Position(object):
+    class ExitReason(Enum):
+        NOT_CLOSED = 0
+        SIGNAL = 1
+        STOP_LOSS = 2
+        TAKE_PROFIT = 3
 
-    def __init__(self, symbol, quote, direction, ratio = 1, stopLoss = -1, stopType = PositionStopType.FIXED, takeProfit = -1):
-        self.symbol = symbol
-        self.direction = direction
+    def __init__(self, order, quote):
+        self.order = order
         self.entryQuote = quote
         self.exitQuote = None
-        self.ratio = ratio
-        self.stopLoss = stopLoss
-        self.absoluteStopLossValue = self.stopLoss
-        self.stopType = stopType
-        self.takeProfit = takeProfit
         self.minPrice = self.entryQuote.close
         self.maxPrice = self.entryQuote.close
         self.closed = False
         self.id = uuid.uuid4()
-        self.exitReason = PositionExitReason.NOT_CLOSED
+        self.exitReason = Position.ExitReason.NOT_CLOSED
         self.adjustedClose = None
 
     def isOpen(self):
@@ -46,11 +32,11 @@ class Position(object):
             else:
                 self.absoluteStopLossValue = min(self.absoluteStopLossValue, quote.low + offset)
 
-    def close(self, quote, reason = PositionExitReason.SIGNAL):
+    def close(self, quote, reason = Position.ExitReason.SIGNAL):
         self.exitQuote = quote
-        if reason == PositionExitReason.STOP_LOSS:
+        if reason == Position.ExitReason.STOP_LOSS:
             self.adjustedClose = self.absoluteStopLossValue
-        if reason == PositionExitReason.TAKE_PROFIT:
+        if reason == Position.ExitReason.TAKE_PROFIT:
             self.adjustedClose = self.takeProfit
         self.closed = True
         self.exitReason = reason
@@ -66,14 +52,14 @@ class Position(object):
             if self.stopLoss != -1:
                 if self.direction == PositionDirection.LONG:
                     if quote.low <= self.absoluteStopLossValue:
-                        return PositionExitReason.STOP_LOSS
+                        return Position.ExitReason.STOP_LOSS
                 else:
                     if quote.high >= self.absoluteStopLossValue:
-                        return PositionExitReason.STOP_LOSS
+                        return Position.ExitReason.STOP_LOSS
 
             if self.takeProfit != -1 and (quote.high - self.entryQuote.close) * multiplier * self.ratio >= self.takeProfit:
-                return PositionExitReason.TAKE_PROFIT
-        return PositionExitReason.NOT_CLOSED
+                return Position.ExitReason.TAKE_PROFIT
+        return Position.ExitReason.NOT_CLOSED
 
     def __str__(self):
         d = "LONG  " if self.direction == PositionDirection.LONG else "SHORT "
@@ -89,7 +75,7 @@ class Position(object):
                                                                             self.entryQuote.close,
                                                                             (self.exitQuote.close if self.adjustedClose is None else self.adjustedClose),
                                                                             self.pointsDelta(),
-                                                                            "StopLoss" if self.exitReason == PositionExitReason.STOP_LOSS
+                                                                            "StopLoss" if self.exitReason == Position.ExitReason.STOP_LOSS
                                                                                 else "Take Profit" if self.exitReason == PositionExitReason.TAKE_PROFIT
                                                                                 else "Signal")
 
