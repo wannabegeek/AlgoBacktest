@@ -3,6 +3,9 @@ from backtest.symbol import Symbol
 import unittest
 
 class SymbolTest(unittest.TestCase):
+    def setUp(self):
+        Symbol.setDataProvider("1")
+
     def testSymbol(self):
         s1 = Symbol("TEST")
         s2 = Symbol("TEST")

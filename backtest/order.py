@@ -52,10 +52,10 @@ class Order(object):
         self.id = uuid.uuid4()
 
     def isPending(self):
-        return self.state == State.PENDING
+        return self.state.value == State.PENDING.value
 
     def isComplete(self):
-        return self.state > State.PENDING
+        return self.state.value > State.PENDING.value
 
     def shouldFill(self, tick):
         if not isinstance(tick, Tick):
@@ -65,7 +65,7 @@ class Order(object):
             raise RunTimeError("Order is already complete")
 
         if self.expireTime is not None:
-            timediff = datetime.utcnow() - self.entryTime
+            timediff = tick.timestamp - self.entryTime
             if timediff.total_seconds() >= self.expireTime.total_seconds():
                 self.state = State.EXPIRED
                 return False

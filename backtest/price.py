@@ -1,4 +1,5 @@
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
+import statistics
 
 class Tick(object):
     def __init__(self, timestamp, bid, offer, volume = 0):
@@ -11,39 +12,55 @@ class Tick(object):
         return self.offer - self.spread
 
     def midPrice(self):
-        return avg(self.bid, self.offer)
+        return statistics.mean([self.bid, self.offer])
 
 
 class PriceConflator(object):
-    def __init__(self, period, callback = None):
+    def __init__(self, symbol, period, callback = None):
         if not isinstance(period, timedelta):
             raise TypeError("period must be a timedelta")
+        self.symbol = symbol
         self.period = period
         self.callback = callback
-        self.currentQuote = Quote()
+        self.periodStartingTimestamp = None
+        self.currentQuote = None
+
+    @classmethod
+    def _roundDateTimeToPeriod(cls, timestamp, period):
+        roundTo = period.total_seconds()
+        seconds = timestamp.replace(tzinfo=timezone.utc).timestamp() % roundTo 
+        return timestamp - timedelta(seconds=seconds)
 
     def addTick(self, tick):
-        self.currentQuote.addTick(tick)
-        if we go to next period:
-            self.callback(self.currentQuote)
-            self.currentQuote = Quote()
+        if not self.currentQuote:
+            self.periodStartingTimestamp = tick.timestamp
+            self.currentQuote = Quote(self._roundDateTimeToPeriod(tick.timestamp, self.period), self.period, tick)
+        else:
+            currentTickTimeBlock = self._roundDateTimeToPeriod(tick.timestamp, self.period)
+            print("tick:%s block:%s" % (tick.timestamp, currentTickTimeBlock))
+            print("quoteTime:%s " % (self.currentQuote.startTime, ))
+            if self.currentQuote.startTime + self.period < currentTickTimeBlock:
+                self.currentQuote.addTick(tick)
+            else:
+                if self.callback is not None:
+                    self.callback(self.currentQuote)
+                self.currentQuote = Quote(self.currentQuote.startTime + self.period, self.period, tick)
+
 
 class Quote(object):
     """
     A single quote representaion. This is for conflated data, so it contains OHLC data.
     """
-    symbol = None
-    timestamp = None
-    open = None
-    high = None
-    low = None
-    close = None
-    volume = None
 
-    data = {}
-
-    def __init__(self, symbol):
-        self.symbol = symbol
+    def __init__(self, startTime, period, tick):
+        self.volume = None
+        self.startTime = startTime
+        self.period = period
+        self.open = None
+        self.high = None
+        self.low = None
+        self.close = None
+        self.addTick(tick)
 
     def addTick(self, tick):
         price = tick.midPrice()
