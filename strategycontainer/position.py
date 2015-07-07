@@ -1,7 +1,8 @@
 from enum import Enum
 import uuid
+
 from backtest.order import StopLoss, Direction, State, Order
-from backtest.price import Tick
+from strategycontainer.price import Tick
 
 
 class Position(object):

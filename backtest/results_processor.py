@@ -1,7 +1,8 @@
 from bisect import bisect_left
 from datetime import timedelta
 
-from backtest.position import PositionDirection
+from strategycontainer.position import PositionDirection
+
 
 class ResultsProcessorResults(object):
     TIMESTAMP = 0

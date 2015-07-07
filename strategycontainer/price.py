@@ -2,6 +2,10 @@ from datetime import timedelta, datetime, timezone
 import statistics
 
 class Tick(object):
+    """
+    A single tick in the market, this contains just a bid, offer and volume
+    Market depth isn't available in this framework yet
+    """
     def __init__(self, timestamp, bid, offer, volume = 0):
         self.timestamp = timestamp
         self.bid = bid
@@ -14,6 +18,10 @@ class Tick(object):
     def midPrice(self):
         return statistics.mean([self.bid, self.offer])
 
+def roundDateTimeToPeriod(timestamp, period):
+    roundTo = period.total_seconds()
+    seconds = timestamp.replace(tzinfo=timezone.utc).timestamp() % roundTo
+    return timestamp - timedelta(seconds=seconds)
 
 class PriceConflator(object):
     def __init__(self, symbol, period, callback = None):
@@ -25,26 +33,22 @@ class PriceConflator(object):
         self.periodStartingTimestamp = None
         self.currentQuote = None
 
-    @classmethod
-    def _roundDateTimeToPeriod(cls, timestamp, period):
-        roundTo = period.total_seconds()
-        seconds = timestamp.replace(tzinfo=timezone.utc).timestamp() % roundTo 
-        return timestamp - timedelta(seconds=seconds)
-
     def addTick(self, tick):
         if not self.currentQuote:
             self.periodStartingTimestamp = tick.timestamp
-            self.currentQuote = Quote(self._roundDateTimeToPeriod(tick.timestamp, self.period), self.period, tick)
+            self.currentQuote = Quote(roundDateTimeToPeriod(tick.timestamp, self.period), self.period, tick)
         else:
-            currentTickTimeBlock = self._roundDateTimeToPeriod(tick.timestamp, self.period)
-            print("tick:%s block:%s" % (tick.timestamp, currentTickTimeBlock))
-            print("quoteTime:%s " % (self.currentQuote.startTime, ))
-            if self.currentQuote.startTime + self.period < currentTickTimeBlock:
+            currentTickTimeBlock = roundDateTimeToPeriod(tick.timestamp, self.period)
+            if currentTickTimeBlock.timestamp() < (self.currentQuote.startTime + self.period).timestamp():
                 self.currentQuote.addTick(tick)
             else:
                 if self.callback is not None:
                     self.callback(self.currentQuote)
-                self.currentQuote = Quote(self.currentQuote.startTime + self.period, self.period, tick)
+                t = self.currentQuote.startTime + self.period
+                while currentTickTimeBlock.timestamp() >= (t + self.period).timestamp():
+                        self.callback(Quote(t, self.period, Tick(self.currentQuote.startTime, self.currentQuote.close, self.currentQuote.close)))
+                        t = t + self.period
+                self.currentQuote = Quote(t, self.period, tick)
 
 
 class Quote(object):
@@ -69,10 +73,6 @@ class Quote(object):
         self.high = price if self.high is None else max(self.high, price)
         self.low = price if self.low is None else min(self.low, price)
         self.close = price
-        self.timestamp = tick.timestamp
-
-    def setWithDictionary(self, values, keys):
-        (self.timestamp, self.high, self.low, self.volume, self.close, self.open) = [values.get(k) for k in keys]
 
     def __str__(self):
-        return "{} - {}: {:.4f} -> {:.4f} o:{:.4f} c:{:.4f}".format(self.symbol.name, self.timestamp, self.low, self.high, self.open, self.close)
+        return "{:.4f} -> {:.4f} o:{:.4f} c:{:.4f}".format(self.low, self.high, self.open, self.close)

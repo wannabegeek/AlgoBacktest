@@ -1,8 +1,10 @@
 from datetime import datetime
 from enum import Enum
 import uuid
-from backtest.symbol import Symbol
+
+from strategycontainer.symbol import Symbol
 from backtest.price import Tick
+
 
 class Direction(Enum):
     LONG = 0

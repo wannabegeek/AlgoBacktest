@@ -1,23 +1,19 @@
-import logging
 import time
 
 from numpy import *
 
-from backtest.algo_framework import AlgoFramework
+from strategycontainer.strategy import StrategyFramework
 from Anaylsis import Financial, Mathmatical
 from HistoricDataRequest import SymbolRequestPeriod
 from Position import PositionDirection, PositionStopType
 from Symbol import Symbol
 
 
-class Algo(AlgoFramework):
+class Algo(StrategyFramework):
     processingCache = {}
 
     def __init__(self):
         pass
-
-    def valid(self):
-        return True
 
     def warmupPeriod(self):
         """
@@ -34,7 +30,7 @@ class Algo(AlgoFramework):
         This is a list of symbols which are used in the portfolio for this algorithm.
         :return: Array of Symbols used in this algorithm
         """
-        return [Symbol.get('FTSE:IDX'), ]
+        return [Symbol('FTSE:IDX'), ]
 
     # def analysis_symbols(self):
     #     """

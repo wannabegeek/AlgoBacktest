@@ -1,6 +1,6 @@
-from backtest.symbol import Symbol
-
 import unittest
+
+from strategycontainer.symbol import Symbol
 
 class SymbolTest(unittest.TestCase):
     def setUp(self):

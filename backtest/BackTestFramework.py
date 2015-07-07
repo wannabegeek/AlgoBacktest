@@ -1,5 +1,5 @@
 import QuoteData
-from backtest.algo_framework import AlgoFramework
+from strategycontainer.strategy import AlgoFramework
 
 
 class BackTestFramework(object):
