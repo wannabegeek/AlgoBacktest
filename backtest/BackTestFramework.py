@@ -1,4 +1,5 @@
 import QuoteData
+from backtest.algo_framework import AlgoFramework
 
 
 class BackTestFramework(object):
@@ -8,16 +9,13 @@ class BackTestFramework(object):
     context = None
 
     def __init__(self, dataProviderClass, algo, progressCallback = None):
+        if not isinstance(algo, AlgoFramework):
+            raise TypeError("Algo provided isn't valid")
+
         self.algo = algo
         self.progressCounter = 0
         self.progressCallback = progressCallback
         self.context = QuoteData.StrategyContext(self.algo.analysis_symbols())
-
-        # if not isinstance(dataProvider, HistoricalQuoteRequest):
-        #     raise TypeError("Data Provider must be of type 'HistoricalQuoteRequest'")
-
-        if not self.algo.valid():
-            raise TypeError("Algo provided isn't valid")
 
         for smbl in algo.analysis_symbols():
             self.dataProviders.append(dataProviderClass(smbl, self.algo.period()))

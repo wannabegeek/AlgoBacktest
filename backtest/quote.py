@@ -4,29 +4,6 @@ import logging
 from backtest.position import Position, PositionDirection, PositionStopType, PositionExitReason
 from backtest.symbol import Symbol
 
-class Quote(object):
-    """
-    A single quote representaion. This is for conflated data, so it contains OHLC data.
-    """
-    symbol = None
-    timestamp = None
-    high = -1
-    low = -1
-    volume = -1
-    close = -1
-    open = -1
-
-    data = {}
-
-    def __init__(self, symbol):
-        self.symbol = symbol
-
-    def setWithDictionary(self, values, keys):
-        (self.timestamp, self.high, self.low, self.volume, self.close, self.open) = [values.get(k) for k in keys]
-
-    def __str__(self):
-        return "{} - {}: {:.4f} -> {:.4f} o:{:.4f} c:{:.4f}".format(self.symbol.name, self.timestamp, self.low, self.high, self.open, self.close)
-
 class SymbolContext(object):
     """
     Context for a symbol contained within a StategyContext
@@ -58,7 +35,7 @@ class SymbolContext(object):
         t = quote.timestamp
         if t not in self.quoteCache:
             self.quoteCache[t] = quote
-        self.cache = {}  # reset out cache
+        self.cache = {}  # reset our cache
         self.lastUpdate = datetime.now()
 
         self.timestamp = quote.timestamp

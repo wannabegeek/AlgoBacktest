@@ -10,8 +10,8 @@ class Symbol(object):
     _symbolState = {}
 
     @staticmethod
-    def setDataProvider(cls, dataProvider):
-        cls._symbolDataProvider = dataProvider
+    def setDataProvider(dataProvider):
+        Symbol._symbolDataProvider = dataProvider
 
     def __init__(self, identifier):
         if self._symbolDataProvider is None:
@@ -24,6 +24,7 @@ class Symbol(object):
             self.name = None
             self.lookup = {}
             self.spread = 1.0
+            self.leverage = 5
             self._symbolState[identifier] = self.__dict__
 
         # cursor = self._dbConnection.cursor(buffered=True)

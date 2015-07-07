@@ -1,3 +1,4 @@
+from abc import ABCMeta, abstractmethod
 
 class AlgoSignalIndicator(object):
     NoAction = 0
@@ -7,6 +8,8 @@ class AlgoSignalIndicator(object):
     ExitShort = 4
 
 class AlgoFramework(object):
+    __metaclass__ = ABCMeta
+
     def __init__(self):
         self.currentContext = None
         pass
@@ -20,14 +23,17 @@ class AlgoFramework(object):
     def analysis_symbols(self):
         return self.portfolio_symbols()
 
+    @abstractmethod
     def portfolio_symbols(self):
-        raise NotImplementedError("'portfolio_symbols' must be implemented by sub-class")
+        pass
 
+    @abstractmethod
     def period(self):
-        raise NotImplementedError("'period' must be implemented by sub-class")
+        pass
 
     def initialiseContext(self, context):
         pass;
 
+    @abstractmethod
     def evaluateTickUpdate(self, context, quote):
-        raise NotImplementedError("'evaluateEntry' must be implemented by sub-class")
+        pass
