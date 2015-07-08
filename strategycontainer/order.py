@@ -36,7 +36,7 @@ class State(Enum):
     CANCELLED = 3
 
 class Order(object):
-    def __init__(self, symbol, entry, direction, stoploss = None, takeProfit = None, expireTime = None):
+    def __init__(self, symbol, quantity, entry, direction, stoploss = None, takeProfit = None, expireTime = None, entryTime = datetime.utcnow()):
         if not isinstance(symbol, Symbol):
             raise ValueError('argument "symbol" must be a Symbol')
         if not isinstance(entry, Entry):
@@ -44,13 +44,14 @@ class Order(object):
         if stoploss is not None and not isinstance(stoploss, StopLoss):
             raise ValueError('argument "stoploss" must be a StopLoss')
         self.symbol = symbol
+        self.quantity = quantity
         self.entry = entry
         self.direction = direction
         self.stoploss = stoploss
         self.takeProfit = takeProfit
         self.expireTime = expireTime
         self.state = State.WORKING
-        self.entryTime = datetime.utcnow()
+        self.entryTime = entryTime
         self.id = uuid.uuid4()
 
     def isPending(self):
@@ -86,3 +87,8 @@ class Order(object):
                 return tick.bid <= self.entry.price
 
         return False
+
+    def __str__(self):
+        return "%s: %s %s@%s" % (self.state.name, self.direction.name, self.quantity, "MARKET" if self.entry.type == Entry.Type.MARKET else self.entry.price)
+
+    __repr__ = __str__

@@ -16,7 +16,7 @@ class PositionExitTests(unittest.TestCase):
         s1.leverage = 1.0
 
         # LONG
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = StopLoss(StopLoss.Type.FIXED, 1))
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = StopLoss(StopLoss.Type.FIXED, 1))
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
 
@@ -31,7 +31,7 @@ class PositionExitTests(unittest.TestCase):
         self.assertEqual(10.0, position.exitPrice)
 
         # SHORT
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss = StopLoss(StopLoss.Type.FIXED, 1))
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss = StopLoss(StopLoss.Type.FIXED, 1))
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
 
@@ -50,7 +50,7 @@ class PositionExitTests(unittest.TestCase):
         s1 = Symbol("TEST")
         s1.leverage = 1.0
 
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = StopLoss(StopLoss.Type.FIXED, 1))
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = StopLoss(StopLoss.Type.FIXED, 1))
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
         result = position.shouldClosePosition(tick)
@@ -63,7 +63,7 @@ class PositionExitTests(unittest.TestCase):
 
         self.assertEqual(9.0, position.exitPrice)
 
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss = StopLoss(StopLoss.Type.FIXED, 1))
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss = StopLoss(StopLoss.Type.FIXED, 1))
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
         result = position.shouldClosePosition(tick)
@@ -80,7 +80,7 @@ class PositionExitTests(unittest.TestCase):
         s1 = Symbol("TEST")
         s1.leverage = 1.0
 
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = StopLoss(StopLoss.Type.TRAILING, 1))
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = StopLoss(StopLoss.Type.TRAILING, 1))
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
 
@@ -104,7 +104,7 @@ class PositionExitTests(unittest.TestCase):
         s1.leverage = 1.0
 
         # LONG
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, takeProfit=12.5)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, takeProfit=12.5)
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
 
@@ -123,7 +123,7 @@ class PositionExitTests(unittest.TestCase):
         self.assertEqual(12.5, position.exitPrice)
 
         # SHORT
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.SHORT, takeProfit=10.5)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, takeProfit=10.5)
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
 
@@ -142,7 +142,7 @@ class PositionExitTests(unittest.TestCase):
         s1.leverage = 1.0
 
         # LONG
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, takeProfit=12.5)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, takeProfit=12.5)
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
 
@@ -161,7 +161,7 @@ class PositionExitTests(unittest.TestCase):
         self.assertEqual(12.5, position.exitPrice)
 
         # SHORT
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.SHORT, takeProfit=10.5)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, takeProfit=10.5)
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
 
@@ -184,7 +184,7 @@ class PositionProfitLossTests(unittest.TestCase):
         s1.leverage = 10000.0
 
         # LONG
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.LONG)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG)
         tick = Tick(datetime.utcnow(), 1.12239, 1.12245) # spread of 0.6
         position = Position(order, tick)
 
@@ -198,7 +198,7 @@ class PositionProfitLossTests(unittest.TestCase):
         s1.leverage = 10000.0
 
         # LONG
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.SHORT)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT)
         tick = Tick(datetime.utcnow(), 1.12239, 1.12245) # spread of 0.6
         position = Position(order, tick)
 
@@ -212,7 +212,7 @@ class PositionProfitLossTests(unittest.TestCase):
         s1.leverage = 10000.0
 
         # LONG
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.LONG)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG)
         tick = Tick(datetime.utcnow(), 1.12239, 1.12245) # spread of 0.6
         position = Position(order, tick)
 
@@ -226,7 +226,7 @@ class PositionProfitLossTests(unittest.TestCase):
         s1.leverage = 10000.0
 
         # LONG
-        order = Order(s1, Entry(Entry.Type.MARKET), Direction.SHORT)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT)
         tick = Tick(datetime.utcnow(), 1.12239, 1.12245) # spread of 0.6
         position = Position(order, tick)
 

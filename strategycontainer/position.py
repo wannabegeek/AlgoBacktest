@@ -84,20 +84,6 @@ class Position(object):
         return Position.ExitReason.NOT_CLOSED
 
     def __str__(self):
-        s = ""
-        if self.order.stoploss is not None:
-            s = "S/L: {0}{1}".format(self.stopLoss, "[T]" if self.order.stoploss == StopLoss.type.TRAILING else "[F]")
-        if self.isOpen():
-            result = "{0} {1:3.1f}: {2} --> (Still Open)        ({3:.4f}) {4}".format(self.order.direction.name, self.ratio, self.entryQuote.timestamp,
-                                                                        self.entryQuote.close, s)
-        else:
-            result = "{0} {1:3.1f}: {2} --> {3} ({4:.4f} - {5:.4f} [{6:.4f}]) {7}".format(self.order.direction.name, self.ratio, self.entryQuote.timestamp,
-                                                                            self.exitQuote.timestamp,
-                                                                            self.entryQuote.close,
-                                                                            (self.exitQuote.close if self.adjustedClose is None else self.adjustedClose),
-                                                                            self.pointsDelta(),
-                                                                            "StopLoss" if self.exitReason == Position.ExitReason.STOP_LOSS
-                                                                                else "Take Profit" if self.exitReason == Position.ExitReason.TAKE_PROFIT
-                                                                                else "Closed")
+        return "Status: %s [%s %s]" % (self.exitReason.name, self.order.direction.name, self.entryPrice)
 
-        return result
+    __repr__ = __str__

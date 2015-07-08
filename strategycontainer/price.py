@@ -43,6 +43,7 @@ class PriceConflator(object):
         if not self.currentQuote:
             self.periodStartingTimestamp = tick.timestamp
             self.currentQuote = Quote(self.symbol, roundDateTimeToPeriod(tick.timestamp, self.period), self.period, tick)
+            return self.currentQuote
         else:
             currentTickTimeBlock = roundDateTimeToPeriod(tick.timestamp, self.period)
             if currentTickTimeBlock.timestamp() < (self.currentQuote.startTime + self.period).timestamp():
@@ -55,6 +56,8 @@ class PriceConflator(object):
                         self.callback(Quote(self.symbol, t, self.period, Tick(self.currentQuote.startTime, self.currentQuote.close, self.currentQuote.close)))
                         t = t + self.period
                 self.currentQuote = Quote(self.symbol, t, self.period, tick)
+                return self.currentQuote
+        return None
 
 
 class Quote(object):
@@ -72,6 +75,7 @@ class Quote(object):
         self.low = None
         self.close = None
         self.ticks = 0
+        self.lastTick = None
         self.addTick(tick)
 
     def addTick(self, tick):
@@ -81,6 +85,7 @@ class Quote(object):
         self.high = price if self.high is None else max(self.high, price)
         self.low = price if self.low is None else min(self.low, price)
         self.close = price
+        self.lastTick = tick
         self.ticks = self.ticks + 1
 
     def __str__(self):

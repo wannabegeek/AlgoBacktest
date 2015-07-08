@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import unittest
 
-from backtest.order import Order, Entry, Direction, State
+from strategycontainer.order import Order, Entry, Direction, State
 from strategycontainer.symbol import Symbol
 from strategycontainer.price import Tick
 
@@ -12,7 +12,7 @@ class OrderTest(unittest.TestCase):
 
     def testMarketOrder(self):
         s = Symbol("TEST")
-        order = Order(s, Entry(Entry.Type.MARKET), Direction.LONG)
+        order = Order(s, 1, Entry(Entry.Type.MARKET), Direction.LONG)
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
 
         r = order.shouldFill(tick)
@@ -20,7 +20,7 @@ class OrderTest(unittest.TestCase):
 
     def testLimitOrder(self):
         s = Symbol("TEST")
-        order = Order(s, Entry(Entry.Type.LIMIT, 10.0), Direction.LONG)
+        order = Order(s, 1, Entry(Entry.Type.LIMIT, 10.0), Direction.LONG)
 
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         r = order.shouldFill(tick)
@@ -32,7 +32,7 @@ class OrderTest(unittest.TestCase):
 
     def testStopEntryOrder(self):
         s = Symbol("TEST")
-        order = Order(s, Entry(Entry.Type.STOP_ENTRY, 10.0), Direction.LONG)
+        order = Order(s, 1, Entry(Entry.Type.STOP_ENTRY, 10.0), Direction.LONG)
 
         tick = Tick(datetime.utcnow(), 9.0, 9.1)
         r = order.shouldFill(tick)
@@ -44,7 +44,7 @@ class OrderTest(unittest.TestCase):
 
     def testExpireTime(self):
         s = Symbol("TEST")
-        order = Order(s, Entry(Entry.Type.STOP_ENTRY, 10.0), Direction.LONG, expireTime=timedelta(seconds=1))
+        order = Order(s, 1, Entry(Entry.Type.STOP_ENTRY, 10.0), Direction.LONG, expireTime=timedelta(seconds=1))
 
         tick = Tick(datetime.utcnow(), 9.0, 9.1)
         r = order.shouldFill(tick)

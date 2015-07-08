@@ -8,7 +8,6 @@ class Algo(Framework):
 
     def __init__(self):
         super(Framework, self).__init__()
-        Symbol.setDataProvider("")
         pass
 
     def warmupPeriod(self):
@@ -60,7 +59,7 @@ class Algo(Framework):
         """
         symbolContext = context.symbolContexts[quote.symbol]
 
-        logging.debug("I'm evaluating the data")
+        logging.debug("I'm evaluating the data for %s" % (symbolContext, ))
 
         # if quote.symbol == self.symbol:
         #     if len(symbolContext.quotes()) > 25:  # i.e. we have enough data

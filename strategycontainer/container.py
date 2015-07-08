@@ -3,6 +3,7 @@ from data.data_provider import Provider
 from strategycontainer.position import Position
 from strategycontainer.price import PriceConflator, Quote
 from strategycontainer.strategy import Framework, Context
+from strategycontainer.symbol import Symbol
 
 
 class Container(object):
@@ -11,6 +12,8 @@ class Container(object):
             raise TypeError("algorithm must be a subclass of strategycontainer.strategy.Framework")
         if not isinstance(priceDataProvider, Provider):
             raise TypeError("priceDataProvider must be a subclass of data.data_provider.Provider")
+
+        Symbol.setDataProvider("")
 
         self.algo = algo
         self.progressCallback = progressCallback
@@ -22,7 +25,8 @@ class Container(object):
 
         self.algo.initialiseContext(self.context)
 
-        for symbol in algo.analysis_symbols():
+    def start(self):
+        for symbol in self.algo.analysis_symbols():
             self.priceConflation[symbol] = PriceConflator(symbol, self.algo.period(), lambda x: self.handleData(x))
             self.priceDataProvider.register(symbol)
 
@@ -33,6 +37,7 @@ class Container(object):
         for order in self.context.getOpenOrders():
             if order.shouldFill(tick):
                 logging.debug("We need to create a position for %s" % order)
+                self.context.openPosition(Position(order, tick))
 
     def _evaluateActivePositions(self, tick):
         for position in self.context.getOpenPositions():
@@ -42,13 +47,12 @@ class Container(object):
 
     def handleTickUpdate(self, symbol, tick):
         try:
-            #logging.debug("Received tick update for %s: %s" % (symbol, tick))
             # We need to evaluate if we have any limit orders and stop loss events triggered
             self._evaluatePendingOrder(tick)
             self._evaluateActivePositions(tick)
             self.priceConflation[symbol].addTick(tick)
         except KeyError as e:
-            logging.error("Received data update for symbol we're not subscribed to")
+            logging.error("Received data update for symbol we're not subscribed to (%s)" % (symbol,))
 
     def handleData(self, quote):
         """
@@ -57,13 +61,16 @@ class Container(object):
         if quote is None or not isinstance(quote, Quote):
             raise AssertionError("Invalid quote")
 
-        logging.debug("We have some data: %s" % (quote,))
+        # logging.debug("We have some data: %s" % (quote,))
+        orderCount = len(self.context.orders)
         self.context.addQuote(quote)
         self.algo.evaluateTickUpdate(self.context, quote)
-        # self.context.addQuote(quote)
-        # for position in self.context.openPositions:
-        #     position.update(quote)
-        # # logging.debug("Received Quote %s", quote)
+
+        # see if any orders have been added, if so, we should see if they need to be filled etc.
+        if orderCount != len(self.context.orders):
+            self._evaluatePendingOrder(quote.lastTick)
+            self._evaluateActivePositions(quote.lastTick)
+
         # self.algo.evaluateTickUpdate(self.context, quote)
         # if self.progressCallback is not None:
         #     self.progressCounter += 1

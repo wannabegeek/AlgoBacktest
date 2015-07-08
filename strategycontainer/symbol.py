@@ -1,3 +1,4 @@
+from bisect import bisect_left
 import datetime
 
 
@@ -25,7 +26,6 @@ class Symbol(object):
             self.identifier = identifier
             self.name = None
             self.lookup = {}
-            self.spread = 1.0
             self.leverage = 5
             self._symbolState[identifier] = self.__dict__
 
@@ -71,12 +71,9 @@ class SymbolContext(object):
 
     You can also store and access custom variables using the [] accessor/mutator
     """
-
     def __init__(self, symbol):
         self.symbol = symbol
         self.lastUpdate = None
-        self.quoteCache = {}
-        self.cache = {}
 
         self.timestamp = None
         self.price = 0.0
@@ -85,102 +82,59 @@ class SymbolContext(object):
         self.high = 0.0
         self.low = 0.0
 
+        self.quotes = []
+        self.opens = []
+        self.highs = []
+        self.lows = []
+        self.closes = []
+
     def addQuote(self, quote):
         """
         Add a quote to this symbol context
         :param quote: quote to add
         :return: None
         """
-        # t = time.mktime(quote.timestamp.timetuple())
-        t = quote.startTime
-        if t not in self.quoteCache:
-            self.quoteCache[t] = quote
-        self.cache = {}  # reset our cache
         self.lastUpdate = datetime.datetime.now()
-
         self.timestamp = quote.startTime
+
         self.price = quote.close
         self.open = quote.open
         self.close = quote.close
         self.high = quote.high
         self.low = quote.low
 
-    def quotes(self):
-        """
-        Return all quotes for this symbol context
-        :return: A timestamp sorted list of all quotes for this symbol
-        """
-        if 'quotes' not in self.cache:
-            self.cache['quotes'] = [self.quoteCache[k] for k in sorted(self.quoteCache.keys())]
-        return self.cache['quotes']
+        self.opens.append(quote.open)
+        self.highs.append(quote.high)
+        self.lows.append(quote.low)
+        self.closes.append(quote.close)
 
-    def quoteAtTime(self, timestamp):
-        """
-        Find the quote relevent at a specific time
-        :param timestamp: timestamp to start search
-        :return:A Quote object
-        """
-        if timestamp in self.quoteCache:
-            return self.quoteCache[timestamp]
-        keys = sorted(self.quoteCache.keys())
-        val = bisect_left(keys, timestamp) - 1
-        return self.quoteCache[keys[val]]
+        self.quotes.append(quote)
+
+    # def quoteAtTime(self, timestamp):
+    #     """
+    #     Find the quote relevant at a specific time
+    #     :param timestamp: timestamp to start search
+    #     :return: A Quote object
+    #     """
+    #     if timestamp in self.quoteCache:
+    #         return self.quoteCache[timestamp]
+    #     keys = sorted(self.quoteCache.keys())
+    #     val = bisect_left(keys, timestamp) - 1
+    #     return self.quoteCache[keys[val]]
 
     def previousQuote(self, quote):
         """
         Find a quote previous to another
         :param quote: Quote object to start the search
-        :return:A Quote object
+        :return: A Quote object
         """
-        keys = sorted(self.quoteCache.keys())
-        val = bisect_left(keys, quote.timestamp) - 1
-        if (val == -1):
+        index = bisect_left(self.quotes, quote) - 1
+        if (index == -1):
             return None
-        return self.quoteCache[keys[val]]
+        return self.quotes[index]
 
-    def highs(self):
-        """
-        Get a list of all periods highs for this symbol context
-        :return:List of all highs
-        """
-        if 'highs' not in self.cache:
-            self.cache['highs'] = [x.high for x in self.quotes()]
-        return self.cache['highs']
-
-    def lows(self):
-        """
-        Get a list of all periods lows for this symbol context
-        :return:List of all lows
-        """
-        if 'lows' not in self.cache:
-            self.cache['lows'] = [x.low for x in self.quotes()]
-        return self.cache['lows']
-
-    def opens(self):
-        """
-        Get a list of all periods opens for this symbol context
-        :return:List of all opens
-        """
-        if 'opens' not in self.cache:
-            self.cache['opens'] = [x.open for x in self.quotes()]
-        return self.cache['opens']
-
-    def closes(self):
-        """
-        Get a list of all periods closes for this symbol context
-        :return:List of all closes
-        """
-        if 'closes' not in self.cache:
-            self.cache['closes'] = [x.close for x in self.quotes()]
-        return self.cache['closes']
-
-    def __getattr__(self, name):
-        return self.__dict__[name]
-
-    def __setattr__(self, name, value):
-        self.__dict__[name] = value
 
     def __str__(self):
-        return "Symbol: {0} Last Update: {1}" % (self.symbol, self.lastUpdate)
+        return "Symbol: %s Last Update: %s Quotes: %d" % (self.symbol, self.lastUpdate, len(self.quotes))
 
     __repr__ = __str__
