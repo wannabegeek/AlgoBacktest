@@ -47,6 +47,34 @@ class PriceTest(unittest.TestCase):
         self.assertEqual(8.8, quote.low)
         self.assertEqual(10.6, quote.close)
 
+    def testQuoteConstructionOnInterval(self):
+        s = Symbol("TEST")
+        conflator = PriceConflator("TEST", datetime.timedelta(minutes=5), self.callback)
+
+        startTime = datetime.datetime(2015, 7, 7, 14, 0, 0)
+        tick = Tick(startTime, 9.0, 9.2)
+        conflator.addTick(tick)
+        tick = Tick(startTime + datetime.timedelta(seconds=60), 9.0, 9.2)
+        conflator.addTick(tick)
+        tick = Tick(startTime + datetime.timedelta(seconds=120), 8.7, 8.9)
+        conflator.addTick(tick)
+        tick = Tick(startTime + datetime.timedelta(seconds=180), 11.0, 11.2)
+        conflator.addTick(tick)
+        tick = Tick(startTime + datetime.timedelta(seconds=240), 10.5, 10.7)
+        conflator.addTick(tick)
+        tick = Tick(startTime + datetime.timedelta(seconds=300), 9.0, 9.2)
+        conflator.addTick(tick)
+        tick = Tick(startTime + datetime.timedelta(seconds=360), 9.0, 9.2)
+        conflator.addTick(tick)
+
+        self.assertEqual(1, len(self.callbackQuote))
+        quote = self.callbackQuote[0]
+        self.assertEqual(4, quote.ticks)
+        self.assertEqual(9.1, quote.open)
+        self.assertEqual(11.1, quote.high)
+        self.assertEqual(8.8, quote.low)
+        self.assertEqual(10.6, quote.close)
+
     def testQuoteGap(self):
         s = Symbol("TEST")
         conflator = PriceConflator("TEST", datetime.timedelta(seconds=5), self.callback)

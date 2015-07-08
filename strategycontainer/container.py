@@ -32,7 +32,7 @@ class Container(object):
 
     def handleTickUpdate(self, symbol, tick):
         try:
-            logging.debug("Received tick update for %s", (symbol, ))
+            logging.debug("Received tick update for %s: %s" % (symbol, tick))
             self.priceConflation[symbol].addTick(tick)
             # TODO: we need to evaluate if we have any limit orders and stop loss events triggered
         except KeyError as e:

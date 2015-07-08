@@ -52,11 +52,7 @@ class Symbol(object):
         return self.lookup[dataSource]
 
     def __str__(self):
-        str = "Symbol: {0}\nName: {1}\n".format(self.identifier, self.name)
-        str += "Spread: {0}\n".format(self.spread)
-        for dataSource in self.lookup.keys():
-            str += "\t{0}: {1}".format(dataSource, self.lookup[dataSource])
-        return str
+        return "Symbol: %s" % (self.identifier,)
 
     def __hash__(self):
         return hash(str(self.identifier))
@@ -183,9 +179,6 @@ class SymbolContext(object):
         self.__dict__[name] = value
 
     def __str__(self):
-        result = "Symbol: {0}\nLast Update: {1}\n\n".format(self.symbol, self.lastUpdate)
-        for value in self.quotes():
-            result += "\t{0}\n".format(value)
-        return result
+        return "Symbol: {0} Last Update: {1}" % (self.symbol, self.lastUpdate)
 
     __repr__ = __str__

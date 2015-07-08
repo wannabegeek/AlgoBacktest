@@ -18,6 +18,11 @@ class Tick(object):
     def midPrice(self):
         return statistics.mean([self.bid, self.offer])
 
+    def __str__(self):
+        return "%s: b:%s o:%s" % (self.timestamp, self.bid, self.offer)
+
+    __repr__ = __str__
+
 def roundDateTimeToPeriod(timestamp, period):
     roundTo = period.total_seconds()
     seconds = timestamp.replace(tzinfo=timezone.utc).timestamp() % roundTo
@@ -64,6 +69,7 @@ class Quote(object):
         self.high = None
         self.low = None
         self.close = None
+        self.ticks = 0
         self.addTick(tick)
 
     def addTick(self, tick):
@@ -73,6 +79,7 @@ class Quote(object):
         self.high = price if self.high is None else max(self.high, price)
         self.low = price if self.low is None else min(self.low, price)
         self.close = price
+        self.ticks = self.ticks + 1
 
     def __str__(self):
         return "{:.4f} -> {:.4f} o:{:.4f} c:{:.4f}".format(self.low, self.high, self.open, self.close)
