@@ -69,7 +69,7 @@ class PriceTest(unittest.TestCase):
 
         self.assertEqual(1, len(self.callbackQuote))
         quote = self.callbackQuote[0]
-        self.assertEqual(4, quote.ticks)
+        self.assertEqual(5, quote.ticks)
         self.assertEqual(9.1, quote.open)
         self.assertEqual(11.1, quote.high)
         self.assertEqual(8.8, quote.low)

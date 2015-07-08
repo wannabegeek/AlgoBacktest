@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import logging
-from strategycontainer.order import Order
+from strategycontainer.order import Order, State
 from strategycontainer.position import Position
 from strategycontainer.symbol import SymbolContext, Symbol
 
@@ -48,9 +48,8 @@ class Context(object):
             context = SymbolContext(symbol)
             self.symbolContexts[symbol] = context
 
-        self.openOrders = []
-        self.openPositions = []
-        self.closedPositions = []
+        self.orders = []
+        self.positions = []
         self.custom_data = dict()
 
     def addQuote(self, quote):
@@ -59,9 +58,6 @@ class Context(object):
         This is for internal use.
         :param quote: The quote to add
         """
-        if quote.symbol is None or not isinstance(quote.symbol, Symbol):
-            raise AssertionError("Quote has invalid symbol")
-
         context = self.symbolContexts[quote.symbol]
         context.addQuote(quote)
 
@@ -79,7 +75,7 @@ class Context(object):
             raise TypeError('order must be an Order object type')
         logging.info("Releasing order {0}".format(order))
         # if this is a market order, it will be filled on the next tick
-        self.openOrders.append(order)
+        self.orders.append(order)
         return order
 
     def cancelOrder(self, order):
@@ -90,6 +86,12 @@ class Context(object):
         """
         if not isinstance(order, Order):
             raise TypeError('order must be an Order object type')
+
+    def openPosition(self, position):
+        if not isinstance(position, Position):
+            raise TypeError('position must be an Position object type')
+
+        self.positions.append(position)
 
     def closePosition(self, position, reason = Position.ExitReason.CLOSED):
         """
@@ -103,8 +105,6 @@ class Context(object):
 
         position.close(quote, reason)
         logging.info("Closing position {0}".format(position))
-        self.openPositions.remove(position)
-        self.closedPositions.append(position)
 
     def record(self, key, value, quote):
         """
@@ -127,14 +127,14 @@ class Context(object):
         Get a list of all open positions
         :return: List of positions
         """
-        return self.openPositions
+        return filter(lambda x: x.exitReason == Position.ExitReason.NOT_CLOSED, self.positions)
 
     def getOpenOrders(self):
         """
         Get a list of all open positions
         :return: List of positions
         """
-        return self.openOrders
+        return filter(lambda x: x.state == State.WORKING, self.orders)
 
     def __getattr__(self, name):
         return self.__dict__[name]

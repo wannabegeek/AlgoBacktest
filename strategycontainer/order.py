@@ -30,7 +30,7 @@ class StopLoss(object):
         self.points = points
 
 class State(Enum):
-    PENDING = 0
+    WORKING = 0
     FILLED = 1
     EXPIRED = 2
     CANCELLED = 3
@@ -49,15 +49,15 @@ class Order(object):
         self.stoploss = stoploss
         self.takeProfit = takeProfit
         self.expireTime = expireTime
-        self.state = State.PENDING
+        self.state = State.WORKING
         self.entryTime = datetime.utcnow()
         self.id = uuid.uuid4()
 
     def isPending(self):
-        return self.state.value == State.PENDING.value
+        return self.state.value == State.WORKING.value
 
     def isComplete(self):
-        return self.state.value > State.PENDING.value
+        return self.state.value > State.WORKING.value
 
     def shouldFill(self, tick):
         if not isinstance(tick, Tick):

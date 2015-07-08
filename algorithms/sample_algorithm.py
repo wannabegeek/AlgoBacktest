@@ -1,3 +1,4 @@
+import logging
 from data import SymbolRequestPeriod
 from strategycontainer.strategy import Framework
 from strategycontainer.symbol import Symbol
@@ -6,6 +7,8 @@ class Algo(Framework):
     processingCache = {}
 
     def __init__(self):
+        super(Framework, self).__init__()
+        Symbol.setDataProvider("")
         pass
 
     def warmupPeriod(self):
@@ -55,7 +58,9 @@ class Algo(Framework):
         """
         This method is called for every market data tick update on the requested symbols.
         """
-        symbolContext = context.symbolContexts[self.symbol]
+        symbolContext = context.symbolContexts[quote.symbol]
+
+        logging.debug("I'm evaluating the data")
 
         # if quote.symbol == self.symbol:
         #     if len(symbolContext.quotes()) > 25:  # i.e. we have enough data

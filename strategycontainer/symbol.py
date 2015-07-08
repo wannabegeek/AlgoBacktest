@@ -1,3 +1,5 @@
+import datetime
+
 
 class SymbolDataSource(object):
     YAHOO = 5
@@ -90,13 +92,13 @@ class SymbolContext(object):
         :return: None
         """
         # t = time.mktime(quote.timestamp.timetuple())
-        t = quote.timestamp
+        t = quote.startTime
         if t not in self.quoteCache:
             self.quoteCache[t] = quote
         self.cache = {}  # reset our cache
-        self.lastUpdate = datetime.now()
+        self.lastUpdate = datetime.datetime.now()
 
-        self.timestamp = quote.timestamp
+        self.timestamp = quote.startTime
         self.price = quote.close
         self.open = quote.open
         self.close = quote.close

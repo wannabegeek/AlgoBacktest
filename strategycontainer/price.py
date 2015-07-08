@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime, timezone
+import logging
 import statistics
 
 class Tick(object):
@@ -41,7 +42,7 @@ class PriceConflator(object):
     def addTick(self, tick):
         if not self.currentQuote:
             self.periodStartingTimestamp = tick.timestamp
-            self.currentQuote = Quote(roundDateTimeToPeriod(tick.timestamp, self.period), self.period, tick)
+            self.currentQuote = Quote(self.symbol, roundDateTimeToPeriod(tick.timestamp, self.period), self.period, tick)
         else:
             currentTickTimeBlock = roundDateTimeToPeriod(tick.timestamp, self.period)
             if currentTickTimeBlock.timestamp() < (self.currentQuote.startTime + self.period).timestamp():
@@ -51,9 +52,9 @@ class PriceConflator(object):
                     self.callback(self.currentQuote)
                 t = self.currentQuote.startTime + self.period
                 while currentTickTimeBlock.timestamp() >= (t + self.period).timestamp():
-                        self.callback(Quote(t, self.period, Tick(self.currentQuote.startTime, self.currentQuote.close, self.currentQuote.close)))
+                        self.callback(Quote(self.symbol, t, self.period, Tick(self.currentQuote.startTime, self.currentQuote.close, self.currentQuote.close)))
                         t = t + self.period
-                self.currentQuote = Quote(t, self.period, tick)
+                self.currentQuote = Quote(self.symbol, t, self.period, tick)
 
 
 class Quote(object):
@@ -61,7 +62,8 @@ class Quote(object):
     A single quote representaion. This is for conflated data, so it contains OHLC data.
     """
 
-    def __init__(self, startTime, period, tick):
+    def __init__(self, symbol, startTime, period, tick):
+        self.symbol = symbol
         self.volume = None
         self.startTime = startTime
         self.period = period
@@ -82,4 +84,4 @@ class Quote(object):
         self.ticks = self.ticks + 1
 
     def __str__(self):
-        return "{:.4f} -> {:.4f} o:{:.4f} c:{:.4f}".format(self.low, self.high, self.open, self.close)
+        return "{} -> {}: {:.4f} -> {:.4f} o:{:.4f} c:{:.4f}".format(self.startTime, self.startTime + self.period, self.low, self.high, self.open, self.close)

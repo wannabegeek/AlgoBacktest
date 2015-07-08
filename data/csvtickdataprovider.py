@@ -9,10 +9,11 @@ from strategycontainer.symbol import Symbol
 
 class CSVProvider(Provider):
     def __init__(self):
-        Symbol.setDataProvider("1")
         self.symbol = None
 
     def register(self, symbol):
+        if not isinstance(symbol, Symbol):
+            raise TypeError("symbol must be a Symbol object")
         self.symbol = symbol
         pass
 
@@ -23,8 +24,8 @@ class CSVProvider(Provider):
     def startPublishing(self, callback):
         now = datetime.datetime.utcnow()
         interval = datetime.timedelta(seconds=60)
-        for i in range(1, 15):
+        for i in range(1, 150):
             now = now + interval
             tick = Tick(now, 10.0 - random.random(), 10.0 + random.random())
             callback(self.symbol, tick)
-            time.sleep(1)
+            time.sleep(0.1)
