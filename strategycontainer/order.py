@@ -3,7 +3,7 @@ from enum import Enum
 import uuid
 
 from strategycontainer.symbol import Symbol
-from backtest.price import Tick
+from strategycontainer.price import Tick
 
 
 class Direction(Enum):

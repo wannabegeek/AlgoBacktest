@@ -1,5 +1,6 @@
-import QuoteData
-from strategycontainer.strategy import AlgoFramework
+import logging
+from algorithms.sample_algorithm import Algo
+from strategycontainer.strategy import Framework, Context
 
 
 class BackTestFramework(object):
@@ -8,14 +9,14 @@ class BackTestFramework(object):
     quotes = []
     context = None
 
-    def __init__(self, dataProviderClass, algo, progressCallback = None):
-        if not isinstance(algo, AlgoFramework):
-            raise TypeError("Algo provided isn't valid")
+    def __init__(self, algo, dataProviderClass, progressCallback = None):
+        if not isinstance(algo, Framework):
+            raise TypeError("algorithm must be a subclass of strategycontainer.strategy.Framework")
 
         self.algo = algo
         self.progressCounter = 0
         self.progressCallback = progressCallback
-        self.context = QuoteData.StrategyContext(self.algo.analysis_symbols())
+        self.context = Context(self.algo.analysis_symbols())
 
         for smbl in algo.analysis_symbols():
             self.dataProviders.append(dataProviderClass(smbl, self.algo.period()))
@@ -50,3 +51,11 @@ class BackTestFramework(object):
 
     def context(self):
         return self.context
+
+def main():
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
+    client = BackTestFramework(Algo(), None)
+    logging.info("All done... shutting down")
+
+if __name__ == '__main__':
+    main()

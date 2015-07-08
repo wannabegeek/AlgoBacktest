@@ -64,6 +64,7 @@ class Symbol(object):
     def __eq__(self, other):
         return self.identifier == other.identifier
 
+    __repr__ = __str__
 
 class SymbolContext(object):
     """
@@ -186,3 +187,5 @@ class SymbolContext(object):
         for value in self.quotes():
             result += "\t{0}\n".format(value)
         return result
+
+    __repr__ = __str__

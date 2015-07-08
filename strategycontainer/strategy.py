@@ -35,7 +35,6 @@ class Framework(object):
 
 
 class Context(object):
-
     def __init__(self, symbols):
         """
         Constructor
@@ -69,18 +68,33 @@ class Context(object):
     def symbolData(self, symbol):
         return self.symbolContexts[symbol]
 
-    def releaseOrder(self, order, filledCallback = None):
+    def placeOrder(self, order, statusCallback = None):
+        """
+        Place an order on the market.
+        :param order: The order to add
+        :param statusCallback: Callback function reporting any status changes
+        :return: The order placed (same as passed in)
+        """
         if not isinstance(order, Order):
             raise TypeError('order must be an Order object type')
         logging.info("Releasing order {0}".format(order))
         # if this is a market order, it will be filled on the next tick
         self.openOrders.append(order)
+        return order
 
-    def closePosition(self, position, quote, reason = Position.ExitReason.CLOSED):
+    def cancelOrder(self, order):
+        """
+        Cancel a resting  order on the market.
+        The status change of the order will be notified by the statusCallback function the placeOrder method
+        :param order: The order to modify
+        """
+        if not isinstance(order, Order):
+            raise TypeError('order must be an Order object type')
+
+    def closePosition(self, position, reason = Position.ExitReason.CLOSED):
         """
         Close an open position
         :param position: The position to close
-        :param quote: The quote causing the exit of the trade
         :param reason: The reason why the trade was closed (Default: Position.ExitReason.CLOSED)
         :return: None
         """
