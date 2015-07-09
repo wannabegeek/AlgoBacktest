@@ -26,7 +26,7 @@ class Symbol(object):
             self.identifier = identifier
             self.name = None
             self.lookup = {}
-            self.leverage = 5
+            self.leverage = 4
             self._symbolState[identifier] = self.__dict__
 
         # cursor = self._dbConnection.cursor(buffered=True)
@@ -94,7 +94,7 @@ class SymbolContext(object):
         :param quote: quote to add
         :return: None
         """
-        self.lastUpdate = datetime.datetime.now()
+        self.lastUpdate = quote.lastTick.timestamp
         self.timestamp = quote.startTime
 
         self.price = quote.close
@@ -135,6 +135,6 @@ class SymbolContext(object):
 
 
     def __str__(self):
-        return "Symbol: %s Last Update: %s Quotes: %d" % (self.symbol, self.lastUpdate, len(self.quotes))
+        return "Symbol: %s Last Quote Time: %s Quotes: %d" % (self.symbol, self.timestamp, len(self.quotes))
 
     __repr__ = __str__

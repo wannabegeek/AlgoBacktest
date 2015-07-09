@@ -83,6 +83,10 @@ class ContainerTest(unittest.TestCase):
         self.assertEqual(Position.ExitReason.NOT_CLOSED, position.exitReason)
         self.assertEqual(10.1, position.entryPrice)
 
+        self.assertEqual(2, len(container.context.symbolContexts[symbol].quotes))
+        self.assertEqual(1, container.context.symbolContexts[symbol].quotes[0].ticks)
+        self.assertEqual(1, container.context.symbolContexts[symbol].quotes[1].ticks) # there wasn't enough time for the last tick to get into a quote
+
         # logging.debug("================")
         # logging.debug("Orders:")
         # for order in container.context.orders:

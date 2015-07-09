@@ -36,14 +36,15 @@ class Container(object):
     def _evaluatePendingOrder(self, tick):
         for order in self.context.getOpenOrders():
             if order.shouldFill(tick):
-                logging.debug("We need to create a position for %s" % order)
-                self.context.openPosition(Position(order, tick))
+                position = Position(order, tick)
+                self.context.openPosition(position)
+                logging.debug("Opened position for %s" % position)
 
     def _evaluateActivePositions(self, tick):
         for position in self.context.getOpenPositions():
             reason = position.shouldClosePosition(tick)
             if reason is not Position.ExitReason.NOT_CLOSED:
-                logging.debug("Position %s has been closed due to %s" % position, reason.name)
+                logging.debug("Position %s has been closed due to %s" % (position, reason.name))
 
     def handleTickUpdate(self, symbol, tick):
         try:

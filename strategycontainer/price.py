@@ -89,4 +89,4 @@ class Quote(object):
         self.ticks = self.ticks + 1
 
     def __str__(self):
-        return "{} -> {}: {:.4f} -> {:.4f} o:{:.4f} c:{:.4f}".format(self.startTime, self.startTime + self.period, self.low, self.high, self.open, self.close)
+        return "{} -> {}: {:.6f} -> {:.6f} o:{:.6f} c:{:.6f}".format(self.startTime, self.startTime + self.period, self.low, self.high, self.open, self.close)

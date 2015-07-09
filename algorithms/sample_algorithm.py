@@ -1,10 +1,13 @@
 import logging
+import time
+from numpy import asarray
+from analysis import financial, mathmatical
 from data import SymbolRequestPeriod
+from strategycontainer.order import Direction, Order, Entry, StopLoss
 from strategycontainer.strategy import Framework
 from strategycontainer.symbol import Symbol
 
 class Algo(Framework):
-    processingCache = {}
 
     def __init__(self):
         super(Framework, self).__init__()
@@ -52,6 +55,7 @@ class Algo(Framework):
             context.symbolContexts[symbol].ema_10 = []
             context.symbolContexts[symbol].ema_25 = []
             context.symbolContexts[symbol].rsi_14 = []
+            context.symbolContexts[symbol].position = False
 
     def evaluateTickUpdate(self, context, quote):
         """
@@ -59,50 +63,61 @@ class Algo(Framework):
         """
         symbolContext = context.symbolContexts[quote.symbol]
 
-        logging.debug("I'm evaluating the data for %s" % (symbolContext, ))
+        logging.debug("I'm evaluating the data for %s" % (quote, ))
 
-        # if quote.symbol == self.symbol:
-        #     if len(symbolContext.quotes()) > 25:  # i.e. we have enough data
-        #         quoteTimes = [time.mktime(o.timestamp.timetuple()) for o in symbolContext.quotes()]
-        #         closePrices = asarray(symbolContext.closes())
-        #
-        #         ema_10 = Financial.ema(closePrices[-10:], 10)
-        #         ema_25 = Financial.ema(closePrices[-25:], 25)
-        #         symbolContext.ema_10.append(ema_10)
-        #         symbolContext.ema_25.append(ema_25)
-        #
-        #         gradientCount = 2
-        #         if len(symbolContext.ema_25) >= gradientCount:
-        #             rsi_14 = Financial.rsi(closePrices[-19:], 14)
-        #             rsi_ema = Financial.ema(rsi_14, 5)
-        #             gradSMA_10 = Mathmatical.gradient(symbolContext.ema_10[-gradientCount:], quoteTimes[-gradientCount:])
-        #             gradSMA_25 = Mathmatical.gradient(symbolContext.ema_10[-gradientCount:], quoteTimes[-gradientCount:])
-        #
-        #             positionsToClose = []
-        #             # do we need to close any of our open positions?
-        #             for position in context.openPositions:
-        #                 if position.symbol == self.symbol:
-        #                     if position.shouldClosePosition(quote):
-        #                         positionsToClose.append(position)
-        #                     else:
-        #                         if position.direction == Direction.LONG:
-        #                             if gradSMA_10 < 0 or gradSMA_25 < 0: # or rsi_ema[-1] >= 70):
-        #                                 positionsToClose.append(position)
-        #                             # elif (quote.close - position.entryQuote.close) < -10.0:
-        #                             #     context.closePosition(position, quote)
-        #                         elif position.direction == Direction.SHORT:
-        #                             if gradSMA_10 > 0 or gradSMA_25 > 0: # or rsi_ema[-1] <= 50):
-        #                                 positionsToClose.append(position)
-        #                             # elif (quote.close - position.entryQuote.close) > 10.0:
-        #                             #     context.closePosition(position, quote)
-        #
-        #             # only take out a position if we don't already have one open
-        #             if len(context.openPositions) == 0 or not any(x.symbol == self.symbol for x in context.openPositions):
-        #                 # If have an upward trend and we were over-sold a few days ago
-        #                 if gradSMA_10 > 0 and gradSMA_25 > 0: # and rsi_ema[-1] < 50:
-        #                     context.openPosition(PDirection.LONG, quote, 5, stopLoss=quote.low - 1000, stopType=PositionStopType.TRAILING)
-        #                 elif gradSMA_10 < 0 and gradSMA_25 < 0: # and rsi_ema[-1] > 50:
-        #                     context.openPosition(Direction.SHORT, quote, 5, stopLoss=quote.high + 1000, stopType=PositionStopType.TRAILING)
-        #
-        #             for position in positionsToClose:
-        #                 context.closePosition(position, quote)
+        if len(symbolContext.quotes) > 25:  # i.e. we have enough data
+            quoteTimes = [time.mktime(o.startTime.timetuple()) for o in symbolContext.quotes]
+            closePrices = asarray(symbolContext.closes)
+
+            ema_10 = financial.ema(closePrices[-10:], 10)
+            ema_25 = financial.ema(closePrices[-15:], 15)
+            symbolContext.ema_10.append(ema_10)
+            symbolContext.ema_25.append(ema_25)
+
+            if ema_10 > ema_25:
+                if context.symbolContexts[quote.symbol].position is False:
+                    # create a LONG position
+                    logging.debug("Opening position")
+                    context.placeOrder(Order(quote.symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=StopLoss(StopLoss.Type.FIXED, 30), takeProfit=15))
+                    context.symbolContexts[quote.symbol].position = True
+            else:
+                if context.symbolContexts[quote.symbol].position is True:
+                    #exit our position
+                    logging.debug("exit our position")
+                    context.symbolContexts[quote.symbol].position = False
+
+            # gradientCount = 2
+            # if len(symbolContext.ema_25) >= gradientCount:
+            #     rsi_14 = financial.rsi(closePrices[-19:], 14)
+            #     rsi_ema = financial.ema(rsi_14, 5)
+            #     gradSMA_10 = mathmatical.gradient(symbolContext.ema_10[-gradientCount:], quoteTimes[-gradientCount:])
+            #     gradSMA_25 = mathmatical.gradient(symbolContext.ema_10[-gradientCount:], quoteTimes[-gradientCount:])
+            #
+            #     positionsToClose = []
+            #     # do we need to close any of our open positions?
+            #     for position in context.openPositions:
+            #         if position.shouldClosePosition(quote):
+            #             positionsToClose.append(position)
+            #         else:
+            #             if position.direction == Direction.LONG:
+            #                 if gradSMA_10 < 0 or gradSMA_25 < 0: # or rsi_ema[-1] >= 70):
+            #                     positionsToClose.append(position)
+            #                 # elif (quote.close - position.entryQuote.close) < -10.0:
+            #                 #     context.closePosition(position, quote)
+            #             elif position.direction == Direction.SHORT:
+            #                 if gradSMA_10 > 0 or gradSMA_25 > 0: # or rsi_ema[-1] <= 50):
+            #                     positionsToClose.append(position)
+            #                 # elif (quote.close - position.entryQuote.close) > 10.0:
+            #                 #     context.closePosition(position, quote)
+            #
+            #     # only take out a position if we don't already have one open
+            #     if len(context.openPositions) == 0:
+            #         # If have an upward trend and we were over-sold a few days ago
+            #         logging.debug("Opening position")
+            #         # if gradSMA_10 > 0 and gradSMA_25 > 0: # and rsi_ema[-1] < 50:
+            #         #     context.openPosition(Direction.LONG, quote, 5, stopLoss=quote.low - 1000, stopType=PositionStopType.TRAILING)
+            #         # elif gradSMA_10 < 0 and gradSMA_25 < 0: # and rsi_ema[-1] > 50:
+            #         #     context.openPosition(Direction.SHORT, quote, 5, stopLoss=quote.high + 1000, stopType=PositionStopType.TRAILING)
+            #
+            #     for position in positionsToClose:
+            #         context.closePosition(position, quote)

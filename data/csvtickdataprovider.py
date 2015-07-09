@@ -1,15 +1,15 @@
 import datetime
 import logging
-import time
-import random
+import csv
 from data.data_provider import Provider
 from strategycontainer.price import Tick
 from strategycontainer.symbol import Symbol
 
 
 class CSVProvider(Provider):
-    def __init__(self):
+    def __init__(self, filename):
         self.symbol = None
+        self.reader = csv.reader(open(filename, 'r'))
 
     def register(self, symbol):
         if not isinstance(symbol, Symbol):
@@ -22,10 +22,13 @@ class CSVProvider(Provider):
         pass
 
     def startPublishing(self, callback):
-        now = datetime.datetime.utcnow()
-        interval = datetime.timedelta(seconds=60)
-        for i in range(1, 150):
-            now = now + interval
-            tick = Tick(now, 10.0 - random.random(), 10.0 + random.random())
-            callback(self.symbol, tick)
-            time.sleep(0.1)
+        for timestamp, bid, ask, volume in self.reader:
+            ts = datetime.datetime.strptime(timestamp, "%Y%m%d %H%M%S%f")
+            callback(self.symbol, Tick(ts, float(bid), float(ask)))
+        # now = datetime.datetime.utcnow()
+        # interval = datetime.timedelta(seconds=60)
+        # for i in range(1, 150):
+        #     now = now + interval
+        #     tick = Tick(now, 10.0 - random.random(), 10.0 + random.random())
+        #     callback(self.symbol, tick)
+        #     time.sleep(0.1)
