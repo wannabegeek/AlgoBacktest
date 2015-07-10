@@ -23,7 +23,7 @@ def printResults(context):
 
 def main():
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    container = Container(Algo(), CSVProvider("/Users/tom/Downloads/HISTDATA_COM_ASCII_EURUSD_T201505/DAT_ASCII_EURUSD_T_201505-SHORT.csv"))
+    container = Container(Algo(), CSVProvider("/Users/tom/Downloads/HISTDATA_COM_ASCII_EURUSD_T201506/DAT_ASCII_EURUSD_T_201506-SHORT.csv"))
     container.start()
 
     printResults(container.context)

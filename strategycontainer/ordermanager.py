@@ -1,10 +1,13 @@
 from abc import ABCMeta, abstractmethod
 
+class OrderbookException(Exception):
+    pass
+
 class OrderManager(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def newOrder(self, order):
+    def placeOrder(self, order):
         # send new order to markete
         pass
 
@@ -19,5 +22,14 @@ class OrderManager(object):
         pass
 
     @abstractmethod
-    def cancelPosition(self, position):
+    def closePosition(self, position):
         pass
+
+    @abstractmethod
+    def addOrderStatusObserver(self, observer):
+        pass
+
+    @abstractmethod
+    def addPositionObserver(self, observer):
+        pass
+

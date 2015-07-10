@@ -13,7 +13,7 @@ class PositionExitTests(unittest.TestCase):
 
     def testStopLoss(self):
         s1 = Symbol("TEST")
-        s1.leverage = 1.0
+        s1.lot_size = 1.0
 
         # LONG
         order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = StopLoss(StopLoss.Type.FIXED, 1))
@@ -48,7 +48,7 @@ class PositionExitTests(unittest.TestCase):
 
     def testStopLossWithSlippage(self):
         s1 = Symbol("TEST")
-        s1.leverage = 1.0
+        s1.lot_size = 1.0
 
         order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = StopLoss(StopLoss.Type.FIXED, 1))
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
@@ -78,7 +78,7 @@ class PositionExitTests(unittest.TestCase):
 
     def testTrailingStopLoss(self):
         s1 = Symbol("TEST")
-        s1.leverage = 1.0
+        s1.lot_size = 1.0
 
         order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = StopLoss(StopLoss.Type.TRAILING, 1))
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
@@ -101,10 +101,10 @@ class PositionExitTests(unittest.TestCase):
 
     def testTakeProfit(self):
         s1 = Symbol("TEST")
-        s1.leverage = 1.0
+        s1.lot_size = 1.0
 
         # LONG
-        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, takeProfit=12.5)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, takeProfit=1.5)
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
 
@@ -123,8 +123,8 @@ class PositionExitTests(unittest.TestCase):
         self.assertEqual(12.5, position.exitPrice)
 
         # SHORT
-        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, takeProfit=10.5)
-        tick = Tick(datetime.utcnow(), 11.0, 11.1)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, takeProfit=0.5)
+        tick = Tick(datetime.utcnow(), 10.9, 11.0)
         position = Position(order, tick)
 
         result = position.shouldClosePosition(tick)
@@ -139,10 +139,10 @@ class PositionExitTests(unittest.TestCase):
 
     def testTakeProfitWithSlippage(self):
         s1 = Symbol("TEST")
-        s1.leverage = 1.0
+        s1.lot_size = 1.0
 
         # LONG
-        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, takeProfit=12.5)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, takeProfit=1.5)
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
 
@@ -161,8 +161,8 @@ class PositionExitTests(unittest.TestCase):
         self.assertEqual(12.5, position.exitPrice)
 
         # SHORT
-        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, takeProfit=10.5)
-        tick = Tick(datetime.utcnow(), 11.0, 11.1)
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, takeProfit=0.5)
+        tick = Tick(datetime.utcnow(), 10.9, 11.0)
         position = Position(order, tick)
 
         result = position.shouldClosePosition(tick)
@@ -181,7 +181,7 @@ class PositionProfitLossTests(unittest.TestCase):
 
     def testLongProfit(self):
         s1 = Symbol("TEST")
-        s1.leverage = 10000.0
+        s1.lot_size = 10000
 
         # LONG
         order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG)
@@ -195,7 +195,7 @@ class PositionProfitLossTests(unittest.TestCase):
 
     def testShortProfit(self):
         s1 = Symbol("TEST")
-        s1.leverage = 10000.0
+        s1.lot_size = 10000
 
         # LONG
         order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT)
@@ -209,7 +209,7 @@ class PositionProfitLossTests(unittest.TestCase):
 
     def testLongLoss(self):
         s1 = Symbol("TEST")
-        s1.leverage = 10000.0
+        s1.lot_size = 10000
 
         # LONG
         order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG)
@@ -223,7 +223,7 @@ class PositionProfitLossTests(unittest.TestCase):
 
     def testShortLoss(self):
         s1 = Symbol("TEST")
-        s1.leverage = 10000.0
+        s1.lot_size = 10000
 
         # LONG
         order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT)

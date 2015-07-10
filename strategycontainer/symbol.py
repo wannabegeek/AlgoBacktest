@@ -26,7 +26,7 @@ class Symbol(object):
             self.identifier = identifier
             self.name = None
             self.lookup = {}
-            self.leverage = 4
+            self.lot_size = 10000
             self._symbolState[identifier] = self.__dict__
 
         # cursor = self._dbConnection.cursor(buffered=True)

@@ -88,6 +88,9 @@ class Order(object):
 
         return False
 
+    def __eq__(self, other):
+        return self.id == other.id
+
     def __str__(self):
         return "%s: %s %s@%s" % (self.state.name, self.direction.name, self.quantity, "MARKET" if self.entry.type == Entry.Type.MARKET else self.entry.price)
 
