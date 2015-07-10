@@ -21,11 +21,11 @@ class PositionExitTests(unittest.TestCase):
         position = Position(order, tick)
 
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
         tick = Tick(datetime.utcnow(), 9.9, 10.0)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.STOP_LOSS, result)
-        if result is not Position.ExitReason.NOT_CLOSED:
+        self.assertEqual(Position.PositionStatus.STOP_LOSS, result)
+        if result is not Position.PositionStatus.OPEN:
             position.close(tick, result)
 
         self.assertEqual(10.0, position.exitPrice)
@@ -36,11 +36,11 @@ class PositionExitTests(unittest.TestCase):
         position = Position(order, tick)
 
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
         tick = Tick(datetime.utcnow(), 12.1, 12.0)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.STOP_LOSS, result)
-        if result is not Position.ExitReason.NOT_CLOSED:
+        self.assertEqual(Position.PositionStatus.STOP_LOSS, result)
+        if result is not Position.PositionStatus.OPEN:
             position.close(tick, result)
 
         self.assertEqual(12.1, position.exitPrice)
@@ -54,11 +54,11 @@ class PositionExitTests(unittest.TestCase):
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
         tick = Tick(datetime.utcnow(), 8.9, 9.0)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.STOP_LOSS, result)
-        if result is not Position.ExitReason.NOT_CLOSED:
+        self.assertEqual(Position.PositionStatus.STOP_LOSS, result)
+        if result is not Position.PositionStatus.OPEN:
             position.close(tick, result)
 
         self.assertEqual(9.0, position.exitPrice)
@@ -67,11 +67,11 @@ class PositionExitTests(unittest.TestCase):
         tick = Tick(datetime.utcnow(), 11.0, 11.1)
         position = Position(order, tick)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
         tick = Tick(datetime.utcnow(), 13.1, 13.0)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.STOP_LOSS, result)
-        if result is not Position.ExitReason.NOT_CLOSED:
+        self.assertEqual(Position.PositionStatus.STOP_LOSS, result)
+        if result is not Position.PositionStatus.OPEN:
             position.close(tick, result)
 
         self.assertEqual(13.1, position.exitPrice)
@@ -86,15 +86,15 @@ class PositionExitTests(unittest.TestCase):
 
         tick = Tick(datetime.utcnow(), 12.5, 12.4)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
 
         tick = Tick(datetime.utcnow(), 11.8, 11.7)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
         tick = Tick(datetime.utcnow(), 11.5, 11.4)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.STOP_LOSS, result)
-        if result is not Position.ExitReason.NOT_CLOSED:
+        self.assertEqual(Position.PositionStatus.STOP_LOSS, result)
+        if result is not Position.PositionStatus.OPEN:
             position.close(tick, result)
 
         self.assertEqual(11.4, position.exitPrice)
@@ -109,15 +109,15 @@ class PositionExitTests(unittest.TestCase):
         position = Position(order, tick)
 
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
         tick = Tick(datetime.utcnow(), 12.5, 12.4)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
 
         tick = Tick(datetime.utcnow(), 12.4, 12.5)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.TAKE_PROFIT, result)
-        if result is not Position.ExitReason.NOT_CLOSED:
+        self.assertEqual(Position.PositionStatus.TAKE_PROFIT, result)
+        if result is not Position.PositionStatus.OPEN:
             position.close(tick, result)
 
         self.assertEqual(12.5, position.exitPrice)
@@ -128,11 +128,11 @@ class PositionExitTests(unittest.TestCase):
         position = Position(order, tick)
 
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
         tick = Tick(datetime.utcnow(), 10.5, 10.6)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.TAKE_PROFIT, result)
-        if result is not Position.ExitReason.NOT_CLOSED:
+        self.assertEqual(Position.PositionStatus.TAKE_PROFIT, result)
+        if result is not Position.PositionStatus.OPEN:
             position.close(tick, result)
 
         self.assertEqual(10.5, position.exitPrice)
@@ -147,15 +147,15 @@ class PositionExitTests(unittest.TestCase):
         position = Position(order, tick)
 
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
         tick = Tick(datetime.utcnow(), 12.5, 12.4)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
 
         tick = Tick(datetime.utcnow(), 14.4, 14.5)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.TAKE_PROFIT, result)
-        if result is not Position.ExitReason.NOT_CLOSED:
+        self.assertEqual(Position.PositionStatus.TAKE_PROFIT, result)
+        if result is not Position.PositionStatus.OPEN:
             position.close(tick, result)
 
         self.assertEqual(12.5, position.exitPrice)
@@ -166,11 +166,11 @@ class PositionExitTests(unittest.TestCase):
         position = Position(order, tick)
 
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, result)
+        self.assertEqual(Position.PositionStatus.OPEN, result)
         tick = Tick(datetime.utcnow(), 9.5, 9.6)
         result = position.shouldClosePosition(tick)
-        self.assertEqual(Position.ExitReason.TAKE_PROFIT, result)
-        if result is not Position.ExitReason.NOT_CLOSED:
+        self.assertEqual(Position.PositionStatus.TAKE_PROFIT, result)
+        if result is not Position.PositionStatus.OPEN:
             position.close(tick, result)
 
         self.assertEqual(10.5, position.exitPrice)

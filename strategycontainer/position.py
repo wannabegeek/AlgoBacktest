@@ -7,8 +7,8 @@ from strategycontainer.price import Tick
 
 
 class Position(object):
-    class ExitReason(Enum):
-        NOT_CLOSED = 0
+    class PositionStatus(Enum):
+        OPEN = 0
         CLOSED = 1
         STOP_LOSS = 2
         TAKE_PROFIT = 3
@@ -26,7 +26,7 @@ class Position(object):
         self.exitTick = None
         self.closed = False
         self.id = uuid.uuid4()
-        self.exitReason = Position.ExitReason.NOT_CLOSED
+        self.status = Position.PositionStatus.OPEN
         self.exitPrice = None
         if self.order.stoploss is not None:
             if self.order.direction == Direction.LONG:
@@ -48,8 +48,8 @@ class Position(object):
     def isOpen(self):
         return not self.closed
 
-    def close(self, tick, reason = ExitReason.CLOSED):
-        if reason == Position.ExitReason.TAKE_PROFIT:
+    def close(self, tick, reason = PositionStatus.CLOSED):
+        if reason == Position.PositionStatus.TAKE_PROFIT:
             self.exitPrice = self.takeProfit
         else:
             if self.order.direction == Direction.LONG:
@@ -59,7 +59,7 @@ class Position(object):
 
         self.exitTick = tick
         self.closed = True
-        self.exitReason = reason
+        self.status = reason
 
     def pointsDelta(self):
         priceDelta = 0.0
@@ -82,30 +82,30 @@ class Position(object):
                 if self.order.direction == Direction.LONG:
                     if tick.offer <= self.stopPrice:
                         # logging.debug("Position %s hit its stop loss (tick %s)" % (self, tick))
-                        self.exitReason = Position.ExitReason.STOP_LOSS
+                        self.status = Position.PositionStatus.STOP_LOSS
                         self.exitPrice = tick.offer
                 else:
                     if tick.bid >= self.stopPrice:
                         # logging.debug("Position %s hit its stop loss (tick %s)" % (self, tick))
                         self.exitPrice = tick.bid
-                        self.exitReason = Position.ExitReason.STOP_LOSS
+                        self.status = Position.PositionStatus.STOP_LOSS
 
             if self.order.takeProfit is not None:
                 if self.order.direction == Direction.LONG and tick.offer >= self.takeProfit:
                     # logging.debug("Position %s hit its take profit target (tick %s)" % (self, tick))
                     self.exitPrice = tick.offer
-                    self.exitReason = Position.ExitReason.TAKE_PROFIT
+                    self.status = Position.PositionStatus.TAKE_PROFIT
                 elif self.order.direction == Direction.SHORT and tick.bid <= self.takeProfit:
                     # logging.debug("Position %s hit its take profit target (tick %s)" % (self, tick))
                     self.exitPrice = tick.bid
-                    self.exitReason = Position.ExitReason.TAKE_PROFIT
+                    self.status = Position.PositionStatus.TAKE_PROFIT
 
-        return self.exitReason
+        return self.status
 
     def __eq__(self, other):
         return self.id == other.id
 
     def __str__(self):
-        return "%s: %s [%s %s --> %s]" % (self.id, self.exitReason.name, self.order.direction.name, self.entryPrice, "OPEN" if self.exitReason == Position.ExitReason.NOT_CLOSED else self.exitPrice)
+        return "%s: %s [%s %s --> %s]" % (self.id, self.status.name, self.order.direction.name, self.entryPrice, "OPEN" if self.status == Position.PositionStatus.OPEN else self.exitPrice)
 
     __repr__ = __str__

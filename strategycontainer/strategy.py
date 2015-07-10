@@ -93,7 +93,7 @@ class Context(object):
 
         self.positions.append(position)
 
-    def closePosition(self, position, reason = Position.ExitReason.CLOSED):
+    def closePosition(self, position, reason = Position.PositionStatus.CLOSED):
         """
         Close an open position
         :param position: The position to close
@@ -127,7 +127,7 @@ class Context(object):
         Get a list of all open positions
         :return: List of positions
         """
-        return filter(lambda x: x.exitReason == Position.ExitReason.NOT_CLOSED, self.positions)
+        return filter(lambda x: x.exitReason == Position.PositionStatus.OPEN, self.positions)
 
     def getOpenOrders(self):
         """

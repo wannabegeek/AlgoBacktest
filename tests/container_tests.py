@@ -80,7 +80,7 @@ class ContainerTest(unittest.TestCase):
         order = container.context.orders[0]
         self.assertEqual(State.FILLED, order.state)
         position = container.context.positions[0]
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, position.exitReason)
+        self.assertEqual(Position.PositionStatus.OPEN, position.exitReason)
         self.assertEqual(10.1, position.entryPrice)
 
         self.assertEqual(2, len(container.context.symbolContexts[symbol].quotes))
@@ -123,7 +123,7 @@ class ContainerTest(unittest.TestCase):
         order = container.context.orders[0]
         self.assertEqual(State.FILLED, order.state)
         position = container.context.positions[0]
-        self.assertEqual(Position.ExitReason.NOT_CLOSED, position.exitReason)
+        self.assertEqual(Position.PositionStatus.OPEN, position.exitReason)
         self.assertEqual(12.1, position.entryPrice)
 
         # logging.debug("================")

@@ -43,7 +43,7 @@ class Container(object):
     def _evaluateActivePositions(self, tick):
         for position in self.context.getOpenPositions():
             reason = position.shouldClosePosition(tick)
-            if reason is not Position.ExitReason.NOT_CLOSED:
+            if reason is not Position.PositionStatus.OPEN:
                 logging.debug("Position %s has been closed due to %s" % (position, reason.name))
 
     def handleTickUpdate(self, symbol, tick):
@@ -60,7 +60,7 @@ class Container(object):
         This method gets called from the PriceConflator callback
         """
         if quote is None or not isinstance(quote, Quote):
-            raise AssertionError("Invalid quote")
+            raise TypeError("Invalid quote")
 
         # logging.debug("We have some data: %s" % (quote,))
         orderCount = len(self.context.orders)

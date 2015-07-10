@@ -54,4 +54,3 @@ class OrderTest(unittest.TestCase):
         r = order.shouldFill(tick)
         self.assertEqual(False, r)
         self.assertEqual(order.state, State.EXPIRED)
-
