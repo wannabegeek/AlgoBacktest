@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 import logging
 from strategycontainer.order import Order, State
+from strategycontainer.ordermanager import OrderManager
 from strategycontainer.position import Position
 from strategycontainer.symbol import SymbolContext, Symbol
 
@@ -35,13 +36,18 @@ class Framework(object):
 
 
 class Context(object):
-    def __init__(self, symbols):
+    def __init__(self, order_manager, symbols):
         """
         Constructor
         This is for internal use.
+        :param order_manager: OrderManager which coordinates getting orders to market
         :param symbols: A List of symbols used in this Strategy
         :return: A StrategyContext object
         """
+        if not isinstance(order_manager, OrderManager):
+            raise TypeError('order_manager must be an OrderManager object type')
+
+        self.order_manager = order_manager
         self.symbolContexts = {}
         for symbol in symbols:
             logging.debug("Creating symbol context for {0}".format(symbol))
@@ -71,9 +77,10 @@ class Context(object):
         :param statusCallback: Callback function reporting any status changes
         :return: The order placed (same as passed in)
         """
-        if not isinstance(order, Order):
-            raise TypeError('order must be an Order object type')
+
         logging.info("Releasing order {0}".format(order))
+        self.order_manager.placeOrder(order)
+
         # if this is a market order, it will be filled on the next tick
         self.orders.append(order)
         return order
@@ -84,8 +91,7 @@ class Context(object):
         The status change of the order will be notified by the statusCallback function the placeOrder method
         :param order: The order to modify
         """
-        if not isinstance(order, Order):
-            raise TypeError('order must be an Order object type')
+        self.order_manager.cancelOrder(order)
 
     def openPosition(self, position):
         if not isinstance(position, Position):
@@ -103,7 +109,7 @@ class Context(object):
         if not isinstance(position, Position):
             raise TypeError('position must be an Position object type')
 
-        position.close(quote, reason)
+        self.order_manager.closePosition(position)
         logging.info("Closing position {0}".format(position))
 
     def record(self, key, value, quote):

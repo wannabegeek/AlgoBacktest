@@ -7,26 +7,16 @@ from strategycontainer.price import Tick
 class Broker(OrderManager):
 
     def __init__(self, priceDataProvider):
-        self.priceDataProvider = priceDataProvider
+        super(Broker, self).__init__(priceDataProvider)
         self.orders = []
         self.positions = []
-        self.currentTick = None
-        self.orderStatusObservers = []
-        self.positionObservers = []
-        self.priceObservers = {}
-
-    def start(self):
-        self.priceDataProvider.startPublishing(lambda symbol, tick: self._handleTickUpdate(symbol, tick))
 
     def placeOrder(self, order):
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
 
-        try:
-            self.orders.append(order)
-            self._evaluateOrdersStatus(order, self.currentTick)
-        except KeyError:
-            raise OrderbookException("Order not found")
+        self.orders.append(order)
+        self._evaluateOrdersStatus(order, self.currentTick)
 
     def modifyOrder(self, order):
         if not isinstance(order, Order):
@@ -52,23 +42,12 @@ class Broker(OrderManager):
 
         self._closePosition(position, self.currentTick, Position.PositionStatus.CLOSED)
 
-    def addOrderStatusObserver(self, observer):
-        self.orderStatusObservers.append(observer)
-
-    def addPositionObserver(self, observer):
-        self.positionObservers.append(observer)
-
-    def addPriceObserver(self, symbol, observer):
-        if symbol not in self.priceObservers:
-            self.priceObservers[symbol] = [observer,]
-        else:
-            self.priceObservers[symbol].append(observer)
-
     def _handleTickUpdate(self, symbol, tick):
         try:
             # We need to evaluate if we have any limit orders and stop loss events triggered
             self._processPendingOrders(tick)
             self._evaluateOpenPositions(tick)
+            self.currentTick = tick
             if symbol in self.priceObservers:
                 for observer in self.priceObservers[symbol]:
                     observer(symbol, tick)
@@ -82,9 +61,11 @@ class Broker(OrderManager):
     def _fillOrder(self, order, tick):
         #Create position and notify client (ordersStatusObservers & positionObservers)
         self.orders.remove(order)
+        #TODO we should filter the observers to the observers related to the position/order
         [f(order, State.FILLED) for f in self.orderStatusObservers]
         position = Position(order, tick)
         [f(position, Position.PositionStatus.OPEN) for f in self.positionObservers]
+        self.positions.append(position)
         logging.debug("Opened position for %s" % position)
         # we're not interested in the order anymore, only the position
 
@@ -106,7 +87,6 @@ class Broker(OrderManager):
 
         if order.entry.type == Entry.Type.MARKET:
             self._fillOrder(order, tick)
-            self._fillOrder(order, tick)
         elif order.entry.type == Entry.Type.LIMIT:
             if order.direction == Direction.LONG and tick.offer <= order.entry.price:
                 self._fillOrder(order, tick)
@@ -126,8 +106,9 @@ class Broker(OrderManager):
         position.close(tick, reason)
         #Notify the client (positionObservers)
         self.positions.remove(position)
-        [f(position, position.exitReason) for f in self.positionObservers]
-        logging.debug("Position %s has been closed due to %s" % (position, position.exitReason.name))
+        #TODO we should filter the observers to the observers related to the position/order
+        [f(position, position.status) for f in self.positionObservers]
+        logging.debug("Position %s has been closed due to %s" % (position, position.status.name))
 
     def _evaluateOpenPosition(self, position, tick):
         if not isinstance(position, Position):

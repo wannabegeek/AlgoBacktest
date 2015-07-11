@@ -10,7 +10,7 @@ from strategycontainer.symbol import Symbol
 class Algo(Framework):
 
     def __init__(self):
-        super(Framework, self).__init__()
+        super(Algo, self).__init__()
         pass
 
     def warmupPeriod(self):
@@ -63,7 +63,7 @@ class Algo(Framework):
         """
         symbolContext = context.symbolContexts[quote.symbol]
 
-        logging.debug("I'm evaluating the data for %s" % (quote, ))
+        # logging.debug("I'm evaluating the data for %s" % (quote, ))
 
         if len(symbolContext.quotes) > 25:  # i.e. we have enough data
             quoteTimes = [time.mktime(o.startTime.timetuple()) for o in symbolContext.quotes]

@@ -62,6 +62,9 @@ class Position(object):
         self.status = reason
 
     def pointsDelta(self):
+        if self.status == Position.PositionStatus.OPEN:
+            raise ValueError("Position is still open")
+
         priceDelta = 0.0
         if self.order.direction == Direction.LONG:
             priceDelta = self.exitPrice - self.entryPrice
@@ -69,38 +72,6 @@ class Position(object):
             priceDelta = self.entryPrice - self.exitPrice
 
         return priceDelta * self.order.symbol.lot_size
-
-    def shouldClosePosition(self, tick):
-        if self.isOpen():
-            if self.order.stoploss is not None:
-                if self.order.stoploss.type == StopLoss.Type.TRAILING:
-                    if self.order.direction == Direction.LONG:
-                        self.stopPrice = max(self.stopPrice, tick.bid - self.order.stoploss.points * self.order.symbol.lot_size)
-                    else:
-                        self.stopPrice = min(self.stopPrice, tick.offer + self.order.stoploss.points * self.order.symbol.lot_size)
-
-                if self.order.direction == Direction.LONG:
-                    if tick.offer <= self.stopPrice:
-                        # logging.debug("Position %s hit its stop loss (tick %s)" % (self, tick))
-                        self.status = Position.PositionStatus.STOP_LOSS
-                        self.exitPrice = tick.offer
-                else:
-                    if tick.bid >= self.stopPrice:
-                        # logging.debug("Position %s hit its stop loss (tick %s)" % (self, tick))
-                        self.exitPrice = tick.bid
-                        self.status = Position.PositionStatus.STOP_LOSS
-
-            if self.order.takeProfit is not None:
-                if self.order.direction == Direction.LONG and tick.offer >= self.takeProfit:
-                    # logging.debug("Position %s hit its take profit target (tick %s)" % (self, tick))
-                    self.exitPrice = tick.offer
-                    self.status = Position.PositionStatus.TAKE_PROFIT
-                elif self.order.direction == Direction.SHORT and tick.bid <= self.takeProfit:
-                    # logging.debug("Position %s hit its take profit target (tick %s)" % (self, tick))
-                    self.exitPrice = tick.bid
-                    self.status = Position.PositionStatus.TAKE_PROFIT
-
-        return self.status
 
     def __eq__(self, other):
         return self.id == other.id

@@ -1,8 +1,10 @@
 import logging
 from algorithms.sample_algorithm import Algo
+from backtest.simulated_broker import Broker
 from data.csvtickdataprovider import CSVProvider
 from strategycontainer.container import Container
 from strategycontainer.position import Position
+from strategycontainer.symbol import Symbol
 
 
 def printResults(context):
@@ -22,8 +24,12 @@ def printResults(context):
 
 
 def main():
+    Symbol.setDataProvider("")
+
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    container = Container(Algo(), CSVProvider("/Users/tom/Downloads/HISTDATA_COM_ASCII_EURUSD_T201506/DAT_ASCII_EURUSD_T_201506-SHORT.csv"))
+    order_manager = Broker(CSVProvider(Symbol("FTSE:IDX"), "/Users/tom/Downloads/HISTDATA_COM_ASCII_EURUSD_T201506/DAT_ASCII_EURUSD_T_201506-SHORT.csv"))
+
+    container = Container(Algo(), order_manager)
     container.start()
 
     printResults(container.context)

@@ -7,8 +7,8 @@ from strategycontainer.symbol import Symbol
 
 
 class CSVProvider(Provider):
-    def __init__(self, filename):
-        self.symbol = None
+    def __init__(self, symbol, filename):
+        self.symbol = symbol
         self.reader = csv.reader(open(filename, 'r'))
 
     def register(self, symbol):

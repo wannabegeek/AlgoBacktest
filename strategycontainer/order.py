@@ -60,36 +60,11 @@ class Order(object):
     def isComplete(self):
         return self.state.value > State.WORKING.value
 
-    def shouldFill(self, tick):
-        if not isinstance(tick, Tick):
-            raise ValueError('argument "tick" must be a Tick')
-
-        if self.isComplete():
-            raise RunTimeError("Order is already complete")
-
-        if self.expireTime is not None:
-            timediff = tick.timestamp - self.entryTime
-            if timediff.total_seconds() >= self.expireTime.total_seconds():
-                self.state = State.EXPIRED
-                return False
-
-        if self.entry.type == Entry.Type.MARKET:
-            return True
-        elif self.entry.type == Entry.Type.LIMIT:
-            if self.direction == Direction.LONG:
-                return tick.offer <= self.entry.price
-            elif self.direction == Direction.SHORT:
-                return tick.bid >= self.entry.price
-        elif self.entry.type == Entry.Type.STOP_ENTRY:
-            if self.direction == Direction.LONG:
-                return tick.offer >= self.entry.price
-            elif self.direction == Direction.SHORT:
-                return tick.bid <= self.entry.price
-
-        return False
-
     def __eq__(self, other):
         return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
     def __str__(self):
         return "%s: %s %s@%s" % (self.state.name, self.direction.name, self.quantity, "MARKET" if self.entry.type == Entry.Type.MARKET else self.entry.price)

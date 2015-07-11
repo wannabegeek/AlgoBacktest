@@ -1,24 +1,22 @@
 import logging
-from data.data_provider import Provider
-from strategycontainer.position import Position
+from strategycontainer.ordermanager import OrderManager
 from strategycontainer.price import PriceConflator, Quote
 from strategycontainer.strategy import Framework, Context
 from strategycontainer.symbol import Symbol
 
 
 class Container(object):
-    def __init__(self, algo, priceDataProvider, progressCallback = None):
+    def __init__(self, algo, order_manager):
         if not isinstance(algo, Framework):
             raise TypeError("algorithm must be a subclass of strategycontainer.strategy.Framework")
-        if not isinstance(priceDataProvider, Provider):
-            raise TypeError("priceDataProvider must be a subclass of data.data_provider.Provider")
+        if not isinstance(order_manager, OrderManager):
+            raise TypeError("order_manager must be a subclass of OrderManager")
 
         Symbol.setDataProvider("")
 
         self.algo = algo
-        self.progressCallback = progressCallback
-        self.context = Context(self.algo.analysis_symbols())
-        self.priceDataProvider = priceDataProvider
+        self.order_manager = order_manager
+        self.context = Context(self.order_manager, self.algo.analysis_symbols())
 
         self.progressCounter = 0
         self.priceConflation = {}
@@ -28,29 +26,12 @@ class Container(object):
     def start(self):
         for symbol in self.algo.analysis_symbols():
             self.priceConflation[symbol] = PriceConflator(symbol, self.algo.period(), lambda x: self.handleData(x))
-            self.priceDataProvider.register(symbol)
+            self.order_manager.addPriceObserver(symbol, self.handleTickUpdate)
 
-        self.priceDataProvider.loadHistoricalData(self.algo.period() * self.algo.warmupPeriod())
-        self.priceDataProvider.startPublishing(lambda symbol, tick: self.handleTickUpdate(symbol, tick))
-
-    def _evaluatePendingOrder(self, tick):
-        for order in self.context.getOpenOrders():
-            if order.shouldFill(tick):
-                position = Position(order, tick)
-                self.context.openPosition(position)
-                logging.debug("Opened position for %s" % position)
-
-    def _evaluateActivePositions(self, tick):
-        for position in self.context.getOpenPositions():
-            reason = position.shouldClosePosition(tick)
-            if reason is not Position.PositionStatus.OPEN:
-                logging.debug("Position %s has been closed due to %s" % (position, reason.name))
+        self.order_manager.start()
 
     def handleTickUpdate(self, symbol, tick):
         try:
-            # We need to evaluate if we have any limit orders and stop loss events triggered
-            self._evaluatePendingOrder(tick)
-            self._evaluateActivePositions(tick)
             self.priceConflation[symbol].addTick(tick)
         except KeyError as e:
             logging.error("Received data update for symbol we're not subscribed to (%s)" % (symbol,))
@@ -62,20 +43,9 @@ class Container(object):
         if quote is None or not isinstance(quote, Quote):
             raise TypeError("Invalid quote")
 
-        # logging.debug("We have some data: %s" % (quote,))
-        orderCount = len(self.context.orders)
+        logging.debug("Handling quote data: %s" % (quote,))
         self.context.addQuote(quote)
         self.algo.evaluateTickUpdate(self.context, quote)
-
-        # see if any orders have been added, if so, we should see if they need to be filled etc.
-        if orderCount != len(self.context.orders):
-            self._evaluatePendingOrder(quote.lastTick)
-            self._evaluateActivePositions(quote.lastTick)
-
-        # self.algo.evaluateTickUpdate(self.context, quote)
-        # if self.progressCallback is not None:
-        #     self.progressCounter += 1
-        #     self.progressCallback(float(self.progressCounter)/float(len(self.quotes)))
 
     def context(self):
         return self.context
