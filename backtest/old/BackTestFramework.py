@@ -1,6 +1,6 @@
 import logging
 from algorithms.sample_algorithm import Algo
-from strategycontainer.strategy import Framework, Context
+from strategy.strategy import Framework, Context
 
 
 class BackTestFramework(object):
@@ -11,7 +11,7 @@ class BackTestFramework(object):
 
     def __init__(self, algo, dataProviderClass, progressCallback = None):
         if not isinstance(algo, Framework):
-            raise TypeError("algorithm must be a subclass of strategycontainer.strategy.Framework")
+            raise TypeError("algorithm must be a subclass of strategy.strategy.Framework")
 
         self.algo = algo
         self.progressCounter = 0

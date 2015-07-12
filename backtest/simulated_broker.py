@@ -1,13 +1,23 @@
 import logging
-from strategycontainer.order import StopLoss, Direction, State, Entry, Order
-from strategycontainer.ordermanager import OrderManager, OrderbookException
-from strategycontainer.position import Position
-from strategycontainer.price import Tick
 
-class Broker(OrderManager):
+from data.data_provider import Provider
+from market.interfaces.data_provider import DataProvider
+from market.order import StopLoss, Direction, State, Entry, Order
+from market.interfaces.orderrouter import OrderRouter, OrderbookException
+from market.position import Position
+from market.price import Tick
+
+
+class Broker(OrderRouter, DataProvider):
 
     def __init__(self, priceDataProvider):
-        super(Broker, self).__init__(priceDataProvider)
+        if not isinstance(priceDataProvider, Provider):
+            raise TypeError("priceDataProvider must be a subclass of data.data_provider.Provider")
+
+        self.priceDataProvider = priceDataProvider
+
+        OrderRouter.__init__(self)
+        DataProvider.__init__(self)
         self.orders = []
         self.positions = []
 

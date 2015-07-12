@@ -1,6 +1,8 @@
-import numpy as np
 import math
-from strategycontainer.symbol import SymbolContext
+
+import numpy as np
+
+from market.symbol import SymbolContext
 
 
 def gradient(x, y):

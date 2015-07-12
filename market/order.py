@@ -2,8 +2,7 @@ from datetime import datetime
 from enum import Enum
 import uuid
 
-from strategycontainer.symbol import Symbol
-from strategycontainer.price import Tick
+from market.symbol import Symbol
 
 
 class Direction(Enum):
@@ -31,9 +30,10 @@ class StopLoss(object):
 
 class State(Enum):
     WORKING = 0
-    FILLED = 1
-    EXPIRED = 2
-    CANCELLED = 3
+    REJECTED = 1
+    FILLED = 2
+    EXPIRED = 3
+    CANCELLED = 4
 
 class Order(object):
     def __init__(self, symbol, quantity, entry, direction, stoploss = None, takeProfit = None, expireTime = None, entryTime = datetime.utcnow()):

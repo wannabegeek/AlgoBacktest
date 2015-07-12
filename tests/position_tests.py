@@ -1,10 +1,10 @@
 from datetime import datetime
 import unittest
 
-from strategycontainer.order import Order, Entry, Direction, StopLoss
-from strategycontainer.position import Position
-from strategycontainer.symbol import Symbol
-from strategycontainer.price import Tick
+from market.order import Order, Entry, Direction
+from market.position import Position
+from market.symbol import Symbol
+from market.price import Tick
 
 
 class PositionExitTests(unittest.TestCase):

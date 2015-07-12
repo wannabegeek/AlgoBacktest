@@ -1,11 +1,14 @@
 import logging
 import time
+
 from numpy import asarray
-from analysis import financial, mathmatical
-from data import SymbolRequestPeriod
-from strategycontainer.order import Direction, Order, Entry, StopLoss
-from strategycontainer.strategy import Framework
-from strategycontainer.symbol import Symbol
+
+from analysis import financial
+from market.interfaces.data_provider import MarketDataPeriod
+from market.order import Direction, Order, Entry, StopLoss
+from strategy.strategy import Framework
+from market.symbol import Symbol
+
 
 class Algo(Framework):
 
@@ -43,7 +46,7 @@ class Algo(Framework):
         This is the interval required for processing backdata.
         :return: Interval for the backdata
         """
-        return SymbolRequestPeriod.MIN_5
+        return MarketDataPeriod.MIN_5
 
     def initialiseContext(self, context):
         """

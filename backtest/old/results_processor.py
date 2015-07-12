@@ -1,8 +1,6 @@
 from bisect import bisect_left
 from datetime import timedelta
 
-from strategycontainer.position import Direction
-
 
 class ResultsProcessorResults(object):
     TIMESTAMP = 0

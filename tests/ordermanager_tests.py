@@ -1,14 +1,14 @@
-from functools import partial
 import logging
 import unittest
 import datetime
+
 from backtest.simulated_broker import Broker
-from data import SymbolRequestPeriod
 from data.data_provider import Provider
-from strategycontainer.order import State, Entry, Direction, Order, StopLoss
-from strategycontainer.position import Position
-from strategycontainer.price import Tick
-from strategycontainer.symbol import Symbol
+from market.interfaces.data_provider import MarketDataPeriod
+from market.order import State, Entry, Direction, Order, StopLoss
+from market.position import Position
+from market.price import Tick
+from market.symbol import Symbol
 
 
 class OrderCreator(object):
@@ -58,9 +58,9 @@ class OrderManagerTest(unittest.TestCase):
         # symbol = algo.analysis_symbols()[0]
         ticks = []
         ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 11.0, 11.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 12.0, 12.1))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
@@ -86,13 +86,13 @@ class OrderManagerTest(unittest.TestCase):
         # symbol = algo.analysis_symbols()[0]
         ticks = []
         ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 11.0, 11.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 12.0, 12.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 12.3, 12.4))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 12.8, 12.9))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
@@ -119,13 +119,13 @@ class OrderManagerTest(unittest.TestCase):
         # symbol = algo.analysis_symbols()[0]
         ticks = []
         ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 11.0, 11.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 12.0, 12.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 12.3, 12.4))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 12.8, 12.9))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
@@ -148,11 +148,11 @@ class OrderManagerTest(unittest.TestCase):
         # symbol = algo.analysis_symbols()[0]
         ticks = []
         ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 11.0, 11.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 8.0, 8.1))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
@@ -181,9 +181,9 @@ class OrderManagerTest(unittest.TestCase):
         # symbol = algo.analysis_symbols()[0]
         ticks = []
         ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 11.0, 11.1))
-        startTime = startTime + SymbolRequestPeriod.MIN_1
+        startTime = startTime + MarketDataPeriod.MIN_1
         ticks.append(Tick(startTime, 13.0, 13.1))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)

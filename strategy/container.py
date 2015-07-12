@@ -1,15 +1,16 @@
 import logging
-from strategycontainer.ordermanager import OrderManager
-from strategycontainer.price import PriceConflator, Quote
-from strategycontainer.strategy import Framework, Context
-from strategycontainer.symbol import Symbol
+
+from market.interfaces.orderrouter import OrderRouter
+from market.price import PriceConflator, Quote
+from strategy.strategy import Framework, Context
+from market.symbol import Symbol
 
 
 class Container(object):
     def __init__(self, algo, order_manager):
         if not isinstance(algo, Framework):
-            raise TypeError("algorithm must be a subclass of strategycontainer.strategy.Framework")
-        if not isinstance(order_manager, OrderManager):
+            raise TypeError("algorithm must be a subclass of strategy.strategy.Framework")
+        if not isinstance(order_manager, OrderRouter):
             raise TypeError("order_manager must be a subclass of OrderManager")
 
         Symbol.setDataProvider("")

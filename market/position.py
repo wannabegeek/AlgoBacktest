@@ -1,9 +1,8 @@
 from enum import Enum
-import logging
 import uuid
 
-from strategycontainer.order import StopLoss, Direction, State, Order
-from strategycontainer.price import Tick
+from market.order import Direction, State, Order
+from market.price import Tick
 
 
 class Position(object):

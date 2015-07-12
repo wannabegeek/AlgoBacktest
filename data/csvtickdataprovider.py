@@ -1,9 +1,10 @@
 import datetime
 import logging
 import csv
+
 from data.data_provider import Provider
-from strategycontainer.price import Tick
-from strategycontainer.symbol import Symbol
+from market.price import Tick
+from market.symbol import Symbol
 
 
 class CSVProvider(Provider):

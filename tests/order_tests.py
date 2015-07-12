@@ -1,9 +1,6 @@
-from datetime import datetime, timedelta
 import unittest
 
-from strategycontainer.order import Order, Entry, Direction, State
-from strategycontainer.symbol import Symbol
-from strategycontainer.price import Tick
+from market.symbol import Symbol
 
 
 class OrderTest(unittest.TestCase):

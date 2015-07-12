@@ -1,9 +1,10 @@
 from abc import ABCMeta, abstractmethod
 import logging
-from strategycontainer.order import Order, State
-from strategycontainer.ordermanager import OrderManager
-from strategycontainer.position import Position
-from strategycontainer.symbol import SymbolContext, Symbol
+
+from market.order import State
+from market.interfaces.orderrouter import OrderRouter
+from market.position import Position
+from market.symbol import SymbolContext
 
 
 class Framework(object):
@@ -44,7 +45,7 @@ class Context(object):
         :param symbols: A List of symbols used in this Strategy
         :return: A StrategyContext object
         """
-        if not isinstance(order_manager, OrderManager):
+        if not isinstance(order_manager, OrderRouter):
             raise TypeError('order_manager must be an OrderManager object type')
 
         self.order_manager = order_manager

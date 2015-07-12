@@ -1,8 +1,9 @@
 import unittest
 import datetime
 
-from strategycontainer.symbol import Symbol
-from strategycontainer.price import Tick, PriceConflator, roundDateTimeToPeriod
+from market.symbol import Symbol
+from market.price import Tick, PriceConflator, roundDateTimeToPeriod
+
 
 class PriceTest(unittest.TestCase):
     def setUp(self):
