@@ -3,6 +3,8 @@ import logging
 from algorithms.sample_algorithm import Algo
 from backtest.simulated_broker import Broker
 from data.csvtickdataprovider import CSVProvider
+from data.randomdataprovider import RandomProvider
+from market.market_data import MarketData
 from strategy.container import Container
 from market.position import Position
 from market.symbol import Symbol
@@ -28,11 +30,13 @@ def main():
     Symbol.setDataProvider("")
 
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    order_manager = Broker(CSVProvider(Symbol("FTSE:IDX"), "/Users/tom/Downloads/HISTDATA_COM_ASCII_EURUSD_T201506/DAT_ASCII_EURUSD_T_201506.csv"))
+    venue_connection = Broker(RandomProvider(Symbol("FTSE:IDX"), 1000))
 
-    container = Container(Algo(), order_manager, order_manager)
+    market_data = MarketData(venue_connection)
 
-    order_manager.start()
+    container = Container(Algo(), venue_connection, market_data)
+
+    venue_connection.start()
 
     printResults(container.context)
     logging.info("All done... shutting down")

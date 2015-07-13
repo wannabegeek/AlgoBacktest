@@ -21,7 +21,6 @@ class MarketDataException(Exception):
     pass
 
 class MarketData(object):
-
     def __init__(self, data_provider):
         if not isinstance(data_provider, DataProvider):
             raise TypeError("data_provider must be a subclass of DataProvider")
@@ -33,24 +32,26 @@ class MarketData(object):
         self.priceObservers = {}
 
     def _observerKey(self, symbol, period):
-        return "%s_%s" % (symbol, period.name)
+        return "%s_%s" % (symbol, period)
 
     def addPriceObserver(self, symbol, period, observer):
         if not isinstance(symbol, Symbol):
             raise TypeError("symbol must be Symbol")
-        if not isinstance(period, MarketDataPeriod):
-            raise TypeError("period must be MarketDataPeriod")
+        if not isinstance(period, datetime.timedelta):
+            raise TypeError("period must be timedelta")
 
+        logging.debug("Adding observer of price updates in %s, period %s" % (symbol, period))
         observerKey = self._observerKey(symbol, period)
         if observerKey not in self.priceObservers:
             self.priceObservers[observerKey] = [observer,]
-            self.data_provider.subscribedSymbols(symbol)
+            self.data_provider.subscribeSymbol(symbol)
         else:
             self.priceObservers[symbol].append(observer)
 
     def removePriceObserver(self, symbol, period, observer):
         observerKey = self._observerKey(symbol, period)
         for observers in self.priceObservers[observerKey]:
+            logging.debug("Removing observer of price updates in %s, period %s" % (symbol, period))
             observers.remove(observer)
             if len(observers) == 0:
                 self.data_provider.unsubscribe(symbol)
