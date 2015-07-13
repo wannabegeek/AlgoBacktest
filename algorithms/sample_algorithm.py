@@ -4,7 +4,7 @@ import time
 from numpy import asarray
 
 from analysis import financial
-from market.interfaces.data_provider import MarketDataPeriod
+from market.market_data import MarketDataPeriod
 from market.order import Direction, Order, Entry, StopLoss
 from strategy.strategy import Framework
 from market.symbol import Symbol

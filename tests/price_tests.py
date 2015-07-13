@@ -1,5 +1,6 @@
 import unittest
 import datetime
+from market.market_data import MarketDataPeriod
 
 from market.symbol import Symbol
 from market.price import Tick, PriceConflator, roundDateTimeToPeriod
@@ -26,19 +27,24 @@ class PriceTest(unittest.TestCase):
 
     def testQuoteConstruction(self):
         s = Symbol("TEST")
-        conflator = PriceConflator("TEST", datetime.timedelta(seconds=5), self.callback)
+        conflator = PriceConflator("TEST", MarketDataPeriod.MIN_5, self.callback)
 
         startTime = datetime.datetime(2015, 7, 7, 14, 10, 0)
-        tick = Tick(startTime + datetime.timedelta(seconds=1), 9.0, 9.2)
+        startTime = startTime + MarketDataPeriod.MIN_1
+        tick = Tick(startTime, 9.0, 9.2)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=2), 8.7, 8.9)
+        startTime = startTime + MarketDataPeriod.MIN_1
+        tick = Tick(startTime, 8.7, 8.9)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=3), 11.0, 11.2)
+        startTime = startTime + MarketDataPeriod.MIN_1
+        tick = Tick(startTime, 11.0, 11.2)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=4), 10.5, 10.7)
+        startTime = startTime + MarketDataPeriod.MIN_1
+        tick = Tick(startTime, 10.5, 10.7)
         conflator.addTick(tick)
 
-        tick = Tick(startTime + datetime.timedelta(seconds=5), 9.0, 9.2)
+        startTime = startTime + MarketDataPeriod.MIN_1
+        tick = Tick(startTime, 9.0, 9.2)
         conflator.addTick(tick)
 
         self.assertEqual(1, len(self.callbackQuote))
@@ -50,7 +56,7 @@ class PriceTest(unittest.TestCase):
 
     def testQuoteConstructionOnInterval(self):
         s = Symbol("TEST")
-        conflator = PriceConflator("TEST", datetime.timedelta(minutes=5), self.callback)
+        conflator = PriceConflator("TEST", MarketDataPeriod.MIN_5, self.callback)
 
         startTime = datetime.datetime(2015, 7, 7, 14, 0, 0)
         tick = Tick(startTime, 9.0, 9.2)
@@ -78,19 +84,24 @@ class PriceTest(unittest.TestCase):
 
     def testQuoteGap(self):
         s = Symbol("TEST")
-        conflator = PriceConflator("TEST", datetime.timedelta(seconds=5), self.callback)
+        conflator = PriceConflator("TEST", MarketDataPeriod.MIN_5, self.callback)
 
         startTime = datetime.datetime(2015, 7, 7, 14, 10, 0)
-        tick = Tick(startTime + datetime.timedelta(seconds=1), 9.0, 9.2)
+        startTime = startTime + MarketDataPeriod.MIN_1
+        tick = Tick(startTime, 9.0, 9.2)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=2), 8.7, 8.9)
+        startTime = startTime + MarketDataPeriod.MIN_1
+        tick = Tick(startTime, 8.7, 8.9)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=3), 11.0, 11.2)
+        startTime = startTime + MarketDataPeriod.MIN_1
+        tick = Tick(startTime, 11.0, 11.2)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=4), 10.5, 10.7)
+        startTime = startTime + MarketDataPeriod.MIN_1
+        tick = Tick(startTime, 10.5, 10.7)
         conflator.addTick(tick)
 
-        tick = Tick(startTime + datetime.timedelta(seconds=15), 9.0, 9.2)
+        startTime = startTime + MarketDataPeriod.MIN_15
+        tick = Tick(startTime, 9.0, 9.2)
         conflator.addTick(tick)
 
         self.assertEqual(3, len(self.callbackQuote))

@@ -28,10 +28,11 @@ def main():
     Symbol.setDataProvider("")
 
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    order_manager = Broker(CSVProvider(Symbol("FTSE:IDX"), "/Users/tom/Downloads/HISTDATA_COM_ASCII_EURUSD_T201505/DAT_ASCII_EURUSD_T_201505.csv"))
+    order_manager = Broker(CSVProvider(Symbol("FTSE:IDX"), "/Users/tom/Downloads/HISTDATA_COM_ASCII_EURUSD_T201506/DAT_ASCII_EURUSD_T_201506.csv"))
 
-    container = Container(Algo(), order_manager)
-    container.start()
+    container = Container(Algo(), order_manager, order_manager)
+
+    order_manager.start()
 
     printResults(container.context)
     logging.info("All done... shutting down")

@@ -4,7 +4,7 @@ import datetime
 
 from backtest.simulated_broker import Broker
 from data.data_provider import Provider
-from market.interfaces.data_provider import MarketDataPeriod
+from market.market_data import MarketDataPeriod
 from market.order import State, Entry, Direction, Order, StopLoss
 from market.position import Position
 from market.price import Tick
@@ -65,10 +65,11 @@ class OrderManagerTest(unittest.TestCase):
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
+        order_manager.subscribeSymbol(symbol)
 
         order = Order(symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG)
         order_creator = OrderCreator(order_manager, symbol, order)
-        order_manager.addPriceObserver(symbol, order_creator.handleData)
+        order_manager.addPriceObserver(order_creator.handleData)
 
         order_manager.start()
 
@@ -97,10 +98,11 @@ class OrderManagerTest(unittest.TestCase):
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
+        order_manager.subscribeSymbol(symbol)
 
         order = Order(symbol, 1, Entry(Entry.Type.STOP_ENTRY, 11.3), Direction.LONG)
         order_creator = OrderCreator(order_manager, symbol, order)
-        order_manager.addPriceObserver(symbol, order_creator.handleData)
+        order_manager.addPriceObserver(order_creator.handleData)
 
         order_manager.start()
 
@@ -130,9 +132,10 @@ class OrderManagerTest(unittest.TestCase):
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
+        order_manager.subscribeSymbol(symbol)
 
         order_creator = OrderCreator(order_manager, symbol, order)
-        order_manager.addPriceObserver(symbol, order_creator.handleData)
+        order_manager.addPriceObserver(order_creator.handleData)
 
         order_manager.start()
 
@@ -157,10 +160,11 @@ class OrderManagerTest(unittest.TestCase):
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
+        order_manager.subscribeSymbol(symbol)
 
         order = Order(symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, StopLoss(StopLoss.Type.FIXED, 1))
         order_creator = OrderCreator(order_manager, symbol, order)
-        order_manager.addPriceObserver(symbol, order_creator.handleData)
+        order_manager.addPriceObserver(order_creator.handleData)
         order_manager.addPositionObserver(lambda position, state: self.setPosition(position))
 
         order_manager.start()
@@ -188,10 +192,11 @@ class OrderManagerTest(unittest.TestCase):
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
+        order_manager.subscribeSymbol(symbol)
 
         order = Order(symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, takeProfit=2)
         order_creator = OrderCreator(order_manager, symbol, order)
-        order_manager.addPriceObserver(symbol, order_creator.handleData)
+        order_manager.addPriceObserver(order_creator.handleData)
         order_manager.addPositionObserver(lambda position, state: self.setPosition(position))
 
         order_manager.start()

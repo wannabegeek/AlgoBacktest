@@ -15,11 +15,15 @@ class Broker(OrderRouter, DataProvider):
             raise TypeError("priceDataProvider must be a subclass of data.data_provider.Provider")
 
         self.priceDataProvider = priceDataProvider
+        self.currentTick = None
 
         OrderRouter.__init__(self)
         DataProvider.__init__(self)
         self.orders = []
         self.positions = []
+
+    def start(self):
+        self.priceDataProvider.startPublishing(lambda symbol, tick: self._handleTickUpdate(symbol, tick))
 
     def placeOrder(self, order):
         if not isinstance(order, Order):
@@ -58,9 +62,7 @@ class Broker(OrderRouter, DataProvider):
             self._processPendingOrders(tick)
             self._evaluateOpenPositions(tick)
             self.currentTick = tick
-            if symbol in self.priceObservers:
-                for observer in self.priceObservers[symbol]:
-                    observer(symbol, tick)
+            self._notifyObservers(symbol, tick)
         except KeyError as e:
             logging.error("Received data update for symbol we're not subscribed to (%s)" % (symbol,))
 

@@ -1,6 +1,8 @@
 from datetime import timedelta, datetime, timezone
 import logging
 import statistics
+from market.market_data import MarketData, MarketDataPeriod
+
 
 class Tick(object):
     """
