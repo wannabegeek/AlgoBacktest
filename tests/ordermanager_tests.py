@@ -207,4 +207,5 @@ class OrderManagerTest(unittest.TestCase):
 
         self.assertIsNotNone(self.position)
         self.assertEqual(Position.PositionStatus.TAKE_PROFIT, self.position.status)
-        self.assertEqual(12.0, self.position.exitPrice)
+        self.assertEqual(12.1, self.position.exitPrice)
+        self.assertAlmostEquals(2.0, self.position.pointsDelta())

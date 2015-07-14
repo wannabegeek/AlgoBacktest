@@ -37,9 +37,9 @@ class Position(object):
 
         if self.order.takeProfit is not None:
             if self.order.direction == Direction.LONG:
-                self.takeProfit = tick.bid + self.order.takeProfit / self.order.symbol.lot_size
+                self.takeProfit = tick.offer + self.order.takeProfit / self.order.symbol.lot_size
             else:
-                self.takeProfit = tick.offer - self.order.takeProfit / self.order.symbol.lot_size
+                self.takeProfit = tick.bid - self.order.takeProfit / self.order.symbol.lot_size
         else:
             self.takeProfit = None
 
