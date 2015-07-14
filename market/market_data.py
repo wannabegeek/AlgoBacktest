@@ -2,8 +2,8 @@ from enum import Enum
 import logging
 import datetime
 from market.interfaces.data_provider import DataProvider
+from market.price import Quote, Tick
 from market.symbol import Symbol
-
 
 class MarketDataPeriod(object):
     MIN_1 = datetime.timedelta(seconds=60)
@@ -20,6 +20,26 @@ class MarketDataPeriod(object):
 class MarketDataException(Exception):
     pass
 
+class MarketDataObserver(object):
+    def __init__(self, symbol, period, observer = None):
+        self.observers = []
+        self.priceConflation = PriceConflator(symbol, period, self.quoteHandler)
+        if observer is not None:
+            self.addObserver(observer)
+
+    def addObserver(self, observer):
+        self.observers.append(observer)
+
+    def removeObserver(self, observer):
+        self.observers.remove(observer)
+
+    def addTick(self, tick):
+        self.priceConflation.addTick(tick)
+
+    def quoteHandler(self, quote):
+        for observer in self.observers:
+            observer(self.priceConflation.symbol, quote)
+
 class MarketData(object):
     def __init__(self, data_provider):
         if not isinstance(data_provider, DataProvider):
@@ -31,9 +51,6 @@ class MarketData(object):
         self.currentTick = None
         self.priceObservers = {}
 
-    def _observerKey(self, symbol, period):
-        return "%s_%s" % (symbol, period)
-
     def addPriceObserver(self, symbol, period, observer):
         if not isinstance(symbol, Symbol):
             raise TypeError("symbol must be Symbol")
@@ -41,26 +58,61 @@ class MarketData(object):
             raise TypeError("period must be timedelta")
 
         logging.debug("Adding observer of price updates in %s, period %s" % (symbol, period))
-        observerKey = self._observerKey(symbol, period)
-        if observerKey not in self.priceObservers:
-            self.priceObservers[observerKey] = [observer,]
+        if symbol not in self.priceObservers:
+            self.priceObservers[symbol] = {period: MarketDataObserver(symbol, period, observer)}
             self.data_provider.subscribeSymbol(symbol)
         else:
-            self.priceObservers[symbol].append(observer)
+            if period not in self.priceObservers[symbol]:
+                self.priceObservers[symbol][period] = MarketDataObserver(symbol, period, observer)
+            else:
+                self.priceObservers[symbol][period].addObserver(observer)
 
     def removePriceObserver(self, symbol, period, observer):
-        observerKey = self._observerKey(symbol, period)
-        for observers in self.priceObservers[observerKey]:
-            logging.debug("Removing observer of price updates in %s, period %s" % (symbol, period))
-            observers.remove(observer)
-            if len(observers) == 0:
-                self.data_provider.unsubscribe(symbol)
-                del(self.priceObservers[observerKey])
+        self.priceObservers[symbol][period].remove(observer)
+        logging.debug("Removing observer of price updates in %s, period %s" % (symbol, period))
+        if len(self.priceObservers[symbol][period]) == 0:
+            self.data_provider.unsubscribe(symbol)
+            del(self.priceObservers[symbol][period])
 
     def handleTickUpdate(self, symbol, tick):
         # we probably need to conflate prices to bake available to algorithms
         try:
-            self.priceConflation[symbol].addTick(tick)
+            for conflationHandlers in self.priceObservers[symbol].values():
+                conflationHandlers.addTick(tick)
         except KeyError as e:
             logging.error("Received data update for symbol we're not subscribed to (%s)" % (symbol,))
 
+def roundDateTimeToPeriod(timestamp, period):
+    roundTo = period.total_seconds()
+    seconds = timestamp.replace(tzinfo=datetime.timezone.utc).timestamp() % roundTo
+    return timestamp - datetime.timedelta(seconds=seconds)
+
+class PriceConflator(object):
+    def __init__(self, symbol, period, callback = None):
+        if not isinstance(period, datetime.timedelta):
+            raise TypeError("period must be a timedelta")
+        self.symbol = symbol
+        self.period = period
+        self.callback = callback
+        self.periodStartingTimestamp = None
+        self.currentQuote = None
+
+    def addTick(self, tick):
+        if not self.currentQuote:
+            self.periodStartingTimestamp = tick.timestamp
+            self.currentQuote = Quote(self.symbol, roundDateTimeToPeriod(tick.timestamp, self.period), self.period, tick)
+            return self.currentQuote
+        else:
+            currentTickTimeBlock = roundDateTimeToPeriod(tick.timestamp, self.period)
+            if currentTickTimeBlock.timestamp() < (self.currentQuote.startTime + self.period).timestamp():
+                self.currentQuote.addTick(tick)
+            else:
+                if self.callback is not None:
+                    self.callback(self.currentQuote)
+                t = self.currentQuote.startTime + self.period
+                while currentTickTimeBlock.timestamp() >= (t + self.period).timestamp():
+                        self.callback(Quote(self.symbol, t, self.period, Tick(self.currentQuote.startTime, self.currentQuote.close, self.currentQuote.close)))
+                        t = t + self.period
+                self.currentQuote = Quote(self.symbol, t, self.period, tick)
+                return self.currentQuote
+        return None

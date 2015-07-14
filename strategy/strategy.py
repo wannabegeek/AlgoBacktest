@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 import logging
 
 from market.order import State
-from market.interfaces.orderrouter import OrderRouter
+from market.orderbook import OrderBook
 from market.position import Position
 from market.symbol import SymbolContext
 
@@ -21,6 +21,10 @@ class Framework(object):
         return self.portfolio_symbols()
 
     @abstractmethod
+    def identifier(self):
+        pass
+
+    @abstractmethod
     def portfolio_symbols(self):
         pass
 
@@ -37,7 +41,7 @@ class Framework(object):
 
 
 class Context(object):
-    def __init__(self, order_manager, symbols):
+    def __init__(self, order_book, symbols):
         """
         Constructor
         This is for internal use.
@@ -45,10 +49,10 @@ class Context(object):
         :param symbols: A List of symbols used in this Strategy
         :return: A StrategyContext object
         """
-        if not isinstance(order_manager, OrderRouter):
-            raise TypeError('order_manager must be an OrderManager object type')
+        if not isinstance(order_book, OrderBook):
+            raise TypeError('order_book must be an OrderBook object type')
 
-        self.order_manager = order_manager
+        self.order_book = order_book
         self.symbolContexts = {}
         for symbol in symbols:
             logging.debug("Creating symbol context for {0}".format(symbol))
@@ -80,7 +84,7 @@ class Context(object):
         """
 
         logging.info("Releasing order {0}".format(order))
-        self.order_manager.placeOrder(order)
+        self.order_book.placeOrder(None, order)
 
         # if this is a market order, it will be filled on the next tick
         self.orders.append(order)
@@ -92,7 +96,7 @@ class Context(object):
         The status change of the order will be notified by the statusCallback function the placeOrder method
         :param order: The order to modify
         """
-        self.order_manager.cancelOrder(order)
+        self.order_book.cancelOrder(order)
 
     def openPosition(self, position):
         if not isinstance(position, Position):
@@ -110,7 +114,7 @@ class Context(object):
         if not isinstance(position, Position):
             raise TypeError('position must be an Position object type')
 
-        self.order_manager.closePosition(position)
+        self.order_book.closePosition(position)
         logging.info("Closing position {0}".format(position))
 
     def record(self, key, value, quote):
@@ -141,7 +145,7 @@ class Context(object):
         Get a list of all open positions
         :return: List of positions
         """
-        return filter(lambda x: x.state == State.WORKING, self.orders)
+        return filter(lambda x: x.state == State.PENDING_NEW, self.orders)
 
     def __getattr__(self, name):
         return self.__dict__[name]

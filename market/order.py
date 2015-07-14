@@ -29,11 +29,14 @@ class StopLoss(object):
         self.points = points
 
 class State(Enum):
-    WORKING = 0
-    REJECTED = 1
-    FILLED = 2
-    EXPIRED = 3
-    CANCELLED = 4
+    PENDING_NEW = 0
+    PENDING_MODIFY = 1
+    PENDING_CANCEL = 2
+    WORKING = 10
+    REJECTED = 20
+    FILLED = 21
+    EXPIRED = 22
+    CANCELLED = 23
 
 class Order(object):
     def __init__(self, symbol, quantity, entry, direction, stoploss = None, takeProfit = None, expireTime = None, entryTime = datetime.utcnow()):
@@ -50,12 +53,12 @@ class Order(object):
         self.stoploss = stoploss
         self.takeProfit = takeProfit
         self.expireTime = expireTime
-        self.state = State.WORKING
+        self.state = State.PENDING_NEW
         self.entryTime = entryTime
         self.id = uuid.uuid4()
 
     def isPending(self):
-        return self.state.value == State.WORKING.value
+        return self.state.value <= State.WORKING.value
 
     def isComplete(self):
         return self.state.value > State.WORKING.value

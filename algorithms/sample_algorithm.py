@@ -16,6 +16,9 @@ class Algo(Framework):
         super(Algo, self).__init__()
         pass
 
+    def identifier(self):
+        return "SampleStrategy"
+
     def warmupPeriod(self):
         """
         This is the number of periods required for the algorithm to warm up.
@@ -31,7 +34,7 @@ class Algo(Framework):
         This is a list of symbols which are used in the portfolio for this algorithm.
         :return: Array of Symbols used in this algorithm
         """
-        return [Symbol('FTSE:IDX'), ]
+        return [Symbol('EURUSD:CUR'), ]
 
     # def analysis_symbols(self):
     #     """

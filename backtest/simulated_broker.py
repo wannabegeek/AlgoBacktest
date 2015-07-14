@@ -29,13 +29,23 @@ class Broker(OrderRouter, DataProvider):
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
 
+        if order.state is not State.PENDING_NEW:
+            raise ValueError("Attempting to place a non-pending order")
+
         self.orders.append(order)
+
+        order.state = State.WORKING
+        [f(order, State.PENDING_NEW) for f in self.orderStatusObservers]
         self._evaluateOrdersStatus(order, self.currentTick)
 
     def modifyOrder(self, order):
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
+        if order.state is not State.PENDING_MODIFY:
+            raise ValueError("Attempting to modify a non-pending order")
 
+        order.state = State.WORKING
+        [f(order, State.PENDING_MODIFY) for f in self.orderStatusObservers]
         if order in self.orders:
             # we shouldn't need to do anything else, since the reference will have been updated
             self._evaluateOrdersStatus(order, self.currentTick)
@@ -45,8 +55,13 @@ class Broker(OrderRouter, DataProvider):
     def cancelOrder(self, order):
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
+        if order.state is not State.PENDING_CANCEL:
+            raise ValueError("Attempting to cancel a non-pending order")
+
         try:
             self.orders.remove(order)
+            order.state = State.CANCELLED
+            [f(order, State.PENDING_CANCEL) for f in self.orderStatusObservers]
         except ValueError:
             raise OrderbookException("Order not found")
 
@@ -71,17 +86,19 @@ class Broker(OrderRouter, DataProvider):
             self._evaluateOrdersStatus(order, tick)
 
     def _fillOrder(self, order, tick):
+        previousState = order.state
         #Create position and notify client (ordersStatusObservers & positionObservers)
         self.orders.remove(order)
         #TODO we should filter the observers to the observers related to the position/order
-        [f(order, State.FILLED) for f in self.orderStatusObservers]
+        [f(order, previousState) for f in self.orderStatusObservers]
         position = Position(order, tick)
-        [f(position, Position.PositionStatus.OPEN) for f in self.positionObservers]
+        [f(position, None) for f in self.positionObservers]
         self.positions.append(position)
         logging.debug("Opened position for %s" % position)
         # we're not interested in the order anymore, only the position
 
     def _evaluateOrdersStatus(self, order, tick):
+        previousState = order.state
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
         if not isinstance(tick, Tick):
@@ -94,7 +111,7 @@ class Broker(OrderRouter, DataProvider):
             timeSinceCreation = tick.timestamp - order.entryTime
             if timeSinceCreation.total_seconds() >= order.expireTime.total_seconds():
                 order.state = State.EXPIRED
-                [f(order, State.EXPIRED) for f in self.orderStatusObservers]
+                [f(order, previousState) for f in self.orderStatusObservers]
                 self.orders.remove(order)
 
         if order.entry.type == Entry.Type.MARKET:
@@ -115,11 +132,12 @@ class Broker(OrderRouter, DataProvider):
             self._evaluateOpenPosition(position, tick)
 
     def _closePosition(self, position, tick, reason):
+        previousState = position.status
         position.close(tick, reason)
         #Notify the client (positionObservers)
         self.positions.remove(position)
         #TODO we should filter the observers to the observers related to the position/order
-        [f(position, position.status) for f in self.positionObservers]
+        [f(position, previousState) for f in self.positionObservers]
         logging.debug("Position %s has been closed due to %s" % (position, position.status.name))
 
     def _evaluateOpenPosition(self, position, tick):

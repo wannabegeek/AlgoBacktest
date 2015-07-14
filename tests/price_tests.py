@@ -1,9 +1,9 @@
 import unittest
 import datetime
-from market.market_data import MarketDataPeriod
+from market.market_data import MarketDataPeriod, roundDateTimeToPeriod, PriceConflator
+from market.price import Tick
 
 from market.symbol import Symbol
-from market.price import Tick, PriceConflator, roundDateTimeToPeriod
 
 
 class PriceTest(unittest.TestCase):

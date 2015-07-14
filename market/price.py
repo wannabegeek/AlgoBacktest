@@ -1,8 +1,4 @@
-from datetime import timedelta, datetime, timezone
-import logging
 import statistics
-from market.market_data import MarketData, MarketDataPeriod
-
 
 class Tick(object):
     """
@@ -25,42 +21,6 @@ class Tick(object):
         return "%s: b:%s o:%s" % (self.timestamp, self.bid, self.offer)
 
     __repr__ = __str__
-
-def roundDateTimeToPeriod(timestamp, period):
-    roundTo = period.total_seconds()
-    seconds = timestamp.replace(tzinfo=timezone.utc).timestamp() % roundTo
-    return timestamp - timedelta(seconds=seconds)
-
-class PriceConflator(object):
-    def __init__(self, symbol, period, callback = None):
-        if not isinstance(period, timedelta):
-            raise TypeError("period must be a timedelta")
-        self.symbol = symbol
-        self.period = period
-        self.callback = callback
-        self.periodStartingTimestamp = None
-        self.currentQuote = None
-
-    def addTick(self, tick):
-        if not self.currentQuote:
-            self.periodStartingTimestamp = tick.timestamp
-            self.currentQuote = Quote(self.symbol, roundDateTimeToPeriod(tick.timestamp, self.period), self.period, tick)
-            return self.currentQuote
-        else:
-            currentTickTimeBlock = roundDateTimeToPeriod(tick.timestamp, self.period)
-            if currentTickTimeBlock.timestamp() < (self.currentQuote.startTime + self.period).timestamp():
-                self.currentQuote.addTick(tick)
-            else:
-                if self.callback is not None:
-                    self.callback(self.currentQuote)
-                t = self.currentQuote.startTime + self.period
-                while currentTickTimeBlock.timestamp() >= (t + self.period).timestamp():
-                        self.callback(Quote(self.symbol, t, self.period, Tick(self.currentQuote.startTime, self.currentQuote.close, self.currentQuote.close)))
-                        t = t + self.period
-                self.currentQuote = Quote(self.symbol, t, self.period, tick)
-                return self.currentQuote
-        return None
-
 
 class Quote(object):
     """
