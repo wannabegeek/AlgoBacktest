@@ -21,12 +21,14 @@ class Position(object):
         self.order = order
         self.order.state = State.FILLED # mark the order as filled
 
+        self.entryTick = tick
         self.entryPrice = tick.offer if self.order.direction == Direction.LONG else tick.bid
         self.exitTick = None
+        self.exitPrice = None
+
         self.closed = False
         self.id = uuid.uuid4()
         self.status = Position.PositionStatus.OPEN
-        self.exitPrice = None
         if self.order.stoploss is not None:
             if self.order.direction == Direction.LONG:
                 self.stopPrice = tick.bid - self.order.stoploss.points / self.order.symbol.lot_size
@@ -37,9 +39,9 @@ class Position(object):
 
         if self.order.takeProfit is not None:
             if self.order.direction == Direction.LONG:
-                self.takeProfit = tick.bid + self.order.takeProfit / self.order.symbol.lot_size
+                self.takeProfit = tick.offer + self.order.takeProfit / self.order.symbol.lot_size
             else:
-                self.takeProfit = tick.offer - self.order.takeProfit / self.order.symbol.lot_size
+                self.takeProfit = tick.bid - self.order.takeProfit / self.order.symbol.lot_size
         else:
             self.takeProfit = None
 
@@ -71,6 +73,11 @@ class Position(object):
             priceDelta = self.entryPrice - self.exitPrice
 
         return priceDelta * self.order.symbol.lot_size
+
+    def positionTime(self):
+        if self.status == Position.PositionStatus.OPEN:
+            raise ValueError("Position is still open")
+        return self.exitTick.timestamp - self.entryTick.timestamp
 
     def __eq__(self, other):
         return self.id == other.id
