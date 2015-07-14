@@ -1,4 +1,5 @@
 import logging
+import weakref
 
 from market.interfaces.orderrouter import OrderRouter
 from market.order import Order, State
@@ -81,14 +82,11 @@ class BacktestOrderbook(OrderBook):
         super(BacktestOrderbook, self).__init__(order_router)
         self.containerPositions = []
 
-    def __del__(self):
-        print(self)
-
     def registerPosition(self, position):
         self.containerPositions.append(position)
 
     def __str__(self):
-        for position in self.containerPositions:
-            return "%s  --> %spts" % (position, position.pointsDelta())
+        ps = map(lambda x: "%s  --> %spts" % (x, x.pointsDelta()), filter(lambda x: not x.isOpen(), self.containerPositions))
+        return "\n".join(ps)
 
     __repr__ = __str__

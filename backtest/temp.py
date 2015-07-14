@@ -32,7 +32,7 @@ def main():
 
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
     # venue_connection = Broker(RandomProvider(Symbol("EURUSD:CUR"), 10000))
-    venue_connection = Broker(CSVProvider(Symbol("EURUSD:CUR"), "/Users/tom/Downloads/HISTDATA_COM_ASCII_EURUSD_T201506/DAT_ASCII_EURUSD_T_201506-SHORT.csv"))
+    venue_connection = Broker(CSVProvider(Symbol("EURUSD:CUR"), "c:\DAT_ASCII_EURUSD_T_201505-SHORT.csv"))
 
     order_book = BacktestOrderbook(venue_connection)
     market_data = MarketData(venue_connection)
@@ -44,6 +44,8 @@ def main():
 
     printResults(container.context)
     logging.info("All done... shutting down")
+
+    print(order_book)
 
 if __name__ == '__main__':
     main()
