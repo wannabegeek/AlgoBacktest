@@ -90,7 +90,7 @@ class BacktestOrderbook(OrderBook):
 
         closed = list(map(lambda x: "%s  --> %spts" % (x, x.pointsDelta()), filter(lambda x: not x.isOpen(), self.containerPositions)))
         open = list(map(lambda x: "%s" % (x), filter(lambda x: x.isOpen(), self.containerPositions)))
-        winning = list(filter(lambda x: x.pointsDelta > 0.0, filter(lambda x: not x.isOpen(), self.containerPositions)))
+        winning = list(filter(lambda x: x.pointsDelta() > 0.0, filter(lambda x: not x.isOpen(), self.containerPositions)))
 
         return "Completed:\n%s\nOpen:\n%s\nWinning Ratio: %s%%" % ("\n".join(closed), "\n".join(open), len(winning)/totalPositions)
 
