@@ -1,4 +1,3 @@
-from enum import Enum
 import logging
 import datetime
 from market.interfaces.data_provider import DataProvider

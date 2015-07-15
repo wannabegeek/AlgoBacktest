@@ -84,7 +84,7 @@ class Algo(Framework):
                 if context.symbolContexts[quote.symbol].position is False:
                     # create a LONG position
                     logging.debug("Opening position")
-                    context.placeOrder(Order(quote.symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=StopLoss(StopLoss.Type.FIXED, 10), takeProfit=15))
+                    context.placeOrder(Order(quote.symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=StopLoss(StopLoss.Type.FIXED, 20), takeProfit=25))
                     context.symbolContexts[quote.symbol].position = True
             else:
                 if context.symbolContexts[quote.symbol].position is True:

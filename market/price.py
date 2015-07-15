@@ -15,7 +15,7 @@ class Tick(object):
         return self.offer - self.spread
 
     def midPrice(self):
-        return statistics.mean([self.bid, self.offer])
+        return (self.bid + self.offer) / 2.0
 
     def __str__(self):
         return "%s: b:%s o:%s" % (self.timestamp, self.bid, self.offer)
@@ -51,4 +51,4 @@ class Quote(object):
         self.ticks = self.ticks + 1
 
     def __str__(self):
-        return "{} -> {}: {:.6f} -> {:.6f} o:{:.6f} c:{:.6f}".format(self.startTime, self.startTime + self.period, self.low, self.high, self.open, self.close)
+        return "{} -> {}: {:.6f} -> {:.6f} o:{:.6f} c:{:.6f} ({:d})".format(self.startTime, self.startTime + self.period, self.low, self.high, self.open, self.close, self.ticks)

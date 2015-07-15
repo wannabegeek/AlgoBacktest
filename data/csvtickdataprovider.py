@@ -1,6 +1,7 @@
 import datetime
 import logging
 import csv
+import pytz
 
 from data.data_provider import Provider
 from market.price import Tick
@@ -11,6 +12,8 @@ class CSVProvider(Provider):
     def __init__(self, symbol, filename):
         self.symbol = symbol
         self.reader = csv.reader(open(filename, 'r'))
+        self.tz = pytz.timezone('America/New_York')
+
 
     def register(self, symbol):
         if not isinstance(symbol, Symbol):
@@ -25,6 +28,7 @@ class CSVProvider(Provider):
     def startPublishing(self, callback):
         for timestamp, bid, ask, volume in self.reader:
             ts = datetime.datetime.strptime(timestamp, "%Y%m%d %H%M%S%f")
+            ts.replace(tzinfo=self.tz)
             callback(self.symbol, Tick(ts, float(bid), float(ask)))
         # now = datetime.datetime.utcnow()
         # interval = datetime.timedelta(seconds=60)
