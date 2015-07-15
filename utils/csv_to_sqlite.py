@@ -1,10 +1,11 @@
+import argparse
 import logging
 import sqlite3
 from data.csvtickdataprovider import CSVProvider
 from market.symbol import Symbol
 
 class Handler(object):
-    def __init__(self, filename):
+    def __init__(self, symbol, csvfile, filename):
         self.pending = []
         self.totalTicks = 0
         self.conn = sqlite3.connect(filename)
@@ -19,7 +20,7 @@ class Handler(object):
                                "bid NUMBER NOT NULL,"
                                "offer NUMBER NOT NULL)")
 
-        data = CSVProvider(Symbol("EURUSD:CUR"), "/Users/tom/Downloads/HISTDATA_COM_ASCII_EURUSD_T201506/DAT_ASCII_EURUSD_T_201506.csv")
+        data = CSVProvider(Symbol(symbol), csvfile)
         data.startPublishing(self.tickHandler)
 
     def tickHandler(self, symbol, tick):
@@ -34,5 +35,12 @@ class Handler(object):
 if __name__ == '__main__':
     Symbol.setDataProvider("")
 
+    parser = argparse.ArgumentParser(description='Parse CSV Tick data into sqlite db.')
+    parser.add_argument("-a", "--symbol", dest="symbol", required=True, help="symbol identifier")
+    parser.add_argument("-o", "--out", dest="db_filename", default="test.store", help="sqlite filename")
+    parser.add_argument("-i", "--in", dest="in_filename", help="csv file to read")
+
+    args = parser.parse_args()
+
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    h = Handler("test.store")
+    h = Handler(args.symbol, args.db_filename, args.in_filename)
