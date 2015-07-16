@@ -37,7 +37,6 @@ class Container(object):
         if quote is None or not isinstance(quote, Quote):
             raise TypeError("Invalid quote")
 
-        logging.debug("Handling quote data: %s" % (quote,))
         self.context.addQuote(quote)
         self.algo.evaluateTickUpdate(self.context, quote)
 
