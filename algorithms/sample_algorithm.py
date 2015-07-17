@@ -14,6 +14,7 @@ class Algo(Framework):
 
     def __init__(self):
         super(Algo, self).__init__()
+        self.maxPositions = 5
         pass
 
     def identifier(self):
@@ -83,13 +84,11 @@ class Algo(Framework):
             if ema_10 > ema_25:
                 if context.symbolContexts[quote.symbol].position is False:
                     # create a LONG position
-                    logging.debug("Opening position")
+                    logging.debug("Opening position on quote: %s" % (quote,))
                     context.placeOrder(Order(quote.symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=StopLoss(StopLoss.Type.FIXED, 20), takeProfit=25))
                     context.symbolContexts[quote.symbol].position = True
             else:
                 if context.symbolContexts[quote.symbol].position is True:
-                    #exit our position
-                    logging.debug("exit our position")
                     context.symbolContexts[quote.symbol].position = False
 
             # gradientCount = 2

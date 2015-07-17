@@ -41,7 +41,7 @@ class Framework(object):
 
 
 class Context(object):
-    def __init__(self, order_book, symbols):
+    def __init__(self, order_book, symbols, history_size):
         """
         Constructor
         This is for internal use.
@@ -56,7 +56,7 @@ class Context(object):
         self.symbolContexts = {}
         for symbol in symbols:
             logging.debug("Creating symbol context for {0}".format(symbol))
-            context = SymbolContext(symbol)
+            context = SymbolContext(symbol, history_size)
             self.symbolContexts[symbol] = context
 
         self.orders = []

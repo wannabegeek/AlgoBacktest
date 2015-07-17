@@ -1,6 +1,7 @@
 import argparse
 import glob
 import logging
+import os
 import sqlite3
 from data.csvtickdataprovider import CSVProvider
 from market.symbol import Symbol
@@ -22,6 +23,7 @@ class Handler(object):
                                "offer NUMBER NOT NULL)")
 
         for filename in input_files:
+            logging.info("Processing '%s'" % (filename,))
             data = CSVProvider(Symbol(symbol), filename)
             data.startPublishing(self.tickHandler)
 
@@ -35,6 +37,7 @@ class Handler(object):
             logging.debug("Commited %s" % (self.totalTicks,))
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
     Symbol.setDataProvider("")
 
     parser = argparse.ArgumentParser(description='Parse CSV Tick data into sqlite db.')
@@ -43,8 +46,6 @@ if __name__ == '__main__':
     parser.add_argument("-i", "--in", dest="in_filename", help="csv file to read")
 
     args = parser.parse_args()
+    input_files = glob.glob(os.path.expanduser(os.path.expandvars(args.in_filename)))
 
-    input_files = glob.glob(args.in_filename)
-
-    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
     h = Handler(args.symbol, args.db_filename, input_files)

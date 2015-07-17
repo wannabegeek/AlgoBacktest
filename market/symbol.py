@@ -1,4 +1,5 @@
 from bisect import bisect_left
+from collections import deque
 import datetime
 
 
@@ -71,7 +72,7 @@ class SymbolContext(object):
 
     You can also store and access custom variables using the [] accessor/mutator
     """
-    def __init__(self, symbol):
+    def __init__(self, symbol, history_size):
         self.symbol = symbol
         self.lastUpdate = None
 
@@ -82,11 +83,11 @@ class SymbolContext(object):
         self.high = 0.0
         self.low = 0.0
 
-        self.quotes = []
-        self.opens = []
-        self.highs = []
-        self.lows = []
-        self.closes = []
+        self.quotes = deque(maxlen=history_size) 
+        self.opens = deque(maxlen=history_size)
+        self.highs = deque(maxlen=history_size)
+        self.lows = deque(maxlen=history_size)
+        self.closes = deque(maxlen=history_size)
 
     def addQuote(self, quote):
         """

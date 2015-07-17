@@ -23,7 +23,7 @@ class Container(object):
         self.algo = algo
         self.order_book = order_book
         self.data_provider = data_provider
-        self.context = Context(self.order_book, self.algo.analysis_symbols())
+        self.context = Context(self.order_book, self.algo.analysis_symbols(), self.algo.warmupPeriod())
 
         self.algo.initialiseContext(self.context)
 
