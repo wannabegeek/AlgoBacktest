@@ -56,6 +56,7 @@ class Order(object):
         self.state = State.PENDING_NEW
         self.entryTime = entryTime
         self.id = uuid.uuid4()
+        self.context = None
 
     def isPending(self):
         return self.state.value <= State.WORKING.value

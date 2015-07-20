@@ -17,8 +17,30 @@ class OrderBook(object):
         self.order_router.addPositionObserver(self.positionStatus)
         self.orders = {}
         self.positions = {}
+        self.orderObservers = {}
+        self.positionObservers = {}
+
+    def addOrderStatusObserver(self, context, callback):
+        if context in self.orderObservers:
+            self.orderObservers[context].append(callback)
+        else:
+            self.orderObservers[context] = [callback, ]
+
+    def addPositionStatusObserver(self, context, callback):
+        if context in self.positionObservers:
+            self.positionObservers[context].append(callback)
+        else:
+            self.positionObservers[context] = [callback, ]
 
     def orderStatus(self, order, previousState):
+        try:
+            callbacks = self.orderObservers[order.context]
+            for callback in callbacks:
+                callback(order, previousState)
+        except KeyError:
+            # there isn't an observer
+            pass
+
         if order.state is State.WORKING:
             if previousState is State.PENDING_NEW:
                 logging.debug("Order has been accepted")
@@ -34,6 +56,14 @@ class OrderBook(object):
         pass
 
     def positionStatus(self, position, previousState):
+        try:
+            callbacks = self.positionObservers[position.order.context]
+            for callback in callbacks:
+                callback(position, previousState)
+        except KeyError:
+            # there isn't an observer
+            pass
+
         if position.status is Position.PositionStatus.OPEN:
             self.positions[position.id] = position
             self.registerPosition(position)
@@ -41,29 +71,31 @@ class OrderBook(object):
             logging.debug("Position has been closed")
             del(self.positions[position.id])
 
-    def placeOrder(self, container, order):
+    def placeOrder(self, context, order):
         # send new order to market
-        if self._checkRiskLimits(container, order):
+        order.context = context
+        if self._checkRiskLimits(context, order):
             self.order_router.placeOrder(order)
-            self.orders[order.id] = (order, container)
         else:
             logging.error("Risk limits breached rejecting request")
 
-    def modifyOrder(self, container, order):
+    def modifyOrder(self, order):
         # modify order on market
-        if self._checkRiskLimits(container, order):
+        # find the original context
+        context = self.orders[order.id][1]
+        if self._checkRiskLimits(context, order):
             order.state = State.PENDING_MODIFY
             self.order_router.modifyOrder(order)
         else:
             logging.error("Risk limits breached rejecting request")
 
-    def cancelOrder(self, container, order):
+    def cancelOrder(self, order):
         # cancel order on market
         order.state = State.PENDING_CANCEL
         self.order_router.cancelOrder(order)
         del(self.orders[order.id])
 
-    def closePosition(self, container, position):
+    def closePosition(self, position):
         self.order_router.closePosition(position)
 
 

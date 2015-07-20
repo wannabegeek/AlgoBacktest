@@ -39,6 +39,9 @@ class Framework(object):
     def evaluateTickUpdate(self, context, quote):
         pass
 
+    def __hash__(self):
+        return hash(self.identifier())
+
 
 class Context(object):
     def __init__(self, order_book, symbols, history_size):
@@ -84,7 +87,7 @@ class Context(object):
         """
 
         logging.info("Releasing order {0}".format(order))
-        self.order_book.placeOrder(None, order)
+        self.order_book.placeOrder(self, order)
 
         # if this is a market order, it will be filled on the next tick
         self.orders.append(order)
@@ -96,13 +99,13 @@ class Context(object):
         The status change of the order will be notified by the statusCallback function the placeOrder method
         :param order: The order to modify
         """
-        self.order_book.cancelOrder(order)
+        self.order_book.cancelOrder(self, order)
 
-    def openPosition(self, position):
-        if not isinstance(position, Position):
-            raise TypeError('position must be an Position object type')
-
-        self.positions.append(position)
+    # def openPosition(self, position):
+    #     if not isinstance(position, Position):
+    #         raise TypeError('position must be an Position object type')
+    #
+    #     self.positions.append(position)
 
     def closePosition(self, position, reason = Position.PositionStatus.CLOSED):
         """
