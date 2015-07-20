@@ -83,6 +83,6 @@ class Position(object):
         return self.id == other.id
 
     def __str__(self):
-        return "%s: %s [%s %s --> %s]" % (self.id, self.status.name, self.order.direction.name, self.entryPrice, "OPEN" if self.status == Position.PositionStatus.OPEN else self.exitPrice)
+        return "%s: %-11s [%-5s %.6s --> %.6s]" % (self.id, self.status.name, self.order.direction.name, self.entryPrice, "OPEN" if self.status == Position.PositionStatus.OPEN else self.exitPrice)
 
     __repr__ = __str__
