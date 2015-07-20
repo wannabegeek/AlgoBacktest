@@ -30,27 +30,6 @@ class Symbol(object):
             self.lot_size = 10000
             self._symbolState[identifier] = self.__dict__
 
-        # cursor = self._dbConnection.cursor(buffered=True)
-        # cursor.callproc('SymbolInfo', [self.identifier, ])
-        # for result in cursor.stored_results():
-        #     results = result.fetchall()
-        #     if len(results) == 0:
-        #         raise LookupError("Symbol: '{0}' Not Found".format(self.identifier))
-        #     for result in results:
-        #         self.spread = result[4]
-        # cursor.close()
-        #
-        # cursor = self._dbConnection.cursor(buffered=True)
-        # cursor.callproc('GetSymbol', [self.identifier, ])
-        # for result in cursor.stored_results():
-        #     results = result.fetchall()
-        #     if len(results) == 0:
-        #         raise LookupError("Symbol: '{0}' Not Found".format(self.identifier))
-        #     for result in results:
-        #         self.name = result[1]
-        #         self.lookup[result[2]] = result[3]
-        # cursor.close()
-
     def referenceSymbol(self, dataSource):
         return self.lookup[dataSource]
 

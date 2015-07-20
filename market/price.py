@@ -42,13 +42,17 @@ class Quote(object):
 
     def addTick(self, tick):
         price = tick.midPrice()
-        if self.open is None:
+        if self.lastTick is None:
             self.open = price
-        self.high = price if self.high is None else max(self.high, price)
-        self.low = price if self.low is None else min(self.low, price)
-        self.close = price
+            self.high = price
+            self.low = price
+            self.close = price
+        else:
+            self.high = max(self.high, price)
+            self.low = min(self.low, price)
+            self.close = price
         self.lastTick = tick
-        self.ticks = self.ticks + 1
+        self.ticks += 1
 
     def __str__(self):
         return "{} -> {}: {:.6f} -> {:.6f} o:{:.6f} c:{:.6f} ({:d})".format(self.startTime, self.startTime + self.period, self.low, self.high, self.open, self.close, self.ticks)
