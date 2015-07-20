@@ -3,7 +3,7 @@ import time
 
 class ProgressBar(object):
     def __init__(self, max = 100, width=50, initial = 0):
-        self.max = max
+        self.max = float(max)
         self.width = width
         self._display(initial)
 
@@ -11,7 +11,7 @@ class ProgressBar(object):
         self._display(value)
 
     def _display(self, value):
-        percent = value / self.max
+        percent = float(value) / self.max
         hashes = '#' * int(round(percent * self.width))
         spaces = ' ' * (self.width - len(hashes))
             # print('\r[{0}] {1}%'.format('#'*(progress/10), progress))
