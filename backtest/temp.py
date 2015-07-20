@@ -13,21 +13,20 @@ from market.symbol import Symbol
 def main():
     Symbol.setDataProvider("")
 
-    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
     venue_connection = Broker(SQLiteProvider(Symbol("EURUSD:CUR"), "../utils/test.store", startDate=datetime.datetime(2015, 6, 29)))
 
     order_book = OrderBook(venue_connection)
     market_data = MarketData(venue_connection)
 
     containers = []
-    containers.append(Container(Algo(25, 10, 10), order_book, market_data))
+    containers.append(Container(Algo(25, 10, 10), 10000, order_book, market_data))
     # containers.append(Container(Algo(15, 5, 10), order_book, market_data))
     # container.start()
 
     venue_connection.start()
 
     for container in containers:
-        logging.info("==========================================================")
         display_results(container)
 
 if __name__ == '__main__':

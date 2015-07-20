@@ -3,13 +3,14 @@ import logging
 from market.market_data import MarketData
 from market.order import State
 from market.orderbook import OrderBook
+from market.position import Position
 from market.price import Quote
 from strategy.strategy import Framework, Context
 from market.symbol import Symbol
 
 
 class Container(object):
-    def __init__(self, algo, order_book, data_provider):
+    def __init__(self, algo, working_capital, order_book, data_provider):
         if not isinstance(algo, Framework):
             raise TypeError("algorithm must be a subclass of strategy.strategy.Framework")
         if not isinstance(order_book, OrderBook):
@@ -20,9 +21,10 @@ class Container(object):
         Symbol.setDataProvider("")
 
         self.algo = algo
+        self.starting_capital = working_capital
         self.order_book = order_book
         self.data_provider = data_provider
-        self.context = Context(self.order_book, self.algo.analysis_symbols(), self.algo.warmupPeriod())
+        self.context = Context(working_capital, self.order_book, self.algo.analysis_symbols(), self.algo.warmupPeriod())
 
         self.algo.initialiseContext(self.context)
 
@@ -51,9 +53,8 @@ class Container(object):
     def positionStatusObserver(self, position, previousState):
         if previousState is None:
             self.context.positions.append(position)
-
-    def context(self):
-        return self.context
+        elif not position.isOpen():
+            self.context.working_capital += position.pointsDelta() * position.order.quantity
 
     def __str__(self):
         totalPositions = len(list(filter(lambda x: not x.isOpen(), self.context.positions)))

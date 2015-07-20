@@ -44,7 +44,7 @@ class Framework(object):
 
 
 class Context(object):
-    def __init__(self, order_book, symbols, history_size):
+    def __init__(self, working_capital, order_book, symbols, history_size):
         """
         Constructor
         This is for internal use.
@@ -55,6 +55,7 @@ class Context(object):
         if not isinstance(order_book, OrderBook):
             raise TypeError('order_book must be an OrderBook object type')
 
+        self.working_capital = working_capital
         self.order_book = order_book
         self.symbolContexts = {}
         for symbol in symbols:

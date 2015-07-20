@@ -66,9 +66,9 @@ class Algo(Framework):
                 # if context.symbolContexts[quote.symbol].position is False:
                     # create a LONG position
                 logging.debug("Opening position on quote: %s" % (quote,))
-                context.placeOrder(Order(quote.symbol, 1, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, takeProfit=self.takeProfit))
+                context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, takeProfit=self.takeProfit))
                 # context.symbolContexts[quote.symbol].position = True
             elif quote.close < ema and buy_signal:
                 logging.debug("Opening position on quote: %s" % (quote,))
-                context.placeOrder(Order(quote.symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, takeProfit=self.takeProfit))
+                context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, takeProfit=self.takeProfit))
 

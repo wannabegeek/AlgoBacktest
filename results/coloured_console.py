@@ -1,11 +1,13 @@
+import locale
 import logging
 
 
 def display_results(container):
     totalPositions = len(list(filter(lambda x: not x.isOpen(), container.context.positions)))
+    locale.setlocale( locale.LC_ALL, '' )
 
     if totalPositions == 0:
-        print("========================")
+        print("=========================================================")
         print("Algo: %s" % (container.algo.identifier(),))
         print("No Positions taken")
     else:
@@ -13,10 +15,12 @@ def display_results(container):
         open = list(map(lambda x: "\t%s" % (x), filter(lambda x: x.isOpen(), container.context.positions)))
         winning = list(filter(lambda x: x.pointsDelta() > 0.0, filter(lambda x: not x.isOpen(), container.context.positions)))
 
-        print("========================")
-        print("Algo:          %s" % (container.algo.identifier(),))
-        print("Winning Ratio: %.2f%%" % ((len(winning)/totalPositions * 100),))
-        print("Total Pts:     %.2f" % (sum([x.pointsDelta() for x in filter(lambda x: not x.isOpen(), container.context.positions)]), ))
-        print("------------------------")
+        print("=========================================================")
+        print("Algo:             %s" % (container.algo.identifier(),))
+        print("Winning Ratio:    %.2f%%" % ((len(winning)/totalPositions * 100),))
+        print("Total Pts:        %.2f" % (sum([x.pointsDelta() for x in filter(lambda x: not x.isOpen(), container.context.positions)]), ))
+        print("Starting Capital: %s" % (locale.currency(container.starting_capital, grouping=True),))
+        print("Current Capital:  %s" % (locale.currency(container.context.working_capital, grouping=True),))
+        print("---------------------------------------------------------")
         print("Completed:\n%s" % ("\n".join(closed),))
         print("Open:\n%s" % ("\n".join(open),))
