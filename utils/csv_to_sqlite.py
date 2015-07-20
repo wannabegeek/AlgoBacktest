@@ -22,6 +22,8 @@ class Handler(object):
                                "bid NUMBER NOT NULL,"
                                "offer NUMBER NOT NULL)")
 
+        self.cursor.execute("CREATE INDEX tick_data_timestamp_idx ON tick_data(timestamp)")
+
         for filename in input_files:
             logging.info("Processing '%s'" % (filename,))
             data = CSVProvider(Symbol(symbol), filename)

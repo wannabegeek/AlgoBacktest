@@ -9,12 +9,15 @@ from market.orderbook import OrderBook
 from results.coloured_console import display_results
 from strategy.container import Container
 from market.symbol import Symbol
+from utils.progress_bar import ProgressBar
+
 
 def main():
     Symbol.setDataProvider("")
 
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
-    venue_connection = Broker(SQLiteProvider(Symbol("EURUSD:CUR"), "../utils/test.store", startDate=datetime.datetime(2015, 6, 29)))
+    data_provider = SQLiteProvider(Symbol("EURUSD:CUR"), "../utils/test.store", startDate=datetime.datetime(2015, 6, 29))
+    venue_connection = Broker(data_provider)
 
     order_book = OrderBook(venue_connection)
     market_data = MarketData(venue_connection)
@@ -23,6 +26,9 @@ def main():
     containers.append(Container(Algo(25, 10, 10), 10000, order_book, market_data))
     # containers.append(Container(Algo(15, 5, 10), order_book, market_data))
     # container.start()
+
+    progress_bar = ProgressBar(data_provider.expected_result_count)
+    data_provider.setProgressCallback(lambda x: progress_bar.set(x))
 
     venue_connection.start()
 

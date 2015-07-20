@@ -14,3 +14,6 @@ class Provider(object):
     @abstractmethod
     def startPublishing(self, callback):
         pass
+
+    def setProgressCallback(self, callback):
+        raise NotImplementedError("setProgressCallback isn't implemented for this Provider instance")
