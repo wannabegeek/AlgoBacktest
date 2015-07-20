@@ -19,13 +19,15 @@ class SQLiteProvider(Provider):
         if not isinstance(symbol, Symbol):
             raise TypeError("symbol must be a Symbol object")
         self.symbol = symbol
-        pass
 
     def loadHistoricalData(self, period):
         logging.debug("Loading historical data for the previous %s interval" % (period, ))
-        pass
 
     def startPublishing(self, callback):
+        self.cursor.execute("SELECT count(*) FROM tick_data WHERE symbol = ? AND timestamp >= ? and timestamp <= ?", (self.symbol.identifier, self.startDate, self.endDate))
+        for result in self.cursor:
+            print("Expecting %s results" % (result[0],))
+
         self.cursor.execute("SELECT timestamp, bid, offer FROM tick_data WHERE symbol = ? AND timestamp >= ? and timestamp <= ? ORDER BY timestamp", (self.symbol.identifier, self.startDate, self.endDate))
         for tick in self.cursor:
             callback(self.symbol, Tick(tick[0], tick[1], tick[2]))
