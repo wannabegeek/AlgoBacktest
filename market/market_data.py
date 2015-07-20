@@ -82,8 +82,7 @@ class MarketData(object):
             logging.error("Received data update for symbol we're not subscribed to (%s)" % (symbol,))
 
 def roundDateTimeToPeriod(timestamp, period):
-    roundTo = period.total_seconds()
-    seconds = timestamp.replace(tzinfo=datetime.timezone.utc).timestamp() % roundTo
+    seconds = timestamp.timestamp() % period.total_seconds()
     return timestamp - datetime.timedelta(seconds=seconds)
 
 class PriceConflator(object):
