@@ -21,6 +21,8 @@ class SQLiteProvider(Provider):
         for result in self.cursor:
             self.expected_result_count = result[0]
 
+        self.callback_interval = int(self.expected_result_count / 100.0)
+
     def setProgressCallback(self, callback):
         self.progress_callback = callback
 
@@ -38,4 +40,5 @@ class SQLiteProvider(Provider):
             callback(self.symbol, Tick(tick[0], tick[1], tick[2]))
             self.progress_count += 1
             if self.progress_callback is not None:
-                self.progress_callback(self.progress_callback)
+                if self.progress_count % self.callback_interval == 0:
+                    self.progress_callback(self.progress_count)
