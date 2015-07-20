@@ -45,9 +45,9 @@ class OrderBook(object):
             if previousState is State.PENDING_NEW:
                 logging.debug("Order has been accepted")
             elif previousState is State.PENDING_MODIFY:
-                logging.debug("Order has been accepted")
+                logging.debug("Modify has been accepted")
             elif previousState is State.PENDING_CANCEL:
-                logging.debug("Order has been accepted")
+                logging.debug("Cancel has been accepted")
         elif order.isComplete() is True:
             # we need to remove the order from the order book since it is complete
             del(self.orders[order.id])
@@ -75,9 +75,16 @@ class OrderBook(object):
         # send new order to market
         order.context = context
         if self._checkRiskLimits(context, order):
+            self.orders[order.id] = order
             self.order_router.placeOrder(order)
         else:
             logging.error("Risk limits breached rejecting request")
+            callbacks = self.orderObservers[context]
+            previousState = order.state
+            order.state = State.REJECTED
+            for callback in callbacks:
+                callback(order, previousState)
+
 
     def modifyOrder(self, order):
         # modify order on market
@@ -88,6 +95,13 @@ class OrderBook(object):
             self.order_router.modifyOrder(order)
         else:
             logging.error("Risk limits breached rejecting request")
+            callbacks = self.orderObservers[context]
+            previousState = order.state
+            order.state = State.REJECTED
+            for callback in callbacks:
+                callback(order, previousState)
+            order.state = State.WORKING
+
 
     def cancelOrder(self, order):
         # cancel order on market

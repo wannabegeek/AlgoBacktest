@@ -3,6 +3,7 @@ import threading
 from queue import Queue
 
 from market.market_data import MarketData, PriceConflator
+from market.order import State
 from market.orderbook import OrderBook, MultiThreadedOrderBook
 from market.price import Quote
 from strategy.strategy import Framework, Context
@@ -44,7 +45,10 @@ class Container(object):
         self.algo.evaluateTickUpdate(self.context, quote)
 
     def orderStatusObserver(self, order, previousState):
-        logging.debug("Received order status update =================")
+        if order.state is State.WORKING and previousState is State.PENDING_NEW:
+            logging.debug("Order accepted =================")
+        elif order.state is State.FILLED and previousState is State.WORKING:
+            logging.debug("Order filled =================")
 
     def positionStatusObserver(self, position, previousState):
         if previousState is None:

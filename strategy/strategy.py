@@ -58,7 +58,6 @@ class Context(object):
         self.order_book = order_book
         self.symbolContexts = {}
         for symbol in symbols:
-            logging.debug("Creating symbol context for {0}".format(symbol))
             context = SymbolContext(symbol, history_size)
             self.symbolContexts[symbol] = context
 
@@ -86,7 +85,6 @@ class Context(object):
         :return: The order placed (same as passed in)
         """
 
-        logging.info("Releasing order {0}".format(order))
         self.order_book.placeOrder(self, order)
 
         # if this is a market order, it will be filled on the next tick
@@ -118,7 +116,7 @@ class Context(object):
             raise TypeError('position must be an Position object type')
 
         self.order_book.closePosition(position)
-        logging.info("Closing position {0}".format(position))
+        logging.debug("Closing position {0}".format(position))
 
     def record(self, key, value, quote):
         """

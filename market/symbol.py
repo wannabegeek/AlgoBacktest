@@ -55,7 +55,7 @@ class Symbol(object):
         return self.lookup[dataSource]
 
     def __str__(self):
-        return "Symbol: %s" % (self.identifier,)
+        return self.identifier
 
     def __hash__(self):
         return hash(str(self.identifier))

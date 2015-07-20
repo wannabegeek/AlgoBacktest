@@ -88,6 +88,7 @@ class Broker(OrderRouter, DataProvider):
     def _fillOrder(self, order, tick):
         previousState = order.state
         #Create position and notify client (ordersStatusObservers & positionObservers)
+        order.state = State.FILLED
         self.orders.remove(order)
         #TODO we should filter the observers to the observers related to the position/order
         [f(order, previousState) for f in self.orderStatusObservers]
