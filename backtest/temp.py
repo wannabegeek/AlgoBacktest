@@ -16,7 +16,7 @@ def main():
     Symbol.setDataProvider("")
 
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
-    data_provider = SQLiteProvider(Symbol("EURUSD:CUR"), "../utils/test.store", startDate=datetime.datetime(2015, 6, 29))
+    data_provider = SQLiteProvider(Symbol("EURUSD:CUR"), "../utils/test.store") #, startDate=datetime.datetime(2015, 6, 29))
     venue_connection = Broker(data_provider)
 
     order_book = OrderBook(venue_connection)

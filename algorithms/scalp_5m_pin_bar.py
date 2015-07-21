@@ -1,5 +1,6 @@
 import logging
 import time
+import datetime
 
 from numpy import asarray
 
@@ -48,11 +49,18 @@ class Algo(Framework):
         if len(symbolContext.quotes) > self.emaPeriod:  # i.e. we have enough data
             space = 5
 
-            quoteTimes = [time.mktime(o.startTime.timetuple()) for o in symbolContext.quotes]
-            closePrices = asarray(symbolContext.closes)
+            if quote.startTime.time() > datetime.time(21, 0) or quote.startTime.time() < datetime.time(7, 0):
+                # not normal EURUSD active period
+                return
+            if quote.startTime.weekday() >= 5:
+                # it's a weekend
+                return
+            if quote.startTime.weekday() == 4 and quote.startTime.time() > datetime.time(12, 0):
+                # no positions after 12 on Friday
+                return
 
+            closePrices = asarray(symbolContext.closes)
             ema = financial.ema(closePrices[-self.emaPeriod:], self.emaPeriod)
-            symbolContext.ema.append(ema)
 
             bar_height = symbolContext.high - symbolContext.low
             # bar_is_largest = bar_height > (symbolContext.highs[-1] - symbolContext.lows[-1])
