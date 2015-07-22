@@ -6,7 +6,7 @@ from backtest.simulated_broker import Broker
 from data.sqlitetickdataprovider import SQLiteProvider
 from market.market_data import MarketData
 from market.orderbook import OrderBook
-from results.coloured_console import display_results
+from results.email import display_results
 from strategy.container import Container
 from market.symbol import Symbol
 from utils.progress_bar import ProgressBar
@@ -16,7 +16,7 @@ def main():
     Symbol.setDataProvider("")
 
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
-    data_provider = SQLiteProvider(Symbol("EURUSD:CUR"), "../utils/test.store") #, startDate=datetime.datetime(2015, 6, 29))
+    data_provider = SQLiteProvider(Symbol("EURUSD:CUR"), "../utils/test.store", startDate=datetime.datetime(2015, 6, 29))
     venue_connection = Broker(data_provider)
 
     order_book = OrderBook(venue_connection)
@@ -31,6 +31,7 @@ def main():
     data_provider.setProgressCallback(lambda x: progress_bar.set(x))
 
     venue_connection.start()
+    logging.info("\nComplete...")
 
     for container in containers:
         display_results(container)
