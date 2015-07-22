@@ -1,5 +1,6 @@
 import unittest
 import datetime
+from data.dummy_symbol_provider import DummySymbolProvider
 from market.market_data import MarketDataPeriod, roundDateTimeToPeriod, PriceConflator
 from market.price import Tick
 
@@ -8,25 +9,25 @@ from market.symbol import Symbol
 
 class PriceTest(unittest.TestCase):
     def setUp(self):
-        Symbol.setDataProvider("1")
+        Symbol.setDataProvider(DummySymbolProvider())
         self.callbackQuote = []
 
     def testTimestampRounding(self):
-        t = datetime.datetime(2015, 7, 7, 13, 4, 47, 123456)
+        t = datetime.datetime(2015, 1, 7, 13, 4, 47, 123456)
         result = roundDateTimeToPeriod(t, datetime.timedelta(seconds=5))
-        self.assertEqual(datetime.datetime(2015, 7, 7, 13, 4, 45, 0), result)
+        self.assertEqual(datetime.datetime(2015, 1, 7, 13, 4, 45, 0), result)
 
         result = roundDateTimeToPeriod(t, datetime.timedelta(minutes=5))
-        self.assertEqual(datetime.datetime(2015, 7, 7, 13, 0), result)
+        self.assertEqual(datetime.datetime(2015, 1, 7, 13, 0), result)
 
         result = roundDateTimeToPeriod(t, datetime.timedelta(hours=4))
-        self.assertEqual(datetime.datetime(2015, 7, 7, 12), result)
+        self.assertEqual(datetime.datetime(2015, 1, 7, 12), result)
 
     def callback(self, quote):
         self.callbackQuote.append(quote)
 
     def testQuoteConstruction(self):
-        s = Symbol("TEST")
+        s = Symbol.get("TEST")
         conflator = PriceConflator("TEST", MarketDataPeriod.MIN_5, self.callback)
 
         startTime = datetime.datetime(2015, 7, 7, 14, 10, 0)
@@ -55,7 +56,7 @@ class PriceTest(unittest.TestCase):
         self.assertEqual(10.6, quote.close)
 
     def testQuoteConstructionOnInterval(self):
-        s = Symbol("TEST")
+        s = Symbol.get("TEST")
         conflator = PriceConflator("TEST", MarketDataPeriod.MIN_5, self.callback)
 
         startTime = datetime.datetime(2015, 7, 7, 14, 0, 0)
@@ -83,7 +84,7 @@ class PriceTest(unittest.TestCase):
         self.assertEqual(10.6, quote.close)
 
     def testQuoteGap(self):
-        s = Symbol("TEST")
+        s = Symbol.get("TEST")
         conflator = PriceConflator("TEST", MarketDataPeriod.MIN_5, self.callback)
 
         startTime = datetime.datetime(2015, 7, 7, 14, 10, 0)

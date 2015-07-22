@@ -1,6 +1,7 @@
 from bisect import bisect_left
 from collections import deque
-import datetime
+
+from data.interfaces.symbol_data_provider import SymbolProviderData, SymbolProvider
 
 
 class SymbolDataSource(object):
@@ -8,41 +9,55 @@ class SymbolDataSource(object):
     GOOGLE = 6
     CMC_MARKETS = 7
 
+
 class Symbol(object):
 
     _symbolDataProvider = None
-    _symbolState = {}
+    _symbol_cache = {}
 
     @staticmethod
     def setDataProvider(dataProvider):
+        if not isinstance(dataProvider, SymbolProvider):
+            raise TypeError("dataProvider must be of type SymbolDataProvider")
         Symbol._symbolDataProvider = dataProvider
 
-    def __init__(self, identifier):
+    @staticmethod
+    def get(sid):
+        if sid in Symbol._symbol_cache:
+            return Symbol._symbol_cache[sid]
+        else:
+            symbol = Symbol(sid)
+            Symbol._symbol_cache[sid] = symbol
+            return symbol
+
+    def __init__(self, sid):
         if self._symbolDataProvider is None:
             raise RuntimeError("Symbol data provider hasn't been set")
+        if sid in Symbol._symbol_cache:
+            raise RuntimeError("Symbol %s already exists in the cache" % (sid,))
 
-        if identifier in self._symbolState:
-            self.__dict__ = self._symbolState[identifier]
-        else:
-            self.identifier = identifier
-            self.name = None
-            self.lookup = {}
-            self.lot_size = 10000
-            self._symbolState[identifier] = self.__dict__
+        self.sid = sid
+        data = Symbol._symbolDataProvider.getDataForSymbol(sid)
+        self.identifier = data[SymbolProviderData.identifier]
+        self.name = data[SymbolProviderData.name]
+        self.lot_size = data[SymbolProviderData.lot_size]
+
+        self.lookup = {}
 
     def referenceSymbol(self, dataSource):
         return self.lookup[dataSource]
 
     def __str__(self):
-        return self.identifier
+        return self.sid
 
     def __hash__(self):
-        return hash(self.identifier)
+        return self.identifier
 
     def __eq__(self, other):
         return self.identifier == other.identifier
 
     __repr__ = __str__
+
 
 class SymbolContext(object):
     """

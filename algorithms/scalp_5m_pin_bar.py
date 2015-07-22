@@ -28,7 +28,7 @@ class Algo(Framework):
         return self.emaPeriod + 1
 
     def portfolio_symbols(self):
-        return [Symbol('EURUSD:CUR'), ]
+        return [Symbol.get('EURUSD:CUR'), ]
 
     def period(self):
         return MarketDataPeriod.MIN_5

@@ -1,9 +1,9 @@
 import datetime
 import logging
 import csv
-import pytz
 
-from data.data_provider import Provider
+import pytz
+from data.interfaces.data_provider import Provider
 from market.price import Tick
 from market.symbol import Symbol
 

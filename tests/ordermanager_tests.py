@@ -3,7 +3,8 @@ import unittest
 import datetime
 
 from backtest.simulated_broker import Broker
-from data.data_provider import Provider
+from data.dummy_symbol_provider import DummySymbolProvider
+from data.interfaces.data_provider import Provider
 from market.market_data import MarketDataPeriod
 from market.order import State, Entry, Direction, Order, StopLoss
 from market.position import Position
@@ -47,12 +48,12 @@ class OrderManagerTest(unittest.TestCase):
         self.position = position
 
     def setUp(self):
-        Symbol.setDataProvider("1")
+        Symbol.setDataProvider(DummySymbolProvider())
         logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
         self.position = None
 
     def testAlgoMarketOrder(self):
-        symbol = Symbol('TEST')
+        symbol = Symbol.get('TEST')
 
         startTime = datetime.datetime(2015, 7, 7, 12)
         # symbol = algo.analysis_symbols()[0]
@@ -81,7 +82,7 @@ class OrderManagerTest(unittest.TestCase):
         self.assertEqual(10.1, position.entryPrice)
 
     def testAlgoStopEntryOrder(self):
-        symbol = Symbol('TEST')
+        symbol = Symbol.get('TEST')
 
         startTime = datetime.datetime(2015, 7, 7, 12)
         # symbol = algo.analysis_symbols()[0]
@@ -114,7 +115,7 @@ class OrderManagerTest(unittest.TestCase):
         self.assertEqual(12.1, position.entryPrice)
 
     def testAlgoExpiredOrder(self):
-        symbol = Symbol('TEST')
+        symbol = Symbol.get('TEST')
         startTime = datetime.datetime(2015, 7, 7, 12)
         order = Order(symbol, 1, Entry(Entry.Type.STOP_ENTRY, 12.5), Direction.LONG, expireTime=datetime.timedelta(seconds=90), entryTime=startTime)
 
@@ -144,7 +145,7 @@ class OrderManagerTest(unittest.TestCase):
         self.assertEqual(State.EXPIRED, order.state)
 
     def testStopLossMarketOrder(self):
-        symbol = Symbol('TEST')
+        symbol = Symbol.get('TEST')
         symbol.lot_size = 1
 
         startTime = datetime.datetime(2015, 7, 7, 12)
@@ -178,7 +179,7 @@ class OrderManagerTest(unittest.TestCase):
         self.assertEqual(8.1, self.position.exitPrice)
 
     def testTakeProfitMarketOrder(self):
-        symbol = Symbol('TEST')
+        symbol = Symbol.get('TEST')
         symbol.lot_size = 1
 
         startTime = datetime.datetime(2015, 7, 7, 12)

@@ -1,5 +1,6 @@
 from datetime import datetime
 import unittest
+from data.dummy_symbol_provider import DummySymbolProvider
 
 from market.order import Order, Entry, Direction
 from market.position import Position
@@ -177,10 +178,10 @@ class PositionExitTests(unittest.TestCase):
 
 class PositionProfitLossTests(unittest.TestCase):
     def setUp(self):
-        Symbol.setDataProvider("1")
+        Symbol.setDataProvider(DummySymbolProvider())
 
     def testLongProfit(self):
-        s1 = Symbol("TEST")
+        s1 = Symbol.get("TEST")
         s1.lot_size = 10000
 
         # LONG
@@ -194,7 +195,7 @@ class PositionProfitLossTests(unittest.TestCase):
         self.assertAlmostEquals(2, position.pointsDelta())
 
     def testShortProfit(self):
-        s1 = Symbol("TEST")
+        s1 = Symbol.get("TEST")
         s1.lot_size = 10000
 
         # LONG
@@ -208,7 +209,7 @@ class PositionProfitLossTests(unittest.TestCase):
         self.assertAlmostEquals(2, position.pointsDelta())
 
     def testLongLoss(self):
-        s1 = Symbol("TEST")
+        s1 = Symbol.get("TEST")
         s1.lot_size = 10000
 
         # LONG
@@ -222,7 +223,7 @@ class PositionProfitLossTests(unittest.TestCase):
         self.assertAlmostEquals(-2, position.pointsDelta())
 
     def testShortLoss(self):
-        s1 = Symbol("TEST")
+        s1 = Symbol.get("TEST")
         s1.lot_size = 10000
 
         # LONG

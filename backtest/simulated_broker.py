@@ -1,6 +1,6 @@
 import logging
 
-from data.data_provider import Provider
+from data.interfaces.data_provider import Provider
 from market.interfaces.data_provider import DataProvider
 from market.order import StopLoss, Direction, State, Entry, Order
 from market.interfaces.orderrouter import OrderRouter, OrderbookException

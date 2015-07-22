@@ -3,6 +3,7 @@ import datetime
 from algorithms.scalp_5m_pin_bar import Algo
 
 from backtest.simulated_broker import Broker
+from data.mysql_symbol_provider import MySQLSymbolProvider
 from data.sqlitetickdataprovider import SQLiteProvider
 from market.market_data import MarketData
 from market.orderbook import OrderBook
@@ -13,10 +14,11 @@ from utils.progress_bar import ProgressBar
 
 
 def main():
-    Symbol.setDataProvider("")
-
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
-    data_provider = SQLiteProvider(Symbol("EURUSD:CUR"), "../utils/test.store", startDate=datetime.datetime(2015, 6, 29))
+
+    Symbol.setDataProvider(MySQLSymbolProvider())
+
+    data_provider = SQLiteProvider(Symbol.get("EURUSD:CUR"), "../utils/test.store", startDate=datetime.datetime(2015, 6, 29))
     venue_connection = Broker(data_provider)
 
     order_book = OrderBook(venue_connection)

@@ -35,7 +35,7 @@ class Algo(Framework):
         This is a list of symbols which are used in the portfolio for this algorithm.
         :return: Array of Symbols used in this algorithm
         """
-        return [Symbol('EURUSD:CUR'), ]
+        return [Symbol.get('EURUSD:CUR'), ]
 
     # def analysis_symbols(self):
     #     """

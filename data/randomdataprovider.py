@@ -1,7 +1,8 @@
 import datetime
 import logging
 from random import random
-from data.data_provider import Provider
+
+from data.interfaces.data_provider import Provider
 from market.price import Tick
 from market.symbol import Symbol
 
@@ -14,6 +15,10 @@ class RandomProvider(Provider):
         self.iterations = iterations
         self.interval = interval
         self.last_publish_time = datetime.datetime.now()
+        self.expected_result_count = iterations
+
+    def setProgressCallback(self, callback):
+        self.progress_callback = callback
 
     def register(self, symbol):
         if not isinstance(symbol, Symbol):
@@ -30,3 +35,5 @@ class RandomProvider(Provider):
             price = base_price + random() - (spread / 2.0)
             callback(self.symbol, Tick(self.last_publish_time, float(price), float(price + spread)))
             self.last_publish_time = self.last_publish_time + self.interval
+            if self.progress_callback is not None:
+                    self.progress_callback(i)
