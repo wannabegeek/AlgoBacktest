@@ -18,8 +18,6 @@ class Container(object):
         if not isinstance(data_provider, MarketData):
             raise TypeError("data_provider must be a subclass of MarketData")
 
-        Symbol.setDataProvider("")
-
         self.algo = algo
         self.starting_capital = working_capital
         self.order_book = order_book
