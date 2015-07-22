@@ -8,7 +8,12 @@ class ProgressBar(object):
         self._display(initial)
 
     def set(self, value):
-        self._display(value)
+        if value < self.max:
+            self._display(value)
+
+    def complete(self):
+        sys.stdout.write("\n")
+        sys.stdout.flush()
 
     def _display(self, value):
         percent = float(value) / self.max

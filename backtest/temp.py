@@ -24,14 +24,15 @@ def main():
 
     containers = []
     containers.append(Container(Algo(25, 10, 10), 10000, order_book, market_data))
-    # containers.append(Container(Algo(15, 5, 10), order_book, market_data))
+    containers.append(Container(Algo(15, 5, 10), 10000, order_book, market_data))
+    containers.append(Container(Algo(15, 10, 5), 10000, order_book, market_data))
     # container.start()
 
     progress_bar = ProgressBar(data_provider.expected_result_count)
     data_provider.setProgressCallback(lambda x: progress_bar.set(x))
 
     venue_connection.start()
-    logging.info("\nComplete...")
+    progress_bar.complete()
 
     for container in containers:
         display_results(container)

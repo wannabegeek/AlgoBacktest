@@ -21,6 +21,7 @@ def display_results(container):
         print("Total Pts:        %.2f" % (sum([x.pointsDelta() for x in filter(lambda x: not x.isOpen(), container.context.positions)]), ))
         print("Starting Capital: %s" % (locale.currency(container.starting_capital, grouping=True),))
         print("Current Capital:  %s" % (locale.currency(container.context.working_capital, grouping=True),))
+        print("Capital Change:  %s" % (locale.currency(container.context.working_capital, grouping=True),))
         print("---------------------------------------------------------")
         print("Completed:\n%s" % ("\n".join(closed),))
         print("Open:\n%s" % ("\n".join(open),))

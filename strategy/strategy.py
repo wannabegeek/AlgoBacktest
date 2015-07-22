@@ -65,6 +65,7 @@ class Context(object):
         self.orders = []
         self.positions = []
         self.custom_data = dict()
+        self.startTime = None
 
     def addQuote(self, quote):
         """
@@ -74,6 +75,8 @@ class Context(object):
         """
         context = self.symbolContexts[quote.symbol]
         context.addQuote(quote)
+        if self.startTime is None:
+            self.startTime = quote.startTime
 
     def symbolData(self, symbol):
         return self.symbolContexts[symbol]

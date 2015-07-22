@@ -49,16 +49,15 @@ def display_results(container):
     htmlLog.append("Algo:             <b>%s</b>" % (container.algo.identifier(),))
 
     have_quote = False
-    startTime = datetime.datetime.max
+    startTime = container.context.startTime
     endTime = datetime.datetime.min
     for symbol_context in container.context.symbolContexts.values():
         have_quote = True
-        startTime = min(symbol_context.quotes[0].startTime, startTime)
         endTime = max(symbol_context.quotes[-1].startTime, endTime)
 
     if have_quote is True:
-        textLog.append("Period:           %s -> %s" % (startTime.strftime("%d-%m-%y %H:%M%S"), endTime.strftime("%d-%m-%y %H:%M%S")))
-        htmlLog.append("Period:           <b>%s -&gt; %s </b>" % (startTime.strftime("%d-%m-%y %H:%M%S"), endTime.strftime("%d-%m-%y %H:%M%S")))
+        textLog.append("Period:           %s -> %s" % (startTime.strftime("%d-%m-%Y %H:%M:%S"), endTime.strftime("%d-%m-%Y %H:%M:%S")))
+        htmlLog.append("Period:           <b>%s -&gt; %s </b>" % (startTime.strftime("%d-%m-%Y %H:%M:%S"), endTime.strftime("%d-%m-%Y %H:%M:%S")))
     else:
         textLog.append("Period:           No Data")
         htmlLog.append("Period:           <b>No Data</b>")
@@ -67,13 +66,13 @@ def display_results(container):
     textLog.append("Current Capital:  %s" % (locale.currency(container.context.working_capital, grouping=True),))
     htmlLog.append("Starting Capital: <b>%s</b>" % (locale.currency(container.starting_capital, grouping=True),))
     htmlLog.append("Current Capital:  <b style='color:#%s'>%s</b>" % ("FF0000" if container.context.working_capital < container.starting_capital else "00FF00", locale.currency(container.context.working_capital, grouping=True)))
+    percent_change = ((container.context.working_capital - container.starting_capital) / container.starting_capital) * 100.0
+    htmlLog.append("Change:  <b style='color:#%s'>%.2f&#37;</b>" % ("FF0000" if percent_change < 0.0 else "00FF00", percent_change))
     if totalPositions == 0:
         textLog.append("No Positions taken")
     else:
-        closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.pointsDelta(), x.positionTime()), filter(lambda x: not x.isOpen(), container.context.positions)))
         open = list(map(lambda x: "%s" % (x), filter(lambda x: x.isOpen(), container.context.positions)))
 
-        closed = list(map(lambda x: "\t%s%s  --> %.2fpts (%s)</span>" % ("<span style='color:#FF0000'>" if x.pointsDelta() < 0.0 else "<span style='color:#00FF00'>", x, x.pointsDelta(), x.positionTime()), filter(lambda x: not x.isOpen(), container.context.positions)))
         winning = list(filter(lambda x: x.pointsDelta() > 0.0, filter(lambda x: not x.isOpen(), container.context.positions)))
 
         textLog.append("Winning Ratio: %.2f%%" % ((len(winning)/totalPositions * 100),))
@@ -82,7 +81,9 @@ def display_results(container):
         htmlLog.append("Total Pts:     <b>%.2f</b>" % (sum([x.pointsDelta() for x in filter(lambda x: not x.isOpen(), container.context.positions)]), ))
         textLog.append("------------------------")
         htmlLog.append("<hr/>")
+        closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.pointsDelta(), x.positionTime()), filter(lambda x: not x.isOpen(), container.context.positions)))
         textLog.append("Completed:\n%s" % ("\n".join(closed),))
+        closed = list(map(lambda x: "\t%s%s  --> %.2fpts (%s)</span>" % ("<span style='color:#FF0000'>" if x.pointsDelta() < 0.0 else "<span style='color:#00FF00'>", x, x.pointsDelta(), x.positionTime()), filter(lambda x: not x.isOpen(), container.context.positions)))
         htmlLog.append("Completed:<br/>%s" % ("<br/>".join(closed),))
         textLog.append("Open:\n%s" % ("\n".join(open),))
         htmlLog.append("Open:<br/>%s" % ("<br/>".join(open),))

@@ -22,7 +22,7 @@ class Algo(Framework):
         pass
 
     def identifier(self):
-        return "5min Pinbar Scalp"
+        return "5min Pinbar Scalp (ema: %s, sl:%s, tp:%s)" % (self.emaPeriod, self.stopLoss.points, self.takeProfit)
 
     def warmupPeriod(self):
         return self.emaPeriod + 1
