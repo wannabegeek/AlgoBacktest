@@ -4,7 +4,7 @@ from algorithms.scalp_5m_pin_bar import Algo
 
 from backtest.simulated_broker import Broker
 from data.mysql_symbol_provider import MySQLSymbolProvider
-from data.sqlite_tickdata_provider import SQLiteProvider
+from data.mysql_tickdata_provider import MySQLProvider
 from market.market_data import MarketData
 from market.orderbook import OrderBook
 from results.email import display_results
@@ -18,7 +18,7 @@ def main():
 
     Symbol.setDataProvider(MySQLSymbolProvider())
 
-    data_provider = SQLiteProvider(Symbol.get("EURUSD:CUR"), "../utils/test.store", startDate=datetime.datetime(2015, 6, 29))
+    data_provider = MySQLProvider(Symbol.get("EURUSD:CUR"), startDate=datetime.datetime(2015, 6, 29))
     venue_connection = Broker(data_provider)
 
     order_book = OrderBook(venue_connection)

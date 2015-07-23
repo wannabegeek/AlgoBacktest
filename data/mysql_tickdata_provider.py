@@ -17,7 +17,7 @@ class MySQLProvider(Provider):
         self.progress_callback = None
         self.progress_count = 0
 
-        self.cursor.execute("SELECT count(*) FROM tick_data WHERE symbol = ? AND timestamp >= ? and timestamp <= ?", (self.symbol.identifier, self.startDate, self.endDate))
+        self.cursor.execute("SELECT count(*) FROM tick_data WHERE symbol_id = %s AND timestamp BETWEEN %s and %s", (self.symbol.identifier, self.startDate, self.endDate))
         for result in self.cursor:
             self.expected_result_count = result[0]
 
@@ -35,7 +35,7 @@ class MySQLProvider(Provider):
         logging.debug("Loading historical data for the previous %s interval" % (period, ))
 
     def startPublishing(self, callback):
-        self.cursor.execute("SELECT timestamp, bid, offer FROM tick_data WHERE symbol = ? AND timestamp >= ? and timestamp <= ? ORDER BY timestamp", (self.symbol.identifier, self.startDate, self.endDate))
+        self.cursor.execute("SELECT timestamp, bid, offer FROM tick_data WHERE symbol_id = %s AND timestamp BETWEEN %s and %s ORDER BY timestamp", (self.symbol.identifier, self.startDate, self.endDate))
         for tick in self.cursor:
             callback(self.symbol, Tick(tick[0], tick[1], tick[2]))
             self.progress_count += 1
