@@ -4,7 +4,7 @@ import logging
 import os
 from mysql.connector import errors
 from mysql import connector
-from data.csvtickdataprovider import CSVProvider
+from data.csv_tickdata_provider import CSVProvider
 from data.mysql_symbol_provider import MySQLSymbolProvider
 from market.symbol import Symbol
 

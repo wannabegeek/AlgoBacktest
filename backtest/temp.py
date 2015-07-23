@@ -4,7 +4,7 @@ from algorithms.scalp_5m_pin_bar import Algo
 
 from backtest.simulated_broker import Broker
 from data.mysql_symbol_provider import MySQLSymbolProvider
-from data.sqlitetickdataprovider import SQLiteProvider
+from data.sqlite_tickdata_provider import SQLiteProvider
 from market.market_data import MarketData
 from market.orderbook import OrderBook
 from results.email import display_results

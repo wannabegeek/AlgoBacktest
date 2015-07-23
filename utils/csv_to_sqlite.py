@@ -3,7 +3,7 @@ import glob
 import logging
 import os
 import sqlite3
-from data.csvtickdataprovider import CSVProvider
+from data.csv_tickdata_provider import CSVProvider
 from market.symbol import Symbol
 
 class Handler(object):
