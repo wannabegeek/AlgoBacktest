@@ -8,7 +8,7 @@ from market.symbol import Symbol
 
 
 class MySQLProvider(Provider):
-    def __init__(self, symbol, filename, startDate=datetime.datetime(datetime.MINYEAR, 1, 1), endDate=datetime.datetime(datetime.MAXYEAR, 1, 1)):
+    def __init__(self, symbol, startDate=datetime.datetime(datetime.MINYEAR, 1, 1), endDate=datetime.datetime(datetime.MAXYEAR, 1, 1)):
         self.symbol = symbol
         self.startDate = startDate
         self.endDate = endDate
