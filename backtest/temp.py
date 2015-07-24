@@ -3,22 +3,22 @@ import datetime
 from algorithms.scalp_5m_pin_bar import Algo
 
 from backtest.simulated_broker import Broker
-from data.mysql_symbol_provider import MySQLSymbolProvider
-from data.mysql_tickdata_provider import MySQLProvider
 from market.market_data import MarketData
 from market.orderbook import OrderBook
-from results.email import display_results
+from results.coloured_console import display_results
 from strategy.container import Container
-from market.symbol import Symbol
+from utils.config import Config
 from utils.progress_bar import ProgressBar
 
 
 def main():
+
+    config = Config("config.conf")
+
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
-    Symbol.setDataProvider(MySQLSymbolProvider())
+    data_provider = config.data_provider
 
-    data_provider = MySQLProvider(Symbol.get("EURUSD:CUR"), startDate=datetime.datetime(2015, 6, 29))
     venue_connection = Broker(data_provider)
 
     order_book = OrderBook(venue_connection)

@@ -1,10 +1,11 @@
 import locale
 import logging
+from results.equity_curve import MatlibPlotResults
 
 
 def display_results(container):
     totalPositions = len(list(filter(lambda x: not x.isOpen(), container.context.positions)))
-    locale.setlocale( locale.LC_ALL, '' )
+    locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')
 
     if totalPositions == 0:
         print("=========================================================")
@@ -25,3 +26,6 @@ def display_results(container):
         print("---------------------------------------------------------")
         print("Completed:\n%s" % ("\n".join(closed),))
         print("Open:\n%s" % ("\n".join(open),))
+
+        d = MatlibPlotResults()
+        d.display(container.context)
