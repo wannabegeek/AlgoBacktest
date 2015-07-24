@@ -16,12 +16,19 @@ class SQLiteProvider(Provider):
         self.cursor = self.conn.cursor()
         self.progress_callback = None
         self.progress_count = 0
+        self._expected_result_count = None
+        self._callback_interval = 0
 
-        self.cursor.execute("SELECT count(*) FROM tick_data WHERE symbol = ? AND timestamp >= ? and timestamp <= ?", (self.symbol.sid, self.startDate, self.endDate))
-        for result in self.cursor:
-            self.expected_result_count = result[0]
 
-        self.callback_interval = int(self.expected_result_count / 100.0)
+    @property
+    def expected_result_count(self):
+        if self._expected_result_count is None:
+            self.cursor.execute("SELECT count(*) FROM tick_data WHERE symbol = ? AND timestamp >= ? and timestamp <= ?", (self.symbol.sid, self.startDate, self.endDate))
+            for result in self.cursor:
+                self._expected_result_count = result[0]
+
+            self._callback_interval = int(self._expected_result_count / 100.0)
+        return self._expected_result_count
 
     def setProgressCallback(self, callback):
         self.progress_callback = callback
@@ -40,5 +47,5 @@ class SQLiteProvider(Provider):
             callback(self.symbol, Tick(tick[0], tick[1], tick[2]))
             self.progress_count += 1
             if self.progress_callback is not None:
-                if self.progress_count % self.callback_interval == 0:
+                if self.progress_count % self._callback_interval == 0:
                     self.progress_callback(self.progress_count)
