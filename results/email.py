@@ -1,3 +1,4 @@
+from io import StringIO
 import smtplib
 import logging
 import datetime
@@ -9,11 +10,14 @@ from email.mime.image import MIMEImage
 
 # me == my email address
 # you == recipient's email address
+import io
+from results.equity_curve import MatlibPlotResults
+
 me = "blackbox@wannabegeek.com"
 you = "tom@wannabegeek.com"
 
 
-locale.setlocale( locale.LC_ALL, '' )
+locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')
 
 def display_results(container):
     # Create message container - the correct MIME type is multipart/alternative.
@@ -81,6 +85,8 @@ def display_results(container):
         htmlLog.append("Total Pts:     <b>%.2f</b>" % (sum([x.pointsDelta() for x in filter(lambda x: not x.isOpen(), container.context.positions)]), ))
         textLog.append("------------------------")
         htmlLog.append("<hr/>")
+        htmlLog.append("<img src='cid:image1'>")
+
         closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.pointsDelta(), x.positionTime()), filter(lambda x: not x.isOpen(), container.context.positions)))
         textLog.append("Completed:\n%s" % ("\n".join(closed),))
         closed = list(map(lambda x: "\t%s%s  --> %.2fpts (%s)</span>" % ("<span style='color:#FF0000'>" if x.pointsDelta() < 0.0 else "<span style='color:#00FF00'>", x, x.pointsDelta(), x.positionTime()), filter(lambda x: not x.isOpen(), container.context.positions)))
@@ -106,9 +112,13 @@ def display_results(container):
 
     # This example assumes the image is in the current directory
 
-#    fp = open('/boot/grub2/themes/system/fireworks.png', 'rb')
-#    msgImage = MIMEImage(fp.read())
-#    fp.close()
+    d = MatlibPlotResults()
+    buf = io.BytesIO()
+    d.display(container, buf)
+    buf.seek(0)
+    msgImage = MIMEImage(buf.getvalue())
+    msgImage.add_header('Content-ID', '<image1>')
+    msg.attach(msgImage)
 
     # Send the message
     s = smtplib.SMTP('joshua.dreamthought.com')

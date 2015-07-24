@@ -26,6 +26,3 @@ def display_results(container):
         print("---------------------------------------------------------")
         print("Completed:\n%s" % ("\n".join(closed),))
         print("Open:\n%s" % ("\n".join(open),))
-
-        d = MatlibPlotResults()
-        d.display(container.context)

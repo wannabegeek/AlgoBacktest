@@ -36,7 +36,7 @@ class Algo(Framework):
     def initialiseContext(self, context):
         for symbol in self.analysis_symbols():
             context.symbolContexts[symbol].ema = []
-            context.symbolContexts[symbol].position = False
+            context.symbolContexts[symbol].positiocn = False
 
     def evaluateTickUpdate(self, context, quote):
         """

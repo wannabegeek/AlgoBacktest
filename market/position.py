@@ -74,6 +74,9 @@ class Position(object):
 
         return priceDelta * self.order.symbol.lot_size
 
+    def equity(self):
+        return self.pointsDelta() * self.order.quantity
+
     def positionTime(self):
         if self.status == Position.PositionStatus.OPEN:
             raise ValueError("Position is still open")
