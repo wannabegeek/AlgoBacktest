@@ -2,11 +2,13 @@ from datetime import datetime, timedelta
 import logging
 
 import numpy as np
+import matplotlib
+#this needs to be dne for headless boxes (& needs to be done before any other imports)
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import matplotlib.dates as mdates
 from matplotlib.finance import candlestick
-import matplotlib
 import pylab
 
 matplotlib.rcParams.update({'font.size': 9})

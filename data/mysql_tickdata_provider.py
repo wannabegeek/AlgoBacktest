@@ -1,6 +1,8 @@
 import datetime
 import logging
+import multiprocessing
 import mysql.connector
+from multiprocessing import Process
 
 from data.interfaces.data_provider import Provider
 from market.price import Tick
@@ -17,7 +19,7 @@ def ResultIter(cursor, arraysize=1000):
 
 
 class MySQLProvider(Provider):
-    def __init__(self, symbol, startDate=datetime.datetime(datetime.MINYEAR, 1, 1), endDate=datetime.datetime(datetime.MAXYEAR, 1, 1)):
+    def __init__(self, symbol, startDate=datetime.datetime(datetime.MINYEAR, 1, 1), endDate=datetime.datetime(datetime.MAXYEAR, 1, 1), multithreaded=True):
         self.symbol = symbol
         self.startDate = startDate
         self.endDate = endDate
@@ -49,12 +51,34 @@ class MySQLProvider(Provider):
     def loadHistoricalData(self, period):
         logging.debug("Loading historical data for the previous %s interval" % (period, ))
 
+    def getTickData(self, queue):
+        # self._db_connection = mysql.connector.connect(user='blackbox', database='blackbox', host="192.168.0.8")
+        cursor = self._db_connection.cursor()
+        cursor.execute("SELECT timestamp, bid, offer FROM tick_data WHERE symbol_id = %s AND timestamp BETWEEN %s and %s ORDER BY timestamp", (self.symbol.identifier, self.startDate, self.endDate))
+        for tick in ResultIter(cursor):
+            queue.put(tick)
+        queue.put(None)
+
+
     def startPublishing(self, callback):
-        self.cursor.execute("SELECT timestamp, bid, offer FROM tick_data WHERE symbol_id = %s AND timestamp BETWEEN %s and %s ORDER BY timestamp", (self.symbol.identifier, self.startDate, self.endDate))
-        for tick in ResultIter(self.cursor):
-            callback(self.symbol, Tick(tick[0], tick[1], tick[2]))
-            self.progress_count += 1
-            if self.progress_callback is not None:
-                if self.progress_count % self._callback_interval == 0:
-                    self.progress_callback(self.progress_count)
+        if multithreaded is True:
+            queue = multiprocessing.Queue()
+
+            p = Process(target=self.getTickData, args=(queue,))
+            p.start()
+
+            for tick in iter(queue.get, None):
+                callback(self.symbol, Tick(tick[0], tick[1], tick[2]))
+                self.progress_count += 1
+                if self.progress_callback is not None:
+                    if self.progress_count % self._callback_interval == 0:
+                        self.progress_callback(self.progress_count)
+        else:
+            self.cursor.execute("SELECT timestamp, bid, offer FROM tick_data WHERE symbol_id = %s AND timestamp BETWEEN %s and %s ORDER BY timestamp", (self.symbol.identifier, self.startDate, self.endDate))
+            for tick in ResultIter(self.cursor):
+                callback(self.symbol, Tick(tick[0], tick[1], tick[2]))
+                self.progress_count += 1
+                if self.progress_callback is not None:
+                    if self.progress_count % self._callback_interval == 0:
+                        self.progress_callback(self.progress_count)
 
