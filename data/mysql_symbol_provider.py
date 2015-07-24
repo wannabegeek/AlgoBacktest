@@ -5,7 +5,7 @@ from data.interfaces.symbol_data_provider import SymbolProvider, SymbolProviderD
 class MySQLSymbolProvider(SymbolProvider):
 
     def __init__(self):
-        self._db_connection = mysql.connector.connect(user='blackbox', database='blackbox', host="192.168.0.8")
+        self._db_connection = mysql.connector.connect(user='blackbox', database='blackbox', host="localhost")
         self.cursor = self._db_connection.cursor(buffered=True)
 
     def getDataForSymbol(self, sid):

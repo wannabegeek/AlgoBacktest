@@ -5,7 +5,7 @@ from algorithms.scalp_5m_pin_bar import Algo
 from backtest.simulated_broker import Broker
 from market.market_data import MarketData
 from market.orderbook import OrderBook
-from results.coloured_console import display_results
+from results.email import display_results
 from strategy.container import Container
 from utils.config import Config
 from utils.progress_bar import ProgressBar

@@ -14,6 +14,8 @@ class Handler(object):
         self.totalTicks = 0
         self._db_connection = connector.connect(user=user, database=database, host=host)
         self.cursor = self._db_connection.cursor(buffered=True)
+        self.cursor.execute("SET unique_checks=0;")
+        self.cursor.execute("SET autocommit=0;")
 
         for filename in input_files:
             logging.info("Processing '%s'" % (filename,))
@@ -21,6 +23,7 @@ class Handler(object):
             data.startPublishing(self.tick_handler)
 
         self._db_connection.commit()
+        self.cursor.execute("SET unique_checks=1;")
         self.cursor.close()
         self._db_connection.close()
 
@@ -28,7 +31,7 @@ class Handler(object):
         try:
             self.cursor.execute("INSERT INTO tick_data(symbol_id, timestamp, bid, offer) VALUES(%s, %s, %s, %s)", (symbol.identifier, tick.timestamp, tick.bid, tick.offer))
             self.totalTicks += 1
-            if self.totalTicks >= 10000:
+            if self.totalTicks >= 100000:
                 self._db_connection.commit()
                 logging.debug("Commited %s" % (self.totalTicks,))
                 self.totalTicks = 0
@@ -49,5 +52,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     input_files = glob.glob(os.path.expanduser(os.path.expandvars(args.in_filename)))
+    logging.debug("Processing %s files: %s" % (len(input_files), input_files))
 
     h = Handler(args.symbol, args.user, args.database, args.host, input_files)
