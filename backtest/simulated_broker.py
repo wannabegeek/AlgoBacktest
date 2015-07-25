@@ -7,6 +7,11 @@ from market.interfaces.orderrouter import OrderRouter, OrderbookException
 from market.position import Position
 from market.price import Tick
 
+# This is a horrible performance optimisation
+# Enums can be slow (calling __getattr__) this should be fixed in Python 3.5+
+long = Direction.LONG
+short = Direction.SHORT
+stop_loss_trailing = StopLoss.Type.TRAILING
 
 class Broker(OrderRouter, DataProvider):
 
@@ -149,13 +154,13 @@ class Broker(OrderRouter, DataProvider):
 
         if position.isOpen():
             if position.order.stoploss is not None:
-                if position.order.stoploss.type == StopLoss.Type.TRAILING:
-                    if position.order.direction == Direction.LONG:
+                if position.order.stoploss.type == stop_loss_trailing:
+                    if position.order.direction == long:
                         position.stopPrice = max(position.stopPrice, tick.bid - position.order.stoploss.points * position.order.symbol.lot_size)
                     else:
                         position.stopPrice = min(position.stopPrice, tick.offer + position.order.stoploss.points * position.order.symbol.lot_size)
 
-                if position.order.direction == Direction.LONG:
+                if position.order.direction == long:
                     if tick.offer <= position.stopPrice:
                         # logging.debug("Position %s hit its stop loss (tick %s)" % (self, tick))
                         self._closePosition(position, tick, Position.PositionStatus.STOP_LOSS)
@@ -165,10 +170,10 @@ class Broker(OrderRouter, DataProvider):
                         self._closePosition(position, tick, Position.PositionStatus.STOP_LOSS)
 
             if position.order.takeProfit is not None:
-                if position.order.direction == Direction.LONG and tick.offer >= position.takeProfit:
+                if position.order.direction == long and tick.offer >= position.takeProfit:
                     # logging.debug("Position %s hit its take profit target (tick %s)" % (self, tick))
                     self._closePosition(position, tick, Position.PositionStatus.TAKE_PROFIT)
-                elif position.order.direction == Direction.SHORT and tick.bid <= position.takeProfit:
+                elif position.order.direction == short and tick.bid <= position.takeProfit:
                     # logging.debug("Position %s hit its take profit target (tick %s)" % (self, tick))
                     self._closePosition(position, tick, Position.PositionStatus.TAKE_PROFIT)
 
