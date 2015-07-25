@@ -57,7 +57,8 @@ def display_results(container):
     endTime = datetime.datetime.min
     for symbol_context in container.context.symbolContexts.values():
         have_quote = True
-        endTime = max(symbol_context.quotes[-1].startTime, endTime)
+        quote = symbol_context.quotes[-1]
+        endTime = max(quote.startTime + quote.period, endTime)
 
     if have_quote is True:
         textLog.append("Period:           %s -> %s" % (startTime.strftime("%d-%m-%Y %H:%M:%S"), endTime.strftime("%d-%m-%Y %H:%M:%S")))
@@ -77,19 +78,20 @@ def display_results(container):
     else:
         open = list(map(lambda x: "%s" % (x), filter(lambda x: x.isOpen(), container.context.positions)))
 
-        winning = list(filter(lambda x: x.pointsDelta() > 0.0, filter(lambda x: not x.isOpen(), container.context.positions)))
+        closedPositions = sorted(filter(lambda x: not x.isOpen(), container.context.positions), key=lambda x: x.exitTick.timestamp)
+        winning = list(filter(lambda x: x.pointsDelta() > 0.0, closedPositions))
 
         textLog.append("Winning Ratio: %.2f%%" % ((len(winning)/totalPositions * 100),))
         htmlLog.append("Winning Ratio: <b>%.2f%%</b>" % ((len(winning)/totalPositions * 100),))
-        textLog.append("Total Pts:     %.2f" % (sum([x.pointsDelta() for x in filter(lambda x: not x.isOpen(), container.context.positions)]), ))
-        htmlLog.append("Total Pts:     <b>%.2f</b>" % (sum([x.pointsDelta() for x in filter(lambda x: not x.isOpen(), container.context.positions)]), ))
+        textLog.append("Total Pts:     %.2f" % (sum([x.pointsDelta() for x in closedPositions]), ))
+        htmlLog.append("Total Pts:     <b>%.2f</b>" % (sum([x.pointsDelta() for x in closedPositions]), ))
         textLog.append("------------------------")
         htmlLog.append("<hr/>")
         htmlLog.append("<img src='cid:image1'>")
 
-        closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.pointsDelta(), x.positionTime()), filter(lambda x: not x.isOpen(), container.context.positions)))
+        closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.pointsDelta(), x.positionTime()), closedPositions))
         textLog.append("Completed:\n%s" % ("\n".join(closed),))
-        closed = list(map(lambda x: "\t%s%s  --> %.2fpts (%s)</span>" % ("<span style='color:#FF0000'>" if x.pointsDelta() < 0.0 else "<span style='color:#00FF00'>", x, x.pointsDelta(), x.positionTime()), filter(lambda x: not x.isOpen(), container.context.positions)))
+        closed = list(map(lambda x: "\t%s%s  --> %.2fpts (%s)</span>" % ("<span style='color:#FF0000'>" if x.pointsDelta() < 0.0 else "<span style='color:#00FF00'>", x, x.pointsDelta(), x.positionTime()), closedPositions))
         htmlLog.append("Completed:<br/>%s" % ("<br/>".join(closed),))
         textLog.append("Open:\n%s" % ("\n".join(open),))
         htmlLog.append("Open:<br/>%s" % ("<br/>".join(open),))

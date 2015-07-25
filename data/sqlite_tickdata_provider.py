@@ -19,7 +19,6 @@ class SQLiteProvider(Provider):
         self._expected_result_count = None
         self._callback_interval = 0
 
-
     @property
     def expected_result_count(self):
         if self._expected_result_count is None:

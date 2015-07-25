@@ -1,5 +1,4 @@
 import logging
-import datetime
 from algorithms.scalp_5m_pin_bar import Algo
 
 from backtest.simulated_broker import Broker
@@ -25,9 +24,9 @@ def main():
     market_data = MarketData(venue_connection)
 
     containers = []
-    containers.append(Container(Algo(25, 10, 10), 10000, order_book, market_data))
-    containers.append(Container(Algo(15, 5, 10), 10000, order_book, market_data))
-    containers.append(Container(Algo(15, 10, 5), 10000, order_book, market_data))
+#    containers.append(Container(Algo(25, 10, 10), 10000, order_book, market_data))
+#   containers.append(Container(Algo(15, 5, 10), 10000, order_book, market_data))
+    containers.append(Container(Algo(15, 50, 100), 100000, order_book, market_data))
     # container.start()
 
     progress_bar = ProgressBar(data_provider.expected_result_count)

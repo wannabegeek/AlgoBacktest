@@ -1,9 +1,10 @@
+import matplotlib
+#this needs to be dne for headless boxes (& needs to be done before any other imports)
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import matplotlib
 
 matplotlib.rcParams.update({'font.size': 9})
-
 
 # pound = u'\N{pound sign}'
 pound = '$'
@@ -23,7 +24,7 @@ class MatlibPlotResults(object):
         #
         self.capital = container.starting_capital
 
-        closed_positions = list(filter(lambda x: not x.isOpen(), container.context.positions))
+        closed_positions = sorted(filter(lambda x: not x.isOpen(), container.context.positions), key=lambda x: x.exitTick.timestamp)
         date = [mdates.date2num(o.exitTick.timestamp) for o in closed_positions]
         algorithm_performance = [self.calculate_capital(float(o.equity())) for o in closed_positions]
 
