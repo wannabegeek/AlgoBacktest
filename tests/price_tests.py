@@ -13,15 +13,16 @@ class PriceTest(unittest.TestCase):
         self.callbackQuote = []
 
     def testTimestampRounding(self):
-        t = datetime.datetime(2015, 1, 7, 13, 4, 47, 123456)
+
+        t = 1437832541.348046
         result = roundDateTimeToPeriod(t, datetime.timedelta(seconds=5))
-        self.assertEqual(datetime.datetime(2015, 1, 7, 13, 4, 45, 0), result)
+        self.assertEqual(1437832540, result)
 
         result = roundDateTimeToPeriod(t, datetime.timedelta(minutes=5))
-        self.assertEqual(datetime.datetime(2015, 1, 7, 13, 0), result)
+        self.assertEqual(1437832500, result)
 
         result = roundDateTimeToPeriod(t, datetime.timedelta(hours=4))
-        self.assertEqual(datetime.datetime(2015, 1, 7, 12), result)
+        self.assertEqual(1437825600, result)
 
     def callback(self, quote):
         self.callbackQuote.append(quote)

@@ -1,3 +1,4 @@
+import datetime
 import matplotlib
 #this needs to be dne for headless boxes (& needs to be done before any other imports)
 matplotlib.use('Agg')
@@ -25,7 +26,7 @@ class MatlibPlotResults(object):
         self.capital = container.starting_capital
 
         closed_positions = sorted(filter(lambda x: not x.isOpen(), container.context.positions), key=lambda x: x.exitTick.timestamp)
-        date = [mdates.date2num(o.exitTick.timestamp) for o in closed_positions]
+        date = [mdates.date2num(datetime.datetime.utcfromtimestamp(o.exitTick.timestamp)) for o in closed_positions]
         algorithm_performance = [self.calculate_capital(float(o.equity())) for o in closed_positions]
 
         date.insert(0, mdates.date2num(container.context.startTime))

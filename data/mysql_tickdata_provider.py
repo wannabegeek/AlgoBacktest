@@ -34,7 +34,7 @@ class MySQLProvider(Provider):
     @property
     def expected_result_count(self):
         if self._expected_result_count is None:
-            self.cursor.execute("SELECT count(*) FROM tick_data WHERE symbol_id = %s AND timestamp BETWEEN %s and %s", (self.symbol.identifier, self.startDate, self.endDate))
+            self.cursor.execute("SELECT count(*) FROM tick_data2 WHERE symbol_id = %s AND timestamp BETWEEN %s and %s", (self.symbol.identifier, self.startDate.timestamp(), self.endDate.timestamp()))
             for result in self.cursor:
                 self._expected_result_count = result[0]
 
@@ -55,7 +55,7 @@ class MySQLProvider(Provider):
     def getTickData(self, queue):
         # self._db_connection = mysql.connector.connect(user='blackbox', database='blackbox', host="192.168.0.8")
         cursor = self._db_connection.cursor()
-        cursor.execute("SELECT timestamp, bid, offer FROM tick_data WHERE symbol_id = %s AND timestamp BETWEEN %s and %s ORDER BY timestamp", (self.symbol.identifier, self.startDate, self.endDate))
+        cursor.execute("SELECT timestamp, bid, offer FROM tick_data2 WHERE symbol_id = %s AND timestamp BETWEEN %s and %s ORDER BY timestamp", (self.symbol.identifier, self.startDate.timestamp(), self.endDate.timestamp()))
         for tick in ResultIter(cursor):
             queue.put(tick)
         queue.put(None)
@@ -75,7 +75,7 @@ class MySQLProvider(Provider):
                     if self.progress_count % self._callback_interval == 0:
                         self.progress_callback(self.progress_count)
         else:
-            self.cursor.execute("SELECT timestamp, bid, offer FROM tick_data WHERE symbol_id = %s AND timestamp BETWEEN %s and %s ORDER BY timestamp", (self.symbol.identifier, self.startDate, self.endDate))
+            self.cursor.execute("SELECT timestamp, bid, offer FROM tick_data2 WHERE symbol_id = %s AND timestamp BETWEEN %s and %s ORDER BY timestamp", (self.symbol.identifier, self.startDate.timestamp(), self.endDate.timestamp()))
             for tick in ResultIter(self.cursor):
                 callback(self.symbol, Tick(tick[0], tick[1], tick[2]))
                 self.progress_count += 1
