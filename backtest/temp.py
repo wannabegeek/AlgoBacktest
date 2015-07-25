@@ -29,7 +29,7 @@ def main():
     containers.append(Container(Algo(15, 50, 100), 100000, order_book, market_data))
     # container.start()
 
-    progress_bar = ProgressBar(data_provider.expected_result_count)
+    progress_bar = ProgressBar(data_provider.expected_result_count, label='Backtest')
     data_provider.setProgressCallback(lambda x: progress_bar.set(x))
 
     venue_connection.start()
