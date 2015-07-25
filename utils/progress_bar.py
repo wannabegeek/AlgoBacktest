@@ -21,7 +21,7 @@ class ProgressBar(object):
     def complete(self):
         sys.stdout.write("\n")
         if self.estimated_time is True:
-            sys.stdout.write("Completed in %s\n", (datetime.datetime.utcnow() - self.start_time,))
+            sys.stdout.write("Completed in %s\n" % (datetime.datetime.utcnow() - self.start_time,))
         sys.stdout.flush()
 
     def _display(self, value):
@@ -29,7 +29,7 @@ class ProgressBar(object):
         hashes = '#' * int(round(percent * self.width))
         spaces = ' ' * (self.width - len(hashes))
 
-        if self.estimated_time is True and self.start_time is not None:
+        if self.estimated_time is True and self.start_time is not None and percent != 0.0:
             remaining = (datetime.datetime.utcnow() - self.start_time) / percent
             sys.stdout.write("\r{0}: [{1}] {2}% - remaining: {3}".format(self.label, hashes + spaces, int(round(percent * 100)), remaining))
             sys.stdout.flush()
@@ -42,4 +42,4 @@ if __name__ == '__main__':
     for i in range(0, 301):
         progress.set(i)
         time.sleep(0.1 )
-    print("")
+    progress.complete()
