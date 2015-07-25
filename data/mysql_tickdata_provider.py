@@ -19,10 +19,11 @@ def ResultIter(cursor, arraysize=1000):
 
 
 class MySQLProvider(Provider):
-    def __init__(self, symbol, startDate=datetime.datetime(datetime.MINYEAR, 1, 1), endDate=datetime.datetime(datetime.MAXYEAR, 1, 1), multithreaded=True):
+    def __init__(self, symbol, startDate=datetime.datetime(datetime.MINYEAR, 1, 1), endDate=datetime.datetime(datetime.MAXYEAR, 1, 1), multithreaded=False):
         self.symbol = symbol
         self.startDate = startDate
         self.endDate = endDate
+        self.multithreaded = multithreaded
         self._db_connection = mysql.connector.connect(user='blackbox', database='blackbox', host="192.168.0.8")
         self.cursor = self._db_connection.cursor()
         self.progress_callback = None
@@ -61,7 +62,7 @@ class MySQLProvider(Provider):
 
 
     def startPublishing(self, callback):
-        if multithreaded is True:
+        if self.multithreaded is True:
             queue = multiprocessing.Queue()
 
             p = Process(target=self.getTickData, args=(queue,))
