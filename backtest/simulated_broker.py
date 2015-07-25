@@ -100,10 +100,10 @@ class Broker(OrderRouter, DataProvider):
 
     def _evaluateOrdersStatus(self, order, tick):
         previousState = order.state
-        if not isinstance(order, Order):
-            raise TypeError('argument "order" must be a Order')
-        if not isinstance(tick, Tick):
-            raise TypeError('argument "tick" must be a Tick')
+        # if not isinstance(order, Order):
+        #     raise TypeError('argument "order" must be a Order')
+        # if not isinstance(tick, Tick):
+        #     raise TypeError('argument "tick" must be a Tick')
 
         if order.isComplete():
             raise OrderbookException("Order is already complete")
@@ -142,10 +142,10 @@ class Broker(OrderRouter, DataProvider):
         logging.debug("Position %s has been closed due to %s" % (position, position.status.name))
 
     def _evaluateOpenPosition(self, position, tick):
-        if not isinstance(position, Position):
-            raise ValueError('argument "position" must be a Position')
-        if not isinstance(tick, Tick):
-            raise ValueError('argument "tick" must be a Tick')
+        # if not isinstance(position, Position):
+        #     raise ValueError('argument "position" must be a Position')
+        # if not isinstance(tick, Tick):
+        #     raise ValueError('argument "tick" must be a Tick')
 
         if position.isOpen():
             if position.order.stoploss is not None:

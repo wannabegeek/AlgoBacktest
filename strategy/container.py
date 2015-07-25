@@ -36,8 +36,8 @@ class Container(object):
         """
         This method gets called from the MarketData framework
         """
-        if quote is None or not isinstance(quote, Quote):
-            raise TypeError("Invalid quote")
+        # if quote is None or not isinstance(quote, Quote):
+        #     raise TypeError("Invalid quote")
 
         self.context.addQuote(quote)
         self.algo.evaluateTickUpdate(self.context, quote)
