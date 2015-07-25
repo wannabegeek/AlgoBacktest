@@ -24,7 +24,7 @@ class MySQLProvider(Provider):
         self.startDate = startDate
         self.endDate = endDate
         self.multithreaded = multithreaded
-        self._db_connection = mysql.connector.connect(user=credentials['user'], database=credentials['database'], host=credentials['host'])
+        self._db_connection = mysql.connector.connect(**credentials)
         self.cursor = self._db_connection.cursor()
         self.progress_callback = None
         self.progress_count = 0
