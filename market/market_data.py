@@ -82,8 +82,7 @@ class MarketData(object):
             logging.error("Received data update for symbol we're not subscribed to (%s)" % (symbol,))
 
 def roundDateTimeToPeriod(timestamp, period):
-    seconds = timestamp.timestamp() % period.total_seconds()
-    return timestamp - datetime.timedelta(seconds=seconds)
+    return timestamp - timestamp % period.total_seconds()
 
 class PriceConflator(object):
     def __init__(self, symbol, period, callback = None):
@@ -98,19 +97,20 @@ class PriceConflator(object):
     def addTick(self, tick):
         if not self.currentQuote:
             self.periodStartingTimestamp = tick.timestamp
-            self.currentQuote = Quote(self.symbol, roundDateTimeToPeriod(tick.timestamp, self.period), self.period, tick)
+            self.currentQuote = Quote(self.symbol, datetime.datetime.utcfromtimestamp(roundDateTimeToPeriod(tick.timestamp, self.period)), self.period, tick)
             return self.currentQuote
         else:
             currentTickTimeBlock = roundDateTimeToPeriod(tick.timestamp, self.period)
-            if currentTickTimeBlock < (self.currentQuote.startTime + self.period):
+            if currentTickTimeBlock < (self.periodStartingTimestamp + self.period.total_seconds()):
                 self.currentQuote.addTick(tick)
             else:
                 if self.callback is not None:
                     self.callback(self.currentQuote)
-                t = self.currentQuote.startTime + self.period
-                while currentTickTimeBlock >= (t + self.period):
-                        self.callback(Quote(self.symbol, t, self.period, Tick(self.currentQuote.startTime, self.currentQuote.close, self.currentQuote.close)))
-                        t = t + self.period
-                self.currentQuote = Quote(self.symbol, t, self.period, tick)
+                t = self.periodStartingTimestamp + self.period.total_seconds()
+                while currentTickTimeBlock >= (t + self.period.total_seconds()):
+                        self.callback(Quote(self.symbol, datetime.datetime.utcfromtimestamp(t), self.period, Tick(self.periodStartingTimestamp, self.currentQuote.close, self.currentQuote.close)))
+                        t += self.period.total_seconds()
+                self.currentQuote = Quote(self.symbol, datetime.datetime.utcfromtimestamp(t), self.period, tick)
+                self.periodStartingTimestamp = t
                 return self.currentQuote
         return None

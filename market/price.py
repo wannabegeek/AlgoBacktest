@@ -1,4 +1,5 @@
-import statistics
+import datetime
+
 
 class Tick(object):
     """
@@ -18,7 +19,7 @@ class Tick(object):
         return (self.bid + self.offer) / 2.0
 
     def __str__(self):
-        return "%s: b:%s o:%s" % (self.timestamp, self.bid, self.offer)
+        return "%s: b:%s o:%s" % (datetime.datetime.utcfromtimestamp(self.timestamp), self.bid, self.offer)
 
     __repr__ = __str__
 
