@@ -15,13 +15,13 @@ class PriceTest(unittest.TestCase):
     def testTimestampRounding(self):
 
         t = 1437832541.348046
-        result = roundDateTimeToPeriod(t, datetime.timedelta(seconds=5))
+        result = roundDateTimeToPeriod(t, 5.0)
         self.assertEqual(1437832540, result)
 
-        result = roundDateTimeToPeriod(t, datetime.timedelta(minutes=5))
+        result = roundDateTimeToPeriod(t, 300.0)  # 5 mins
         self.assertEqual(1437832500, result)
 
-        result = roundDateTimeToPeriod(t, datetime.timedelta(hours=4))
+        result = roundDateTimeToPeriod(t, 14400.0)  # 4 hours
         self.assertEqual(1437825600, result)
 
     def callback(self, quote):
@@ -33,20 +33,20 @@ class PriceTest(unittest.TestCase):
 
         startTime = datetime.datetime(2015, 7, 7, 14, 10, 0)
         startTime = startTime + MarketDataPeriod.MIN_1
-        tick = Tick(startTime, 9.0, 9.2)
+        tick = Tick(startTime.timestamp(), 9.0, 9.2)  # 14:11:00
         conflator.addTick(tick)
         startTime = startTime + MarketDataPeriod.MIN_1
-        tick = Tick(startTime, 8.7, 8.9)
+        tick = Tick(startTime.timestamp(), 8.7, 8.9)  # 14:12:00
         conflator.addTick(tick)
         startTime = startTime + MarketDataPeriod.MIN_1
-        tick = Tick(startTime, 11.0, 11.2)
+        tick = Tick(startTime.timestamp(), 11.0, 11.2)  # 14:13:00
         conflator.addTick(tick)
         startTime = startTime + MarketDataPeriod.MIN_1
-        tick = Tick(startTime, 10.5, 10.7)
+        tick = Tick(startTime.timestamp(), 10.5, 10.7)  # 14:14:00
         conflator.addTick(tick)
 
         startTime = startTime + MarketDataPeriod.MIN_1
-        tick = Tick(startTime, 9.0, 9.2)
+        tick = Tick(startTime.timestamp(), 9.0, 9.2)  # 14:15:00
         conflator.addTick(tick)
 
         self.assertEqual(1, len(self.callbackQuote))
@@ -61,19 +61,19 @@ class PriceTest(unittest.TestCase):
         conflator = PriceConflator("TEST", MarketDataPeriod.MIN_5, self.callback)
 
         startTime = datetime.datetime(2015, 7, 7, 14, 0, 0)
-        tick = Tick(startTime, 9.0, 9.2)
+        tick = Tick(startTime.timestamp(), 9.0, 9.2)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=60), 9.0, 9.2)
+        tick = Tick((startTime + datetime.timedelta(seconds=60)).timestamp(), 9.0, 9.2)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=120), 8.7, 8.9)
+        tick = Tick((startTime + datetime.timedelta(seconds=120)).timestamp(), 8.7, 8.9)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=180), 11.0, 11.2)
+        tick = Tick((startTime + datetime.timedelta(seconds=180)).timestamp(), 11.0, 11.2)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=240), 10.5, 10.7)
+        tick = Tick((startTime + datetime.timedelta(seconds=240)).timestamp(), 10.5, 10.7)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=300), 9.0, 9.2)
+        tick = Tick((startTime + datetime.timedelta(seconds=300)).timestamp(), 9.0, 9.2)
         conflator.addTick(tick)
-        tick = Tick(startTime + datetime.timedelta(seconds=360), 9.0, 9.2)
+        tick = Tick((startTime + datetime.timedelta(seconds=360)).timestamp(), 9.0, 9.2)
         conflator.addTick(tick)
 
         self.assertEqual(1, len(self.callbackQuote))
@@ -90,23 +90,31 @@ class PriceTest(unittest.TestCase):
 
         startTime = datetime.datetime(2015, 7, 7, 14, 10, 0)
         startTime = startTime + MarketDataPeriod.MIN_1
-        tick = Tick(startTime, 9.0, 9.2)
+        tick = Tick(startTime.timestamp(), 9.0, 9.2)  # 14:11
         conflator.addTick(tick)
         startTime = startTime + MarketDataPeriod.MIN_1
-        tick = Tick(startTime, 8.7, 8.9)
+        tick = Tick(startTime.timestamp(), 8.7, 8.9)  # 14:12
         conflator.addTick(tick)
         startTime = startTime + MarketDataPeriod.MIN_1
-        tick = Tick(startTime, 11.0, 11.2)
+        tick = Tick(startTime.timestamp(), 11.0, 11.2)  # 14:13
         conflator.addTick(tick)
         startTime = startTime + MarketDataPeriod.MIN_1
-        tick = Tick(startTime, 10.5, 10.7)
+        tick = Tick(startTime.timestamp(), 10.5, 10.7)  # 14:14
         conflator.addTick(tick)
+
+        self.assertEqual(0, len(self.callbackQuote))  # (All in 14:10:00)
 
         startTime = startTime + MarketDataPeriod.MIN_15
-        tick = Tick(startTime, 9.0, 9.2)
+        tick = Tick(startTime.timestamp(), 9.0, 9.2)  # 14:29
         conflator.addTick(tick)
 
-        self.assertEqual(3, len(self.callbackQuote))
+        self.assertEqual(3, len(self.callbackQuote))  # 14:15:00, 14:20:00, 14:25:00
+
+        startTime = startTime + MarketDataPeriod.MIN_1
+        tick = Tick(startTime.timestamp(), 10.5, 10.7)  # 14:30
+        conflator.addTick(tick)
+
+        self.assertEqual(4, len(self.callbackQuote))
         quote = self.callbackQuote[0]
         self.assertEqual(9.1, quote.open)
         self.assertEqual(11.1, quote.high)
