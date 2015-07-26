@@ -143,7 +143,7 @@ class Context(object):
         Get a list of all open positions
         :return: List of positions
         """
-        return filter(lambda x: x.exitReason == Position.PositionStatus.OPEN, self.positions)
+        return filter(lambda x: x.status == Position.PositionStatus.OPEN, self.positions)
 
     def getOpenOrders(self):
         """

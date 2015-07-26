@@ -15,7 +15,7 @@ class Algo(Framework):
 
     def __init__(self, emaPeriod, stopLoss, takeProfit):
         super(Algo, self).__init__()
-        self.maxPositions = 5
+        self.maxPositions = 2
         self.emaPeriod = emaPeriod
         self.stopLoss = StopLoss(StopLoss.Type.FIXED, stopLoss)
         self.takeProfit = takeProfit
@@ -69,14 +69,25 @@ class Algo(Framework):
 
             buy_signal = bar_is_lowest and ((min(symbolContext.open, symbolContext.close) - symbolContext.low) * 1.5) >= (symbolContext.high - symbolContext.low)
             sell_signal = bar_is_highest and ((symbolContext.high - max(symbolContext.open, symbolContext.close)) * 1.5) >= (symbolContext.high - symbolContext.low)
+            open_positions = list(context.getOpenPositions())
 
             if quote.close > ema and sell_signal:
                 # if context.symbolContexts[quote.symbol].position is False:
                     # create a LONG position
-                logging.debug("Opening position on quote: %s" % (quote,))
-                context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, takeProfit=self.takeProfit))
+                if len(open_positions) != 0:
+                    position = open_positions[0]
+                    if position.order.direction is Direction.LONG:
+                        context.closePosition(position)
+                else:
+                    logging.debug("Opening position on quote: %s" % (quote,))
+                    context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, takeProfit=self.takeProfit))
                 # context.symbolContexts[quote.symbol].position = True
             elif quote.close < ema and buy_signal:
-                logging.debug("Opening position on quote: %s" % (quote,))
-                context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, takeProfit=self.takeProfit))
+                if len(open_positions) != 0:
+                    position = open_positions[0]
+                    if position.order.direction is Direction.SHORT:
+                        context.closePosition(position)
+                else:
+                    logging.debug("Opening position on quote: %s" % (quote,))
+                    context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, takeProfit=self.takeProfit))
 
