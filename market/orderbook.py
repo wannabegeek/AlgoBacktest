@@ -1,8 +1,7 @@
 import logging
-import weakref
 
 from market.interfaces.orderrouter import OrderRouter
-from market.order import Order, State
+from market.order import State
 from market.position import Position
 
 
