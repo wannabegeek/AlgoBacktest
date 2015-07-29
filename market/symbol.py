@@ -44,7 +44,7 @@ class Symbol(object):
 
         self.lookup = {}
 
-    def referenceSymbol(self, dataSource):
+    def reference_symbol(self, dataSource):
         return self.lookup[dataSource]
 
     def __str__(self):
@@ -68,7 +68,7 @@ class SymbolContext(object):
     """
     def __init__(self, symbol, history_size):
         self.symbol = symbol
-        self.lastUpdate = None
+        self.last_update = None
 
         self.timestamp = None
         self.price = 0.0
@@ -83,14 +83,14 @@ class SymbolContext(object):
         self.lows = deque(maxlen=history_size)
         self.closes = deque(maxlen=history_size)
 
-    def addQuote(self, quote):
+    def add_quote(self, quote):
         """
         Add a quote to this symbol context
         :param quote: quote to add
         :return: None
         """
-        self.lastUpdate = quote.lastTick.timestamp
-        self.timestamp = quote.startTime
+        self.lastUpdate = quote.last_tick.timestamp
+        self.timestamp = quote.start_time
 
         self.price = quote.close
         self.open = quote.open
@@ -117,7 +117,7 @@ class SymbolContext(object):
     #     val = bisect_left(keys, timestamp) - 1
     #     return self.quoteCache[keys[val]]
 
-    def previousQuote(self, quote):
+    def previous_quote(self, quote):
         """
         Find a quote previous to another
         :param quote: Quote object to start the search

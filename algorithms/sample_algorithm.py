@@ -73,7 +73,7 @@ class Algo(Framework):
         # logging.debug("I'm evaluating the data for %s" % (quote, ))
 
         if len(symbolContext.quotes) > 25:  # i.e. we have enough data
-            quoteTimes = [time.mktime(o.startTime.timetuple()) for o in symbolContext.quotes]
+            quoteTimes = [time.mktime(o.start_time.timetuple()) for o in symbolContext.quotes]
             closePrices = asarray(symbolContext.closes)
 
             ema_10 = financial.ema(closePrices[-10:], 10)
@@ -85,7 +85,7 @@ class Algo(Framework):
                 if context.symbolContexts[quote.symbol].position is False:
                     # create a LONG position
                     logging.debug("Opening position on quote: %s" % (quote,))
-                    context.placeOrder(Order(quote.symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=StopLoss(StopLoss.Type.FIXED, 20), takeProfit=25))
+                    context.place_order(Order(quote.symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=StopLoss(StopLoss.Type.FIXED, 20), take_profit=25))
                     context.symbolContexts[quote.symbol].position = True
             else:
                 if context.symbolContexts[quote.symbol].position is True:

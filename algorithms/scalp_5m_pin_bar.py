@@ -49,13 +49,13 @@ class Algo(Framework):
         if len(symbolContext.quotes) > self.emaPeriod:  # i.e. we have enough data
             space = 5
 
-            if quote.startTime.time() > datetime.time(21, 0) or quote.startTime.time() < datetime.time(7, 0):
+            if quote.start_time.time() > datetime.time(21, 0) or quote.start_time.time() < datetime.time(7, 0):
                 # not normal EURUSD active period
                 return
-            if quote.startTime.weekday() >= 5:
+            if quote.start_time.weekday() >= 5:
                 # it's a weekend
                 return
-            if quote.startTime.weekday() == 4 and quote.startTime.time() > datetime.time(12, 0):
+            if quote.start_time.weekday() == 4 and quote.start_time.time() > datetime.time(12, 0):
                 # no positions after 12 on Friday
                 return
 
@@ -77,17 +77,17 @@ class Algo(Framework):
                 if len(open_positions) != 0:
                     position = open_positions[0]
                     if position.order.direction is Direction.LONG:
-                        context.closePosition(position)
+                        context.close_position(position)
                 else:
                     logging.debug("Opening position on quote: %s" % (quote,))
-                    context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, takeProfit=self.takeProfit))
+                    context.place_order(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, take_profit=self.takeProfit))
                 # context.symbolContexts[quote.symbol].position = True
             elif quote.close < ema and buy_signal:
                 if len(open_positions) != 0:
                     position = open_positions[0]
                     if position.order.direction is Direction.SHORT:
-                        context.closePosition(position)
+                        context.close_position(position)
                 else:
                     logging.debug("Opening position on quote: %s" % (quote,))
-                    context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, takeProfit=self.takeProfit))
+                    context.place_order(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, take_profit=self.takeProfit))
 

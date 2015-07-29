@@ -46,7 +46,7 @@ class ResultsProcessor(object):
             totalVolume = 0.0
             for symbol in self.algo.analysis_symbols():
                 quote = context.symbolContexts[symbol].quoteAtTime(processingDate)
-                prevQuote = context.symbolContexts[symbol].previousQuote(quote)
+                prevQuote = context.symbolContexts[symbol].previous_quote(quote)
                 if prevQuote is not None:
                     delta = (quote.close - prevQuote.close)
                     benchmark += delta

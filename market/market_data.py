@@ -32,8 +32,8 @@ class MarketDataObserver(object):
     def removeObserver(self, observer):
         self.observers.remove(observer)
 
-    def addTick(self, tick):
-        self.priceConflation.addTick(tick)
+    def add_tick(self, tick):
+        self.priceConflation.add_tick(tick)
 
     def quoteHandler(self, quote):
         for observer in self.observers:
@@ -77,7 +77,7 @@ class MarketData(object):
         # we probably need to conflate prices to bake available to algorithms
         try:
             for conflationHandlers in self.priceObservers[symbol].values():
-                conflationHandlers.addTick(tick)
+                conflationHandlers.add_tick(tick)
         except KeyError as e:
             logging.error("Received data update for symbol we're not subscribed to (%s)" % (symbol,))
 
@@ -94,7 +94,7 @@ class PriceConflator(object):
         self.periodStartingTimestamp = None
         self.currentQuote = None
 
-    def addTick(self, tick):
+    def add_tick(self, tick):
         grouping_period = self.period.total_seconds()
 
         if not self.currentQuote:
@@ -104,7 +104,7 @@ class PriceConflator(object):
         else:
             currentTickTimeBlock = roundDateTimeToPeriod(tick.timestamp, grouping_period)
             if (currentTickTimeBlock - self.periodStartingTimestamp) < grouping_period:
-                self.currentQuote.addTick(tick)
+                self.currentQuote.add_tick(tick)
             else:
                 if self.callback is not None:
                     self.callback(self.currentQuote)

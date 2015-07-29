@@ -41,7 +41,7 @@ class OrderTest(unittest.TestCase):
     #
     # def testExpireTime(self):
     #     s = Symbol("TEST")
-    #     order = Order(s, 1, Entry(Entry.Type.STOP_ENTRY, 10.0), Direction.LONG, expireTime=timedelta(seconds=1))
+    #     order = Order(s, 1, Entry(Entry.Type.STOP_ENTRY, 10.0), Direction.LONG, expire_time=timedelta(seconds=1))
     #
     #     tick = Tick(datetime.utcnow(), 9.0, 9.1)
     #     r = order.shouldFill(tick)

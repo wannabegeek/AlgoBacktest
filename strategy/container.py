@@ -42,30 +42,30 @@ class Container(object):
         self.context.addQuote(quote)
         self.algo.evaluateTickUpdate(self.context, quote)
 
-    def orderStatusObserver(self, order, previousState):
-        if order.state is State.WORKING and previousState is State.PENDING_NEW:
+    def orderStatusObserver(self, order, previous_state):
+        if order.state is State.WORKING and previous_state is State.PENDING_NEW:
             logging.debug("Order accepted =================")
-        elif order.state is State.FILLED and previousState is State.WORKING:
+        elif order.state is State.FILLED and previous_state is State.WORKING:
             logging.debug("Order filled =================")
 
-    def positionStatusObserver(self, position, previousState):
-        if previousState is None:
+    def positionStatusObserver(self, position, previous_state):
+        if previous_state is None:
             self.context.positions.append(position)
-        elif not position.isOpen():
-            self.context.working_capital += position.pointsDelta() * position.order.quantity
+        elif not position.is_open():
+            self.context.working_capital += position.points_delta() * position.order.quantity
 
     def __str__(self):
-        totalPositions = len(list(filter(lambda x: not x.isOpen(), self.context.positions)))
+        total_positions = len(list(filter(lambda x: not x.is_open(), self.context.positions)))
 
-        if totalPositions == 0:
+        if total_positions == 0:
             return "========================\nAlgo %s\nNo Positions taken" % (self.algo.identifier(),)
         else:
-            closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.pointsDelta(), x.positionTime()), filter(lambda x: not x.isOpen(), self.context.positions)))
-            open = list(map(lambda x: "%s" % (x), filter(lambda x: x.isOpen(), self.context.positions)))
-            winning = list(filter(lambda x: x.pointsDelta() > 0.0, filter(lambda x: not x.isOpen(), self.context.positions)))
+            closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.points_delta(), x.position_time()), filter(lambda x: not x.is_open(), self.context.positions)))
+            open = list(map(lambda x: "%s" % (x), filter(lambda x: x.is_open(), self.context.positions)))
+            winning = list(filter(lambda x: x.points_delta() > 0.0, filter(lambda x: not x.is_open(), self.context.positions)))
 
             return "========================\nAlgo %s\nCompleted:\n%s\nOpen:\n%s\nWinning Ratio: %.2f%%\nTotal Pts: %.2f" % (self.algo.identifier(), "\n".join(closed),
                                                                        "\n".join(open),
-                                                                       (len(winning)/totalPositions * 100),
-                                                                       sum([x.pointsDelta() for x in filter(lambda x: not x.isOpen(), self.context.positions)]))
+                                                                       (len(winning)/total_positions * 100),
+                                                                       sum([x.points_delta() for x in filter(lambda x: not x.is_open(), self.context.positions)]))
 

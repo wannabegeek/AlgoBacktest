@@ -12,22 +12,22 @@ class OrderRouter(object):
         self.positionObservers = []
 
     @abstractmethod
-    def placeOrder(self, order):
+    def place_order(self, order):
         # send new order to market
         pass
 
     @abstractmethod
-    def modifyOrder(self, order):
+    def modify_order(self, order):
         # modify order on market
         pass
 
     @abstractmethod
-    def cancelOrder(self, order):
+    def cancel_order(self, order):
         # cancel order on market
         pass
 
     @abstractmethod
-    def closePosition(self, position):
+    def close_position(self, position):
         pass
 
     def addOrderStatusObserver(self, observer):

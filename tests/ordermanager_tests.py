@@ -19,9 +19,9 @@ class OrderCreator(object):
         self.order = order
         self.done = False
 
-    def handleData(self, symbol, tick):
+    def handle_data(self, symbol, tick):
         if self.done is False:
-            self.order_manager.placeOrder(self.order)
+            self.order_manager.place_order(self.order)
             self.done = True
 
 class SimulatedDataProvider(Provider):
@@ -35,10 +35,10 @@ class SimulatedDataProvider(Provider):
         self.symbol = symbol
         pass
 
-    def loadHistoricalData(self, period):
+    def load_historical_data(self, period):
         pass
 
-    def startPublishing(self, callback):
+    def start_publishing(self, callback):
         for tick in self.ticks:
             callback(self.symbol, tick)
 
@@ -55,14 +55,14 @@ class OrderManagerTest(unittest.TestCase):
     def testAlgoMarketOrder(self):
         symbol = Symbol.get('TEST')
 
-        startTime = datetime.datetime(2015, 7, 7, 12)
+        start_time = datetime.datetime(2015, 7, 7, 12)
         # symbol = algo.analysis_symbols()[0]
         ticks = []
-        ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 11.0, 11.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 12.0, 12.1))
+        ticks.append(Tick(start_time, 10.0, 10.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 11.0, 11.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 12.0, 12.1))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
@@ -70,7 +70,7 @@ class OrderManagerTest(unittest.TestCase):
 
         order = Order(symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG)
         order_creator = OrderCreator(order_manager, symbol, order)
-        order_manager.addPriceObserver(order_creator.handleData)
+        order_manager.addPriceObserver(order_creator.handle_data)
 
         order_manager.start()
 
@@ -79,23 +79,23 @@ class OrderManagerTest(unittest.TestCase):
         self.assertEqual(State.FILLED, order.state)
         position = order_manager.positions[0]
         self.assertEqual(Position.PositionStatus.OPEN, position.status)
-        self.assertEqual(10.1, position.entryPrice)
+        self.assertEqual(10.1, position.entry_price)
 
     def testAlgoStopEntryOrder(self):
         symbol = Symbol.get('TEST')
 
-        startTime = datetime.datetime(2015, 7, 7, 12)
+        start_time = datetime.datetime(2015, 7, 7, 12)
         # symbol = algo.analysis_symbols()[0]
         ticks = []
-        ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 11.0, 11.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 12.0, 12.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 12.3, 12.4))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 12.8, 12.9))
+        ticks.append(Tick(start_time, 10.0, 10.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 11.0, 11.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 12.0, 12.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 12.3, 12.4))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 12.8, 12.9))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
@@ -103,7 +103,7 @@ class OrderManagerTest(unittest.TestCase):
 
         order = Order(symbol, 1, Entry(Entry.Type.STOP_ENTRY, 11.3), Direction.LONG)
         order_creator = OrderCreator(order_manager, symbol, order)
-        order_manager.addPriceObserver(order_creator.handleData)
+        order_manager.addPriceObserver(order_creator.handle_data)
 
         order_manager.start()
 
@@ -112,31 +112,31 @@ class OrderManagerTest(unittest.TestCase):
         self.assertEqual(State.FILLED, order.state)
         position = order_manager.positions[0]
         self.assertEqual(Position.PositionStatus.OPEN, position.status)
-        self.assertEqual(12.1, position.entryPrice)
+        self.assertEqual(12.1, position.entry_price)
 
     def testAlgoExpiredOrder(self):
         symbol = Symbol.get('TEST')
-        startTime = datetime.datetime(2015, 7, 7, 12)
-        order = Order(symbol, 1, Entry(Entry.Type.STOP_ENTRY, 12.5), Direction.LONG, expireTime=datetime.timedelta(seconds=90), entryTime=startTime)
+        start_time = datetime.datetime(2015, 7, 7, 12)
+        order = Order(symbol, 1, Entry(Entry.Type.STOP_ENTRY, 12.5), Direction.LONG, expire_time=datetime.timedelta(seconds=90), entry_time=start_time)
 
         # symbol = algo.analysis_symbols()[0]
         ticks = []
-        ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 11.0, 11.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 12.0, 12.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 12.3, 12.4))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 12.8, 12.9))
+        ticks.append(Tick(start_time, 10.0, 10.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 11.0, 11.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 12.0, 12.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 12.3, 12.4))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 12.8, 12.9))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
         order_manager.subscribeSymbol(symbol)
 
         order_creator = OrderCreator(order_manager, symbol, order)
-        order_manager.addPriceObserver(order_creator.handleData)
+        order_manager.addPriceObserver(order_creator.handle_data)
 
         order_manager.start()
 
@@ -148,16 +148,16 @@ class OrderManagerTest(unittest.TestCase):
         symbol = Symbol.get('TEST')
         symbol.lot_size = 1
 
-        startTime = datetime.datetime(2015, 7, 7, 12)
+        start_time = datetime.datetime(2015, 7, 7, 12)
         # symbol = algo.analysis_symbols()[0]
         ticks = []
-        ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 11.0, 11.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 8.0, 8.1))
+        ticks.append(Tick(start_time, 10.0, 10.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 11.0, 11.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 10.0, 10.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 8.0, 8.1))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
@@ -165,7 +165,7 @@ class OrderManagerTest(unittest.TestCase):
 
         order = Order(symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, StopLoss(StopLoss.Type.FIXED, 1))
         order_creator = OrderCreator(order_manager, symbol, order)
-        order_manager.addPriceObserver(order_creator.handleData)
+        order_manager.addPriceObserver(order_creator.handle_data)
         order_manager.addPositionObserver(lambda position, state: self.setPosition(position))
 
         order_manager.start()
@@ -176,28 +176,28 @@ class OrderManagerTest(unittest.TestCase):
 
         self.assertIsNotNone(self.position)
         self.assertEqual(Position.PositionStatus.STOP_LOSS, self.position.status)
-        self.assertEqual(8.1, self.position.exitPrice)
+        self.assertEqual(8.1, self.position.exit_price)
 
     def testTakeProfitMarketOrder(self):
         symbol = Symbol.get('TEST')
         symbol.lot_size = 1
 
-        startTime = datetime.datetime(2015, 7, 7, 12)
+        start_time = datetime.datetime(2015, 7, 7, 12)
         # symbol = algo.analysis_symbols()[0]
         ticks = []
-        ticks.append(Tick(startTime, 10.0, 10.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 11.0, 11.1))
-        startTime = startTime + MarketDataPeriod.MIN_1
-        ticks.append(Tick(startTime, 13.0, 13.1))
+        ticks.append(Tick(start_time, 10.0, 10.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 11.0, 11.1))
+        start_time = start_time + MarketDataPeriod.MIN_1
+        ticks.append(Tick(start_time, 13.0, 13.1))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
         order_manager.subscribeSymbol(symbol)
 
-        order = Order(symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, takeProfit=2)
+        order = Order(symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, take_profit=2)
         order_creator = OrderCreator(order_manager, symbol, order)
-        order_manager.addPriceObserver(order_creator.handleData)
+        order_manager.addPriceObserver(order_creator.handle_data)
         order_manager.addPositionObserver(lambda position, state: self.setPosition(position))
 
         order_manager.start()
@@ -208,5 +208,5 @@ class OrderManagerTest(unittest.TestCase):
 
         self.assertIsNotNone(self.position)
         self.assertEqual(Position.PositionStatus.TAKE_PROFIT, self.position.status)
-        self.assertEqual(12.1, self.position.exitPrice)
-        self.assertAlmostEquals(2.0, self.position.pointsDelta())
+        self.assertEqual(12.1, self.position.exit_price)
+        self.assertAlmostEquals(2.0, self.position.points_delta())

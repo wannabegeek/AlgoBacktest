@@ -30,7 +30,7 @@ def main():
     # container.start()
 
     progress_bar = ProgressBar(data_provider.expected_result_count, label='Backtest')
-    data_provider.setProgressCallback(lambda x: progress_bar.set(x))
+    data_provider.set_progress_callback(lambda x: progress_bar.set(x))
 
     venue_connection.start()
     progress_bar.complete()

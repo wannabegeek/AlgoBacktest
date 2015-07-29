@@ -39,7 +39,7 @@ class State(Enum):
     CANCELLED = 23
 
 class Order(object):
-    def __init__(self, symbol, quantity, entry, direction, stoploss = None, takeProfit = None, expireTime = None, entryTime = datetime.utcnow()):
+    def __init__(self, symbol, quantity, entry, direction, stoploss = None, take_profit = None, expire_time = None, entry_time = datetime.utcnow()):
         if not isinstance(symbol, Symbol):
             raise ValueError('argument "symbol" must be a Symbol')
         if not isinstance(entry, Entry):
@@ -51,17 +51,17 @@ class Order(object):
         self.entry = entry
         self.direction = direction
         self.stoploss = stoploss
-        self.takeProfit = takeProfit
-        self.expireTime = expireTime
+        self.take_profit = take_profit
+        self.expire_time = expire_time
         self.state = State.PENDING_NEW
-        self.entryTime = entryTime
+        self.entry_time = entry_time
         self.id = uuid.uuid4()
         self.context = None
 
-    def isPending(self):
+    def is_pending(self):
         return self.state.value <= State.WORKING.value
 
-    def isComplete(self):
+    def is_complete(self):
         return self.state.value > State.WORKING.value
 
     def __eq__(self, other):

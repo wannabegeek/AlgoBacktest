@@ -19,7 +19,7 @@ class Extractor(object):
         Symbol.setDataProvider(MySQLSymbolProvider(database))
         provider = MySQLProvider(database, Symbol.get('EURUSD:CUR'), MarketDataPeriod.HOUR_1)
 
-        provider.startPublishing(lambda symbol, quote: self.add_quote(quote))
+        provider.start_publishing(lambda symbol, quote: self.add_quote(quote))
 
         with open(r"market_data_h1.pkl", "wb") as output_file:
             pickle.dump(self.quotes, output_file)

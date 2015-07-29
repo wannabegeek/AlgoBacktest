@@ -29,7 +29,7 @@ class SQLiteProvider(Provider):
             self._callback_interval = int(self._expected_result_count / 100.0)
         return self._expected_result_count
 
-    def setProgressCallback(self, callback):
+    def set_progress_callback(self, callback):
         self.progress_callback = callback
 
     def register(self, symbol):
@@ -37,10 +37,10 @@ class SQLiteProvider(Provider):
             raise TypeError("symbol must be a Symbol object")
         self.symbol = symbol
 
-    def loadHistoricalData(self, period):
+    def load_historical_data(self, period):
         logging.debug("Loading historical data for the previous %s interval" % (period, ))
 
-    def startPublishing(self, callback):
+    def start_publishing(self, callback):
         self.cursor.execute("SELECT timestamp, bid, offer FROM tick_data WHERE symbol = ? AND timestamp >= ? and timestamp <= ? ORDER BY timestamp", (self.symbol.sid, self.startDate, self.endDate))
         for tick in self.cursor:
             callback(self.symbol, Tick(tick[0], tick[1], tick[2]))

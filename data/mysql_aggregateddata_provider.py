@@ -36,7 +36,7 @@ class MySQLProvider(Provider):
     def expected_result_count(self):
         raise NotImplementedError("Not implemented")
 
-    def setProgressCallback(self, callback):
+    def set_progress_callback(self, callback):
         self.progress_callback = callback
 
     def register(self, symbol):
@@ -44,7 +44,7 @@ class MySQLProvider(Provider):
             raise TypeError("symbol must be a Symbol object")
         self.symbol = symbol
 
-    def loadHistoricalData(self, period):
+    def load_historical_data(self, period):
         logging.debug("Loading historical data for the previous %s interval" % (period, ))
 
     def getTickData(self, queue):
@@ -53,14 +53,14 @@ class MySQLProvider(Provider):
         cursor.callproc('aggregated_data', [self.symbol.identifier, self.period, self.startDate.timestamp(), self.endDate.timestamp() ])
         for tick in self.cursor.stored_results():
             quote = Quote(self.symbol, tick[0], self.period, Tick(tick[0], tick[1], tick[1]))  # open
-            quote.addTick(Tick(tick[0], tick[2], tick[2]))  # high
-            quote.addTick(Tick(tick[0], tick[3], tick[3]))  # low
-            quote.addTick(Tick(tick[0], tick[4], tick[4]))  # close
+            quote.add_tick(Tick(tick[0], tick[2], tick[2]))  # high
+            quote.add_tick(Tick(tick[0], tick[3], tick[3]))  # low
+            quote.add_tick(Tick(tick[0], tick[4], tick[4]))  # close
             queue.put(quote)
         queue.put(None)
 
 
-    def startPublishing(self, callback):
+    def start_publishing(self, callback):
         if self.multithreaded is True:
             queue = multiprocessing.Queue()
 
@@ -80,9 +80,9 @@ class MySQLProvider(Provider):
             for results in self.cursor.stored_results():
                 for tick in ResultIter(results):
                     quote = Quote(self.symbol, tick[0], self.period, Tick(tick[0], float(tick[1]), float(tick[1])))  # open
-                    quote.addTick(Tick(tick[0], tick[2], tick[2]))  # high
-                    quote.addTick(Tick(tick[0], tick[3], tick[3]))  # low
-                    quote.addTick(Tick(tick[0], float(tick[4]), float(tick[4])))  # close
+                    quote.add_tick(Tick(tick[0], tick[2], tick[2]))  # high
+                    quote.add_tick(Tick(tick[0], tick[3], tick[3]))  # low
+                    quote.add_tick(Tick(tick[0], float(tick[4]), float(tick[4])))  # close
                     callback(self.symbol, quote)
                     self.progress_count += 1
                     if self.progress_callback is not None:

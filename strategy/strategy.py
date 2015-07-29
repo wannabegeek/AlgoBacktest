@@ -65,7 +65,7 @@ class Context(object):
         self.orders = []
         self.positions = []
         self.custom_data = dict()
-        self.startTime = None
+        self.start_time = None
 
     def addQuote(self, quote):
         """
@@ -74,9 +74,9 @@ class Context(object):
         :param quote: The quote to add
         """
         context = self.symbolContexts[quote.symbol]
-        context.addQuote(quote)
-        if self.startTime is None:
-            self.startTime = quote.startTime
+        context.add_quote(quote)
+        if self.start_time is None:
+            self.start_time = quote.start_time
 
     def symbolData(self, symbol):
         return self.symbolContexts[symbol]
@@ -89,7 +89,7 @@ class Context(object):
         :return: The order placed (same as passed in)
         """
 
-        self.order_book.placeOrder(self, order)
+        self.order_book.place_order(self, order)
 
         # if this is a market order, it will be filled on the next tick
         self.orders.append(order)
@@ -101,7 +101,7 @@ class Context(object):
         The status change of the order will be notified by the statusCallback function the placeOrder method
         :param order: The order to modify
         """
-        self.order_book.cancelOrder(self, order)
+        self.order_book.cancel_order(self, order)
 
     # def openPosition(self, position):
     #     if not isinstance(position, Position):
@@ -119,7 +119,7 @@ class Context(object):
         if not isinstance(position, Position):
             raise TypeError('position must be an Position object type')
 
-        self.order_book.closePosition(position)
+        self.order_book.close_position(position)
         logging.debug("Closing position {0}".format(position))
 
     def record(self, key, value, quote):

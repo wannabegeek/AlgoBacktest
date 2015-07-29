@@ -20,7 +20,7 @@ class Handler(object):
         for filename in input_files:
             logging.info("Processing '%s'" % (filename,))
             data = CSVProvider(Symbol.get(symbol), filename)
-            data.startPublishing(self.tick_handler)
+            data.start_publishing(self.tick_handler)
 
         self._db_connection.commit()
         self.cursor.execute("SET unique_checks=1;")

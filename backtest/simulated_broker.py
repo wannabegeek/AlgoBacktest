@@ -28,9 +28,9 @@ class Broker(OrderRouter, DataProvider):
         self.positions = []
 
     def start(self):
-        self.priceDataProvider.startPublishing(lambda symbol, tick: self._handleTickUpdate(symbol, tick))
+        self.priceDataProvider.start_publishing(lambda symbol, tick: self._handleTickUpdate(symbol, tick))
 
-    def placeOrder(self, order):
+    def place_order(self, order):
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
 
@@ -43,7 +43,7 @@ class Broker(OrderRouter, DataProvider):
         [f(order, State.PENDING_NEW) for f in self.orderStatusObservers]
         self._evaluateOrdersStatus(order, self.currentTick)
 
-    def modifyOrder(self, order):
+    def modify_order(self, order):
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
         if order.state is not State.PENDING_MODIFY:
@@ -57,7 +57,7 @@ class Broker(OrderRouter, DataProvider):
         else:
             raise OrderbookException("Order not found")
 
-    def cancelOrder(self, order):
+    def cancel_order(self, order):
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
         if order.state is not State.PENDING_CANCEL:
@@ -70,7 +70,7 @@ class Broker(OrderRouter, DataProvider):
         except ValueError:
             raise OrderbookException("Order not found")
 
-    def closePosition(self, position):
+    def close_position(self, position):
         if not isinstance(position, Position):
             raise TypeError('argument "position" must be a Position')
 
@@ -110,12 +110,12 @@ class Broker(OrderRouter, DataProvider):
         # if not isinstance(tick, Tick):
         #     raise TypeError('argument "tick" must be a Tick')
 
-        if order.isComplete():
+        if order.is_complete():
             raise OrderbookException("Order is already complete")
 
-        if order.expireTime is not None:
-            timeSinceCreation = tick.timestamp - order.entryTime
-            if timeSinceCreation.total_seconds() >= order.expireTime.total_seconds():
+        if order.expire_time is not None:
+            timeSinceCreation = tick.timestamp - order.entry_time
+            if timeSinceCreation.total_seconds() >= order.expire_time.total_seconds():
                 order.state = State.EXPIRED
                 [f(order, previousState) for f in self.orderStatusObservers]
                 self.orders.remove(order)
@@ -152,28 +152,28 @@ class Broker(OrderRouter, DataProvider):
         # if not isinstance(tick, Tick):
         #     raise ValueError('argument "tick" must be a Tick')
 
-        if position.isOpen():
+        if position.is_open():
             if position.order.stoploss is not None:
                 if position.order.stoploss.type == stop_loss_trailing:
                     if position.order.direction == long:
-                        position.stopPrice = max(position.stopPrice, tick.bid - position.order.stoploss.points * position.order.symbol.lot_size)
+                        position.stop_price = max(position.stop_price, tick.bid - position.order.stoploss.points * position.order.symbol.lot_size)
                     else:
-                        position.stopPrice = min(position.stopPrice, tick.offer + position.order.stoploss.points * position.order.symbol.lot_size)
+                        position.stop_price = min(position.stop_price, tick.offer + position.order.stoploss.points * position.order.symbol.lot_size)
 
                 if position.order.direction == long:
-                    if tick.offer <= position.stopPrice:
+                    if tick.offer <= position.stop_price:
                         # logging.debug("Position %s hit its stop loss (tick %s)" % (self, tick))
                         self._closePosition(position, tick, Position.PositionStatus.STOP_LOSS)
                 else:
-                    if tick.bid >= position.stopPrice:
+                    if tick.bid >= position.stop_price:
                         # logging.debug("Position %s hit its stop loss (tick %s)" % (self, tick))
                         self._closePosition(position, tick, Position.PositionStatus.STOP_LOSS)
 
-            if position.order.takeProfit is not None:
-                if position.order.direction == long and tick.offer >= position.takeProfit:
+            if position.order.take_profit is not None:
+                if position.order.direction == long and tick.offer >= position.take_profit:
                     # logging.debug("Position %s hit its take profit target (tick %s)" % (self, tick))
                     self._closePosition(position, tick, Position.PositionStatus.TAKE_PROFIT)
-                elif position.order.direction == short and tick.bid <= position.takeProfit:
+                elif position.order.direction == short and tick.bid <= position.take_profit:
                     # logging.debug("Position %s hit its take profit target (tick %s)" % (self, tick))
                     self._closePosition(position, tick, Position.PositionStatus.TAKE_PROFIT)
 

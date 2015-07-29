@@ -8,12 +8,12 @@ class Provider(object):
         pass
 
     @abstractmethod
-    def loadHistoricalData(self, period):
+    def load_historical_data(self, period):
         pass
 
     @abstractmethod
-    def startPublishing(self, callback):
+    def start_publishing(self, callback):
         pass
 
-    def setProgressCallback(self, callback):
+    def set_progress_callback(self, callback):
         raise NotImplementedError("setProgressCallback isn't implemented for this Provider instance")

@@ -17,7 +17,7 @@ class RandomProvider(Provider):
         self.last_publish_time = datetime.datetime.now()
         self.expected_result_count = iterations
 
-    def setProgressCallback(self, callback):
+    def set_progress_callback(self, callback):
         self.progress_callback = callback
 
     def register(self, symbol):
@@ -26,11 +26,11 @@ class RandomProvider(Provider):
         self.symbol = symbol
         pass
 
-    def loadHistoricalData(self, period):
+    def load_historical_data(self, period):
         logging.debug("Loading historical data for the previous %s interval" % (period, ))
         pass
 
-    def startPublishing(self, callback):
+    def start_publishing(self, callback):
         for i in range(0, self.iterations):
             price = base_price + random() - (spread / 2.0)
             callback(self.symbol, Tick(self.last_publish_time, float(price), float(price + spread)))

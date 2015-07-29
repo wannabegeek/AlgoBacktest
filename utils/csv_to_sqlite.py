@@ -27,7 +27,7 @@ class Handler(object):
         for filename in input_files:
             logging.info("Processing '%s'" % (filename,))
             data = CSVProvider(Symbol.get(symbol), filename)
-            data.startPublishing(self.tickHandler)
+            data.start_publishing(self.tickHandler)
 
     def tickHandler(self, symbol, tick):
         self.pending.append((symbol.identifier, tick.timestamp, tick.bid, tick.offer))

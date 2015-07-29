@@ -29,7 +29,7 @@ class MatlibPlotResults(object):
         date = [mdates.date2num(datetime.datetime.utcfromtimestamp(o.exitTick.timestamp)) for o in closed_positions]
         algorithm_performance = [self.calculate_capital(float(o.equity())) for o in closed_positions]
 
-        date.insert(0, mdates.date2num(container.context.startTime))
+        date.insert(0, mdates.date2num(container.context.start_time))
         algorithm_performance.insert(0, container.starting_capital)
 
         mondays = mdates.WeekdayLocator(mdates.MONDAY)        # major ticks on the mondays

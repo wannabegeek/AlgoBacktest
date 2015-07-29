@@ -11,16 +11,16 @@ from market.symbol import Symbol
 from strategy.strategy import Context
 
 class TestOrderRouter(OrderRouter):
-    def placeOrder(self, order):
+    def place_order(self, order):
         print("Placed order")
 
-    def cancelOrder(self, order):
+    def cancel_order(self, order):
         pass
 
-    def closePosition(self, position):
+    def close_position(self, position):
         pass
 
-    def modifyOrder(self, order):
+    def modify_order(self, order):
         pass
 
 
@@ -68,9 +68,9 @@ class NakedTests(unittest.TestCase):
         for t in ticks:
             tick = Tick(start_time.timestamp(), t[0], t[0])
             quote = Quote(symbol, start_time, MarketDataPeriod.HOUR_1 - datetime.timedelta(seconds=1), tick)
-            quote.addTick(Tick(start_time.timestamp(), t[1], t[1]))
-            quote.addTick(Tick(start_time.timestamp(), t[2], t[2]))
-            quote.addTick(Tick(start_time.timestamp(), t[3], t[3]))
+            quote.add_tick(Tick(start_time.timestamp(), t[1], t[1]))
+            quote.add_tick(Tick(start_time.timestamp(), t[2], t[2]))
+            quote.add_tick(Tick(start_time.timestamp(), t[3], t[3]))
             quotes.append(quote)
             start_time += MarketDataPeriod.HOUR_1
 

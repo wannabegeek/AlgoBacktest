@@ -44,13 +44,13 @@ class NakedReversalAlgo(Framework):
 
         if len(symbol_context.quotes) > self.warmupPeriod() - 1:  # i.e. we have enough data
 
-            if quote.startTime.time() > datetime.time(21, 0) or quote.startTime.time() < datetime.time(7, 0):
+            if quote.start_time.time() > datetime.time(21, 0) or quote.start_time.time() < datetime.time(7, 0):
                 # not normal EURUSD active period
                 return
-            if quote.startTime.weekday() >= 5:
+            if quote.start_time.weekday() >= 5:
                 # it's a weekend
                 return
-            if quote.startTime.weekday() == 4 and quote.startTime.time() > datetime.time(16, 0):
+            if quote.start_time.weekday() == 4 and quote.start_time.time() > datetime.time(16, 0):
                 # no positions after 16:00 on Friday
                 return
 
@@ -61,12 +61,12 @@ class NakedReversalAlgo(Framework):
                     # since this is 2 candle set up, find the lowes of the current an previous
                     low = min(symbol_context.low, symbol_context.lows[-2])
                     if low < min(list(symbol_context.lows)[:-3]):
-                        context.placeOrder(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stop_loss, takeProfit=self.take_profit))
+                        context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stop_loss, take_profit=self.take_profit))
                 else:
                     # selling oppertunity
                     high = min(symbol_context.high, symbol_context.high[-2])
                     if high > max(list(symbol_context.highs)[:-3]):
-                        context.placeOrder(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stop_loss, takeProfit=self.take_profit))
+                        context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stop_loss, take_profit=self.take_profit))
 
             # open_positions = list(context.getOpenPositions())
 
@@ -79,7 +79,7 @@ class NakedReversalAlgo(Framework):
             #             context.closePosition(position)
             #     else:
             #         logging.debug("Opening position on quote: %s" % (quote,))
-            #         context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, takeProfit=self.takeProfit))
+            #         context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, take_profit=self.take_profit))
             #     # context.symbolContexts[quote.symbol].position = True
             # elif quote.close < ema and buy_signal:
             #     if len(open_positions) != 0:
@@ -88,5 +88,5 @@ class NakedReversalAlgo(Framework):
             #             context.closePosition(position)
             #     else:
             #         logging.debug("Opening position on quote: %s" % (quote,))
-            #         context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, takeProfit=self.takeProfit))
+            #         context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, take_profit=self.take_profit))
 

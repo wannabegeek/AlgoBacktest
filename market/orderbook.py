@@ -12,8 +12,8 @@ class OrderBook(object):
 
         self.order_router = order_router
         self.containers = []
-        self.order_router.addOrderStatusObserver(self.orderStatus)
-        self.order_router.addPositionObserver(self.positionStatus)
+        self.order_router.addOrderStatusObserver(self._order_status_update)
+        self.order_router.addPositionObserver(self._position_status_update)
         self.orders = {}
         self.positions = {}
         self.orderObservers = {}
@@ -31,7 +31,7 @@ class OrderBook(object):
         else:
             self.positionObservers[context] = [callback, ]
 
-    def orderStatus(self, order, previousState):
+    def _order_status_update(self, order, previousState):
         try:
             callbacks = self.orderObservers[order.context]
             for callback in callbacks:
@@ -47,14 +47,14 @@ class OrderBook(object):
                 logging.debug("Modify has been accepted")
             elif previousState is State.PENDING_CANCEL:
                 logging.debug("Cancel has been accepted")
-        elif order.isComplete() is True:
+        elif order.is_complete() is True:
             # we need to remove the order from the order book since it is complete
             del(self.orders[order.id])
 
-    def registerPosition(self, position):
+    def register_position(self, position):
         pass
 
-    def positionStatus(self, position, previousState):
+    def _position_status_update(self, position, previousState):
         try:
             callbacks = self.positionObservers[position.order.context]
             for callback in callbacks:
@@ -65,17 +65,17 @@ class OrderBook(object):
 
         if position.status is Position.PositionStatus.OPEN:
             self.positions[position.id] = position
-            self.registerPosition(position)
+            self.register_position(position)
         elif not position.isOpen():
             logging.debug("Position has been closed")
             del(self.positions[position.id])
 
-    def placeOrder(self, context, order):
+    def place_order(self, context, order):
         # send new order to market
         order.context = context
-        if self._checkRiskLimits(context, order):
+        if self._check_risk_limits(context, order):
             self.orders[order.id] = order
-            self.order_router.placeOrder(order)
+            self.order_router.place_order(order)
         else:
             logging.error("Risk limits breached rejecting request")
             callbacks = self.orderObservers[context]
@@ -85,13 +85,13 @@ class OrderBook(object):
                 callback(order, previousState)
 
 
-    def modifyOrder(self, order):
+    def modify_order(self, order):
         # modify order on market
         # find the original context
         context = self.orders[order.id][1]
-        if self._checkRiskLimits(context, order):
+        if self._check_risk_limits(context, order):
             order.state = State.PENDING_MODIFY
-            self.order_router.modifyOrder(order)
+            self.order_router.modify_order(order)
         else:
             logging.error("Risk limits breached rejecting request")
             callbacks = self.orderObservers[context]
@@ -102,17 +102,17 @@ class OrderBook(object):
             order.state = State.WORKING
 
 
-    def cancelOrder(self, order):
+    def cancel_order(self, order):
         # cancel order on market
         order.state = State.PENDING_CANCEL
-        self.order_router.cancelOrder(order)
+        self.order_router.cancel_order(order)
         del(self.orders[order.id])
 
-    def closePosition(self, position):
-        self.order_router.closePosition(position)
+    def close_position(self, position):
+        self.order_router.close_position(position)
 
 
-    def _checkRiskLimits(self, container, order):
+    def _check_risk_limits(self, container, order):
         # do container specific checks
         # do overall risk checks
         return True
@@ -127,19 +127,19 @@ class BacktestOrderbook(OrderBook):
         super(BacktestOrderbook, self).__init__(order_router)
         self.containerPositions = []
 
-    def registerPosition(self, position):
+    def register_position(self, position):
         self.containerPositions.append(position)
 
     def __str__(self):
-        totalPositions = len(list(filter(lambda x: not x.isOpen(), self.containerPositions)))
+        total_positions = len(list(filter(lambda x: not x.isOpen(), self.containerPositions)))
 
-        closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.pointsDelta(), x.positionTime()), filter(lambda x: not x.isOpen(), self.containerPositions)))
-        open = list(map(lambda x: "%s" % (x), filter(lambda x: x.isOpen(), self.containerPositions)))
-        winning = list(filter(lambda x: x.pointsDelta() > 0.0, filter(lambda x: not x.isOpen(), self.containerPositions)))
+        closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.points_delta(), x.position_time()), filter(lambda x: not x.is_open(), self.containerPositions)))
+        open = list(map(lambda x: "%s" % (x), filter(lambda x: x.is_open(), self.containerPositions)))
+        winning = list(filter(lambda x: x.points_delta() > 0.0, filter(lambda x: not x.is_open(), self.containerPositions)))
 
         return "Completed:\n%s\nOpen:\n%s\nWinning Ratio: %.2f%%\nTotal Pts: %.2f" % ("\n".join(closed),
                                                                    "\n".join(open),
-                                                                   (len(winning)/totalPositions * 100),
-                                                                   sum([x.pointsDelta() for x in filter(lambda x: not x.isOpen(), self.containerPositions)]))
+                                                                   (len(winning)/total_positions * 100),
+                                                                   sum([x.points_delta() for x in filter(lambda x: not x.is_open(), self.containerPositions)]))
 
     __repr__ = __str__

@@ -21,71 +21,71 @@ class Position(object):
         self.order = order
         self.order.state = State.FILLED # mark the order as filled
 
-        self.entryTick = tick
-        self.entryPrice = tick.offer if self.order.direction == Direction.LONG else tick.bid
-        self.exitTick = None
-        self.exitPrice = None
+        self.entry_tick = tick
+        self.entry_price = tick.offer if self.order.direction == Direction.LONG else tick.bid
+        self.exit_tick = None
+        self.exit_price = None
 
         self.closed = False
         self.id = uuid.uuid4()
         self.status = Position.PositionStatus.OPEN
         if self.order.stoploss is not None:
             if self.order.direction == Direction.LONG:
-                self.stopPrice = tick.bid - self.order.stoploss.points / self.order.symbol.lot_size
+                self.stop_price = tick.bid - self.order.stoploss.points / self.order.symbol.lot_size
             else:
-                self.stopPrice = tick.offer + self.order.stoploss.points / self.order.symbol.lot_size
+                self.stop_price = tick.offer + self.order.stoploss.points / self.order.symbol.lot_size
         else:
-            self.stopPrice = None
+            self.stop_price = None
 
-        if self.order.takeProfit is not None:
+        if self.order.take_profit is not None:
             if self.order.direction == Direction.LONG:
-                self.takeProfit = tick.offer + self.order.takeProfit / self.order.symbol.lot_size
+                self.take_profit = tick.offer + self.order.take_profit / self.order.symbol.lot_size
             else:
-                self.takeProfit = tick.bid - self.order.takeProfit / self.order.symbol.lot_size
+                self.take_profit = tick.bid - self.order.take_profit / self.order.symbol.lot_size
         else:
-            self.takeProfit = None
+            self.take_profit = None
 
 
-    def isOpen(self):
+    def is_open(self):
         return not self.closed
 
     def close(self, tick, reason = PositionStatus.CLOSED):
         if reason == Position.PositionStatus.TAKE_PROFIT:
-            self.exitPrice = self.takeProfit
+            self.exit_price = self.take_profit
         else:
             if self.order.direction == Direction.LONG:
-                self.exitPrice = tick.offer
+                self.exit_price = tick.offer
             else:
-                self.exitPrice = tick.bid
+                self.exit_price = tick.bid
 
-        self.exitTick = tick
+        self.exit_tick = tick
         self.closed = True
         self.status = reason
 
-    def pointsDelta(self):
+    def points_delta(self):
         if self.status == Position.PositionStatus.OPEN:
             raise ValueError("Position is still open")
 
-        priceDelta = 0.0
+        price_delta = 0.0
         if self.order.direction == Direction.LONG:
-            priceDelta = self.exitPrice - self.entryPrice
+            price_delta = self.exit_price - self.entry_price
         else:
-            priceDelta = self.entryPrice - self.exitPrice
+            price_delta = self.entry_price - self.exit_price
 
-        return priceDelta * self.order.symbol.lot_size
+        return price_delta * self.order.symbol.lot_size
 
     def equity(self):
-        return self.pointsDelta() * self.order.quantity
+        return self.points_delta() * self.order.quantity
 
-    def positionTime(self):
+    def position_time(self):
         if self.status == Position.PositionStatus.OPEN:
             raise ValueError("Position is still open")
-        return self.exitTick.timestamp - self.entryTick.timestamp
+        return self.exit_tick.timestamp - self.entry_tick.timestamp
 
     def __eq__(self, other):
         return self.id == other.id
 
     def __str__(self):
-        return "%s: %-11s [%-5s %.6s --> %.6s]" % (self.id, self.status.name, self.order.direction.name, self.entryPrice, "OPEN" if self.status == Position.PositionStatus.OPEN else self.exitPrice)
+        return "%s: %-11s [%-5s %.6s --> %.6s]" % (self.id, self.status.name, self.order.direction.name, self.entry_price, "OPEN" if self.status == Position.PositionStatus.OPEN else self.exit_price)
 
     __repr__ = __str__

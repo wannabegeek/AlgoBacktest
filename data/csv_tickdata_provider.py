@@ -21,15 +21,15 @@ class CSVProvider(Provider):
         self.symbol = symbol
         pass
 
-    def loadHistoricalData(self, period):
+    def load_historical_data(self, period):
         logging.debug("Loading historical data for the previous %s interval" % (period, ))
         pass
 
-    def startPublishing(self, callback):
+    def start_publishing(self, callback):
         for timestamp, bid, ask, volume in self.reader:
             ts = datetime.datetime.strptime(timestamp, "%Y%m%d %H%M%S%f")
             ts = self.tz.localize(ts)
             callback(self.symbol, Tick(ts.astimezone(pytz.utc), float(bid), float(ask)))
 
-    def setProgressCallback(self, callback):
+    def set_progress_callback(self, callback):
         raise NotImplementedError("setProgressCallback isn't implemented for this Provider instance")

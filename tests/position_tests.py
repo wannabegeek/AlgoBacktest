@@ -105,7 +105,7 @@ class PositionExitTests(unittest.TestCase):
     #     s1.lot_size = 1.0
     #
     #     # LONG
-    #     order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, takeProfit=1.5)
+    #     order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, take_profit=1.5)
     #     tick = Tick(datetime.utcnow(), 11.0, 11.1)
     #     position = Position(order, tick)
     #
@@ -124,7 +124,7 @@ class PositionExitTests(unittest.TestCase):
     #     self.assertEqual(12.5, position.exitPrice)
     #
     #     # SHORT
-    #     order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, takeProfit=0.5)
+    #     order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, take_profit=0.5)
     #     tick = Tick(datetime.utcnow(), 10.9, 11.0)
     #     position = Position(order, tick)
     #
@@ -143,7 +143,7 @@ class PositionExitTests(unittest.TestCase):
     #     s1.lot_size = 1.0
     #
     #     # LONG
-    #     order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, takeProfit=1.5)
+    #     order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss = None, take_profit=1.5)
     #     tick = Tick(datetime.utcnow(), 11.0, 11.1)
     #     position = Position(order, tick)
     #
@@ -162,7 +162,7 @@ class PositionExitTests(unittest.TestCase):
     #     self.assertEqual(12.5, position.exitPrice)
     #
     #     # SHORT
-    #     order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, takeProfit=0.5)
+    #     order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT, take_profit=0.5)
     #     tick = Tick(datetime.utcnow(), 10.9, 11.0)
     #     position = Position(order, tick)
     #
@@ -192,7 +192,7 @@ class PositionProfitLossTests(unittest.TestCase):
         tick = Tick(datetime.utcnow(), 1.12259, 1.12265)
         position.close(tick)
 
-        self.assertAlmostEquals(2, position.pointsDelta())
+        self.assertAlmostEquals(2, position.points_delta())
 
     def testShortProfit(self):
         s1 = Symbol.get("TEST")
@@ -206,7 +206,7 @@ class PositionProfitLossTests(unittest.TestCase):
         tick = Tick(datetime.utcnow(), 1.12219, 1.12225)
         position.close(tick)
 
-        self.assertAlmostEquals(2, position.pointsDelta())
+        self.assertAlmostEquals(2, position.points_delta())
 
     def testLongLoss(self):
         s1 = Symbol.get("TEST")
@@ -220,7 +220,7 @@ class PositionProfitLossTests(unittest.TestCase):
         tick = Tick(datetime.utcnow(), 1.12219, 1.12225)
         position.close(tick)
 
-        self.assertAlmostEquals(-2, position.pointsDelta())
+        self.assertAlmostEquals(-2, position.points_delta())
 
     def testShortLoss(self):
         s1 = Symbol.get("TEST")
@@ -234,4 +234,4 @@ class PositionProfitLossTests(unittest.TestCase):
         tick = Tick(datetime.utcnow(), 1.12259, 1.12265)
         position.close(tick)
 
-        self.assertAlmostEquals(-2, position.pointsDelta())
+        self.assertAlmostEquals(-2, position.points_delta())

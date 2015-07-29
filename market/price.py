@@ -15,7 +15,7 @@ class Tick(object):
     def spread(self):
         return self.offer - self.spread
 
-    def midPrice(self):
+    def mid_price(self):
         return (self.bid + self.offer) / 2.0
 
     def __str__(self):
@@ -28,22 +28,22 @@ class Quote(object):
     A single quote representaion. This is for conflated data, so it contains OHLC data.
     """
 
-    def __init__(self, symbol, startTime, period, tick):
+    def __init__(self, symbol, start_time, period, tick):
         self.symbol = symbol
         self.volume = None
-        self.startTime = startTime
+        self.start_time = start_time
         self.period = period
         self.open = None
         self.high = None
         self.low = None
         self.close = None
         self.ticks = 0
-        self.lastTick = None
-        self.addTick(tick)
+        self.last_tick = None
+        self.add_tick(tick)
 
-    def addTick(self, tick):
-        price = tick.midPrice()
-        if self.lastTick is None:
+    def add_tick(self, tick):
+        price = tick.mid_price()
+        if self.last_tick is None:
             self.open = price
             self.high = price
             self.low = price
@@ -52,8 +52,8 @@ class Quote(object):
             self.high = max(self.high, price)
             self.low = min(self.low, price)
             self.close = price
-        self.lastTick = tick
+        self.last_tick = tick
         self.ticks += 1
 
     def __str__(self):
-        return "{} -> {}: {:.6f} -> {:.6f} o:{:.6f} c:{:.6f} ({:d})".format(self.startTime, self.startTime + self.period, self.low, self.high, self.open, self.close, self.ticks)
+        return "{} -> {}: {:.6f} -> {:.6f} o:{:.6f} c:{:.6f} ({:d})".format(self.start_time, self.start_time + self.period, self.low, self.high, self.open, self.close, self.ticks)
