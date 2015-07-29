@@ -2,6 +2,7 @@ import sys
 import pickle
 from pylab import *
 from numpy import NaN, Inf, arange, isscalar, asarray, array
+from scipy.stats import kde
 
 def peakdet(v, delta, x = None):
     """
@@ -74,13 +75,50 @@ def peakdet(v, delta, x = None):
 
     return array(maxtab), array(mintab)
 
+def find_cluster(turning_points, limit):
+
+    v = sort(turning_points)
+    result = []
+
+    prev = None
+    current_zone = []
+
+    for point in v:
+        if prev is not None:
+            if point - prev < limit:
+                current_zone.append(prev)
+            else:
+                current_zone.append(point)
+                if len(current_zone) > 2:
+                    result.append(current_zone)
+                current_zone = []
+
+        prev = point
+
+    if len(current_zone) > 1:
+        result.append(current_zone)
+
+    return result
+
+def find_cluster2(iterable, tollerance):
+    prev = None
+    group = []
+    for item in iterable:
+        if not prev or item - prev <= tollerance:
+            group.append(item)
+        else:
+            yield group
+            group = [item]
+        prev = item
+    if group:
+        yield group
+
 if __name__=="__main__":
     from matplotlib.pyplot import plot, scatter, show
-    # series = [0,0,0,2,0,0,0,-2,0,0,0,2,0,0,0,-2,0]
-    # x = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21]
+    from matplotlib import patches
 
-    x = arange(0.0, 2.0, 0.01)
-    series = sin(2*pi*x)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
 
     quotes = []
     file_handle = open('/Users/tom/Downloads/market_data_d1.pkl', 'rb')
@@ -91,11 +129,20 @@ if __name__=="__main__":
         except EOFError:
             break
 
-    x = [x.start_time for x in quotes]
-    series = [x.close for x in quotes]
+    timestamps = [x.start_time for x in quotes]
+    closing_prices = [x.close for x in quotes]
 
-    maxtab, mintab = peakdet(series, 2000, x=x)
-    plot(x, series)
-    scatter(array(maxtab)[:, 0], array(maxtab)[:, 1], color='blue')
-    scatter(array(mintab)[:, 0], array(mintab)[:, 1], color='red')
-    show()
+    maxtab, mintab = peakdet(closing_prices, 0.005, x=timestamps)
+    ax.plot(timestamps, closing_prices)
+    ax.scatter(array(maxtab)[:, 0], array(maxtab)[:, 1], color='blue')
+    ax.scatter(array(mintab)[:, 0], array(mintab)[:, 1], color='red')
+
+
+    turning_points = np.concatenate((array(maxtab)[:, 1], array(mintab)[:, 1]))
+    sr = find_cluster2(sort(turning_points), 0.002)
+    for i in sr:
+        if len(i) > 2:
+            r = patches.Rectangle((min(timestamps), min(i)), width=max(timestamps), height=max(i) - min(i), alpha=0.5, color='green')
+            ax.add_patch(r)
+
+    plt.show()
