@@ -25,8 +25,8 @@ class MatlibPlotResults(object):
         #
         self.capital = container.starting_capital
 
-        closed_positions = sorted(filter(lambda x: not x.isOpen(), container.context.positions), key=lambda x: x.exitTick.timestamp)
-        date = [mdates.date2num(datetime.datetime.utcfromtimestamp(o.exitTick.timestamp)) for o in closed_positions]
+        closed_positions = sorted(filter(lambda x: not x.is_open(), container.context.positions), key=lambda x: x.exit_tick.timestamp)
+        date = [mdates.date2num(datetime.datetime.utcfromtimestamp(o.exit_tick.timestamp)) for o in closed_positions]
         algorithm_performance = [self.calculate_capital(float(o.equity())) for o in closed_positions]
 
         date.insert(0, mdates.date2num(container.context.start_time))

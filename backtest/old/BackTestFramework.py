@@ -40,7 +40,7 @@ class BackTestFramework(object):
         if quote is None or not isinstance(quote, QuoteData.Quote):
             raise AssertionError("Invalid quote")
 
-        self.context.addQuote(quote)
+        self.context.add_quote(quote)
         for position in self.context.openPositions:
             position.update(quote)
         # logging.debug("Received Quote %s", quote)

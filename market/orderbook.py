@@ -66,7 +66,7 @@ class OrderBook(object):
         if position.status is Position.PositionStatus.OPEN:
             self.positions[position.id] = position
             self.register_position(position)
-        elif not position.isOpen():
+        elif not position.is_open():
             logging.debug("Position has been closed")
             del(self.positions[position.id])
 
@@ -131,7 +131,7 @@ class BacktestOrderbook(OrderBook):
         self.containerPositions.append(position)
 
     def __str__(self):
-        total_positions = len(list(filter(lambda x: not x.isOpen(), self.containerPositions)))
+        total_positions = len(list(filter(lambda x: not x.is_open(), self.containerPositions)))
 
         closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.points_delta(), x.position_time()), filter(lambda x: not x.is_open(), self.containerPositions)))
         open = list(map(lambda x: "%s" % (x), filter(lambda x: x.is_open(), self.containerPositions)))
