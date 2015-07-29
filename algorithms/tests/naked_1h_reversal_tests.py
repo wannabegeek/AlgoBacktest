@@ -76,7 +76,7 @@ class NakedTests(unittest.TestCase):
 
 
         for quote in quotes:
-            self.context.addQuote(quote)
+            self.context.add_quote(quote)
             self.algo.evaluateTickUpdate(self.context, quote)
 
         # self.assertEqual(s1, s2)

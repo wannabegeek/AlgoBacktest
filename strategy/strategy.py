@@ -67,7 +67,7 @@ class Context(object):
         self.custom_data = dict()
         self.start_time = None
 
-    def addQuote(self, quote):
+    def add_quote(self, quote):
         """
         Add a quote to the strategy context.
         This is for internal use.
@@ -81,7 +81,7 @@ class Context(object):
     def symbolData(self, symbol):
         return self.symbolContexts[symbol]
 
-    def placeOrder(self, order, statusCallback = None):
+    def place_order(self, order, statusCallback = None):
         """
         Place an order on the market.
         :param order: The order to add
@@ -95,7 +95,7 @@ class Context(object):
         self.orders.append(order)
         return order
 
-    def cancelOrder(self, order):
+    def cancel_order(self, order):
         """
         Cancel a resting  order on the market.
         The status change of the order will be notified by the statusCallback function the placeOrder method
@@ -109,7 +109,7 @@ class Context(object):
     #
     #     self.positions.append(position)
 
-    def closePosition(self, position, reason = Position.PositionStatus.CLOSED):
+    def close_position(self, position, reason = Position.PositionStatus.CLOSED):
         """
         Close an open position
         :param position: The position to close

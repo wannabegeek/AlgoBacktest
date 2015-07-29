@@ -4,7 +4,7 @@ from results.equity_curve import MatlibPlotResults
 
 
 def display_results(container):
-    total_positions = len(list(filter(lambda x: not x.isOpen(), container.context.positions)))
+    total_positions = len(list(filter(lambda x: not x.is_open(), container.context.positions)))
     locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')
 
     if total_positions == 0:
