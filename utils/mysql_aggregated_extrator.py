@@ -12,17 +12,16 @@ class Extractor(object):
         self.quotes = []
 
     def add_quote(self, quote):
-        self.quotes.append(quote)
+        pickle.dump(quote, self.file_handle)
 
     def run(self):
-        database = {'user': 'blackbox', 'database': 'blackbox', 'host': "192.168.0.8"}
+        database = {'user': 'blackbox', 'database': 'blackbox', 'host': "localhost"}
         Symbol.setDataProvider(MySQLSymbolProvider(database))
-        provider = MySQLProvider(database, Symbol.get('EURUSD:CUR'), MarketDataPeriod.HOUR_1)
+        provider = MySQLProvider(database, Symbol.get('EURUSD:CUR'), MarketDataPeriod.DAY.total_seconds())
 
-        provider.start_publishing(lambda symbol, quote: self.add_quote(quote))
-
-        with open(r"market_data_h1.pkl", "wb") as output_file:
-            pickle.dump(self.quotes, output_file)
+        self.file_handle = open(r"market_data_d1.pkl", "wb")
+        provider.startPublishing(lambda symbol, quote: self.add_quote(quote))
+        self.file_handle.close()
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)

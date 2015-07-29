@@ -76,18 +76,18 @@ class Algo(Framework):
                     # create a LONG position
                 if len(open_positions) != 0:
                     position = open_positions[0]
-                    if position.order.direction is Direction.LONG:
-                        context.close_position(position)
+                    if position.order.direction is Direction.SHORT:
+                        context.closePosition(position)
                 else:
                     logging.debug("Opening position on quote: %s" % (quote,))
-                    context.place_order(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, take_profit=self.takeProfit))
+                    context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, takeProfit=self.takeProfit))
                 # context.symbolContexts[quote.symbol].position = True
             elif quote.close < ema and buy_signal:
                 if len(open_positions) != 0:
                     position = open_positions[0]
-                    if position.order.direction is Direction.SHORT:
-                        context.close_position(position)
+                    if position.order.direction is Direction.LONG:
+                        context.closePosition(position)
                 else:
                     logging.debug("Opening position on quote: %s" % (quote,))
-                    context.place_order(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, take_profit=self.takeProfit))
+                    context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, takeProfit=self.takeProfit))
 
