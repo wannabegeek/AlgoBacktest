@@ -41,7 +41,7 @@ class Broker(OrderRouter, DataProvider):
 
         order.state = State.WORKING
         [f(order, State.PENDING_NEW) for f in self.orderStatusObservers]
-        self._evaluateOrdersStatus(order, self.currentTick)
+        self._evaluate_orders(order, self.currentTick)
 
     def modify_order(self, order):
         if not isinstance(order, Order):
@@ -53,7 +53,7 @@ class Broker(OrderRouter, DataProvider):
         [f(order, State.PENDING_MODIFY) for f in self.orderStatusObservers]
         if order in self.orders:
             # we shouldn't need to do anything else, since the reference will have been updated
-            self._evaluateOrdersStatus(order, self.currentTick)
+            self._evaluate_orders(order, self.currentTick)
         else:
             raise OrderbookException("Order not found")
 
@@ -74,23 +74,23 @@ class Broker(OrderRouter, DataProvider):
         if not isinstance(position, Position):
             raise TypeError('argument "position" must be a Position')
 
-        self._closePosition(position, self.currentTick, Position.PositionStatus.CLOSED)
+        self._close_position(position, self.currentTick, Position.PositionStatus.CLOSED)
 
     def _handleTickUpdate(self, symbol, tick):
         try:
             # We need to evaluate if we have any limit orders and stop loss events triggered
-            self._processPendingOrders(tick)
-            self._evaluateOpenPositions(tick)
+            self._process_pending_orders(tick)
+            self._evaluate_positions(tick)
             self.currentTick = tick
             self._notifyObservers(symbol, tick)
         except KeyError as e:
             logging.error("Received data update for symbol we're not subscribed to (%s)" % (symbol,))
 
-    def _processPendingOrders(self, tick):
+    def _process_pending_orders(self, tick):
         for order in self.orders:
-            self._evaluateOrdersStatus(order, tick)
+            self._evaluate_orders(order, tick)
 
-    def _fillOrder(self, order, tick):
+    def _fill_order(self, order, tick):
         previousState = order.state
         #Create position and notify client (ordersStatusObservers & positionObservers)
         order.state = State.FILLED
@@ -103,7 +103,7 @@ class Broker(OrderRouter, DataProvider):
         logging.debug("Opened position for %s" % position)
         # we're not interested in the order anymore, only the position
 
-    def _evaluateOrdersStatus(self, order, tick):
+    def _evaluate_orders(self, order, tick):
         previousState = order.state
         # if not isinstance(order, Order):
         #     raise TypeError('argument "order" must be a Order')
@@ -121,23 +121,23 @@ class Broker(OrderRouter, DataProvider):
                 self.orders.remove(order)
 
         if order.entry.type == Entry.Type.MARKET:
-            self._fillOrder(order, tick)
+            self._fill_order(order, tick)
         elif order.entry.type == Entry.Type.LIMIT:
             if order.direction == Direction.LONG and tick.offer <= order.entry.price:
-                self._fillOrder(order, tick)
+                self._fill_order(order, tick)
             elif order.direction == Direction.SHORT and tick.bid >= order.entry.price:
-                self._fillOrder(order, tick)
+                self._fill_order(order, tick)
         elif order.entry.type == Entry.Type.STOP_ENTRY:
             if order.direction == Direction.LONG and tick.offer >= order.entry.price:
-                self._fillOrder(order, tick)
+                self._fill_order(order, tick)
             elif order.direction == Direction.SHORT and tick.bid <= order.entry.price:
-                self._fillOrder(order, tick)
+                self._fill_order(order, tick)
 
-    def _evaluateOpenPositions(self, tick):
+    def _evaluate_positions(self, tick):
         for position in self.positions:
-            self._evaluateOpenPosition(position, tick)
+            self._evaluate_position(position, tick)
 
-    def _closePosition(self, position, tick, reason):
+    def _close_position(self, position, tick, reason):
         previousState = position.status
         position.close(tick, reason)
         #Notify the client (positionObservers)
@@ -146,7 +146,7 @@ class Broker(OrderRouter, DataProvider):
         [f(position, previousState) for f in self.positionObservers]
         logging.debug("Position %s has been closed due to %s" % (position, position.status.name))
 
-    def _evaluateOpenPosition(self, position, tick):
+    def _evaluate_position(self, position, tick):
         # if not isinstance(position, Position):
         #     raise ValueError('argument "position" must be a Position')
         # if not isinstance(tick, Tick):
@@ -163,18 +163,18 @@ class Broker(OrderRouter, DataProvider):
                 if position.order.direction == long:
                     if tick.offer <= position.stop_price:
                         # logging.debug("Position %s hit its stop loss (tick %s)" % (self, tick))
-                        self._closePosition(position, tick, Position.PositionStatus.STOP_LOSS)
+                        self._close_position(position, tick, Position.PositionStatus.STOP_LOSS)
                 else:
                     if tick.bid >= position.stop_price:
                         # logging.debug("Position %s hit its stop loss (tick %s)" % (self, tick))
-                        self._closePosition(position, tick, Position.PositionStatus.STOP_LOSS)
+                        self._close_position(position, tick, Position.PositionStatus.STOP_LOSS)
 
             if position.order.take_profit is not None:
                 if position.order.direction == long and tick.offer >= position.take_profit:
                     # logging.debug("Position %s hit its take profit target (tick %s)" % (self, tick))
-                    self._closePosition(position, tick, Position.PositionStatus.TAKE_PROFIT)
+                    self._close_position(position, tick, Position.PositionStatus.TAKE_PROFIT)
                 elif position.order.direction == short and tick.bid <= position.take_profit:
                     # logging.debug("Position %s hit its take profit target (tick %s)" % (self, tick))
-                    self._closePosition(position, tick, Position.PositionStatus.TAKE_PROFIT)
+                    self._close_position(position, tick, Position.PositionStatus.TAKE_PROFIT)
 
         return position.status

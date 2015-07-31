@@ -24,7 +24,7 @@ class Algo(Framework):
     def identifier(self):
         return "5min Pinbar Scalp (ema: %s, sl:%s, tp:%s)" % (self.emaPeriod, self.stopLoss.points, self.takeProfit)
 
-    def warmupPeriod(self):
+    def warmup_period(self):
         return self.emaPeriod + 1
 
     def portfolio_symbols(self):

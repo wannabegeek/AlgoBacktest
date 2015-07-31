@@ -16,7 +16,7 @@ class Extractor(object):
 
     def run(self):
         database = {'user': 'blackbox', 'database': 'blackbox', 'host': "192.168.0.8"}
-        Symbol.setDataProvider(MySQLSymbolProvider(database))
+        Symbol.set_info_provider(MySQLSymbolProvider(database))
         provider = MySQLProvider(database, Symbol.get('EURUSD:CUR'), MarketDataPeriod.HOUR_1)
 
         provider.start_publishing(lambda symbol, quote: self.add_quote(quote))

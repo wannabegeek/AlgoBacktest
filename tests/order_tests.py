@@ -5,7 +5,7 @@ from market.symbol import Symbol
 
 class OrderTest(unittest.TestCase):
     def setUp(self):
-        Symbol.setDataProvider("1")
+        Symbol.set_info_provider("1")
 
     # def testMarketOrder(self):
     #     s = Symbol("TEST")

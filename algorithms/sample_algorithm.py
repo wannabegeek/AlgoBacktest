@@ -20,7 +20,7 @@ class Algo(Framework):
     def identifier(self):
         return "SampleStrategy"
 
-    def warmupPeriod(self):
+    def warmup_period(self):
         """
         This is the number of periods required for the algorithm to warm up.
         i.e. how many periods should be process but not include in the overall performance

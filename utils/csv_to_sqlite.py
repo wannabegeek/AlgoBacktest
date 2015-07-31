@@ -40,7 +40,7 @@ class Handler(object):
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    Symbol.setDataProvider("")
+    Symbol.set_info_provider("")
 
     parser = argparse.ArgumentParser(description='Parse CSV Tick data into sqlite db.')
     parser.add_argument("-a", "--symbol", dest="symbol", required=True, help="symbol identifier")

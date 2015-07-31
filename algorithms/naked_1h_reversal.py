@@ -24,7 +24,7 @@ class NakedReversalAlgo(Framework):
     def identifier(self):
         return "Naked 1H Reversal (space_to_left: %s, sl:%s, tp:%s)" % (self.space_to_left, self.stop_loss.points, self.take_profit)
 
-    def warmupPeriod(self):
+    def warmup_period(self):
         return self.space_to_left + 1
 
     def portfolio_symbols(self):
@@ -42,7 +42,7 @@ class NakedReversalAlgo(Framework):
         """
         symbol_context = context.symbolContexts[quote.symbol]
 
-        if len(symbol_context.quotes) > self.warmupPeriod() - 1:  # i.e. we have enough data
+        if len(symbol_context.quotes) > self.warmup_period() - 1:  # i.e. we have enough data
 
             if quote.start_time.time() > datetime.time(21, 0) or quote.start_time.time() < datetime.time(7, 0):
                 # not normal EURUSD active period
@@ -64,7 +64,7 @@ class NakedReversalAlgo(Framework):
                         context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stop_loss, take_profit=self.take_profit))
                 else:
                     # selling oppertunity
-                    high = min(symbol_context.high, symbol_context.high[-2])
+                    high = min(symbol_context.high, symbol_context.highs[-2])
                     if high > max(list(symbol_context.highs)[:-3]):
                         context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stop_loss, take_profit=self.take_profit))
 

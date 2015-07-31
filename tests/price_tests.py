@@ -1,7 +1,7 @@
 import unittest
 import datetime
 from data.dummy_symbol_provider import DummySymbolProvider
-from market.market_data import MarketDataPeriod, roundDateTimeToPeriod, PriceConflator
+from market.market_data import MarketDataPeriod, PriceConflator
 from market.price import Tick
 
 from market.symbol import Symbol
@@ -9,19 +9,19 @@ from market.symbol import Symbol
 
 class PriceTest(unittest.TestCase):
     def setUp(self):
-        Symbol.setDataProvider(DummySymbolProvider())
+        Symbol.set_info_provider(DummySymbolProvider())
         self.callbackQuote = []
 
     def testTimestampRounding(self):
 
         t = 1437832541.348046
-        result = roundDateTimeToPeriod(t, 5.0)
+        result = PriceConflator.round_datetime_to_period(t, 5.0)
         self.assertEqual(1437832540, result)
 
-        result = roundDateTimeToPeriod(t, 300.0)  # 5 mins
+        result = PriceConflator.round_datetime_to_period(t, 300.0)  # 5 mins
         self.assertEqual(1437832500, result)
 
-        result = roundDateTimeToPeriod(t, 14400.0)  # 4 hours
+        result = PriceConflator.round_datetime_to_period(t, 14400.0)  # 4 hours
         self.assertEqual(1437825600, result)
 
     def callback(self, quote):

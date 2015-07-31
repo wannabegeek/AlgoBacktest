@@ -14,7 +14,7 @@ class Framework(object):
         self.currentContext = None
         pass
 
-    def warmupPeriod(self):
+    def warmup_period(self):
         return 0
 
     def analysis_symbols(self):
@@ -161,13 +161,13 @@ class Context(object):
     def __getstate__(self):
         state = {}
         state['symbol'] = self.symbol
-        state['lastUpdate'] = self.lastUpdate
+        state['last_update'] = self.lastUpdate
         state['data'] = self.quoteCache
         return state
 
     def __setstate__(self, state):
         self.symbol = state['symbol']
-        self.lastUpdate = state['lastUpdate']
+        self.lastUpdate = state['last_update']
         self.quoteCache = state['data']
 
     def __str__(self):

@@ -12,5 +12,5 @@ class SymbolProvider(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def getDataForSymbol(self, sid):
+    def get_symbol_info(self, sid):
         pass

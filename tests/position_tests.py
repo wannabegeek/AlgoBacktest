@@ -10,7 +10,7 @@ from market.price import Tick
 
 class PositionExitTests(unittest.TestCase):
     def setUp(self):
-        Symbol.setDataProvider("1")
+        Symbol.set_info_provider("1")
 
     # def testStopLoss(self):
     #     s1 = Symbol("TEST")
@@ -178,7 +178,7 @@ class PositionExitTests(unittest.TestCase):
 
 class PositionProfitLossTests(unittest.TestCase):
     def setUp(self):
-        Symbol.setDataProvider(DummySymbolProvider())
+        Symbol.set_info_provider(DummySymbolProvider())
 
     def testLongProfit(self):
         s1 = Symbol.get("TEST")

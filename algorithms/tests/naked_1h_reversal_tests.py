@@ -26,10 +26,10 @@ class TestOrderRouter(OrderRouter):
 
 class NakedTests(unittest.TestCase):
     def setUp(self):
-        Symbol.setDataProvider(DummySymbolProvider())
+        Symbol.set_info_provider(DummySymbolProvider())
         self.order_router = TestOrderRouter()
         self.algo = NakedReversalAlgo(10, 50, 100)
-        self.context = Context(10000, OrderBook(self.order_router), self.algo.analysis_symbols(), self.algo.warmupPeriod())
+        self.context = Context(10000, OrderBook(self.order_router), self.algo.analysis_symbols(), self.algo.warmup_period())
 
     def testBuyEntry(self):
         symbol = self.algo.analysis_symbols()[0]
