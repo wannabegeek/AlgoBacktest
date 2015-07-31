@@ -1,10 +1,3 @@
-import logging
-import time
-import datetime
-
-from numpy import asarray
-
-from analysis import financial
 from market.market_data import MarketDataPeriod
 from market.order import Direction, Order, Entry, StopLoss
 from strategy.strategy import Framework
@@ -55,38 +48,20 @@ class NakedReversalAlgo(Framework):
             #     return
 
             if symbol_context.close <= symbol_context.closes[-2] and symbol_context.open >= symbol_context.opens[-2]:
+                open_positions = list(context.open_positions())
+
                 # we have an engulfing body
                 if symbol_context.open < symbol_context.close:
-                    # buying oppertunity
+                    # buying signal
                     # since this is 2 candle set up, find the lowest of the current an previous
                     low = min(symbol_context.low, symbol_context.lows[-2])
                     if low < min(list(symbol_context.lows)[:-3]):
-                        context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stop_loss, take_profit=self.take_profit))
+                        if len(open_positions) == 0:
+                            context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stop_loss, take_profit=self.take_profit))
                 else:
-                    # selling oppertunity
+                    # selling signal
                     high = max(symbol_context.high, symbol_context.highs[-2])
                     if high > max(list(symbol_context.highs)[:-3]):
-                        context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stop_loss, take_profit=self.take_profit))
-
-            # open_positions = list(context.getOpenPositions())
-
-            # if quote.close > ema and sell_signal:
-            #     # if context.symbol_contexts[quote.symbol].position is False:
-            #         # create a LONG position
-            #     if len(open_positions) != 0:
-            #         position = open_positions[0]
-            #         if position.order.direction is Direction.LONG:
-            #             context.closePosition(position)
-            #     else:
-            #         logging.debug("Opening position on quote: %s" % (quote,))
-            #         context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, take_profit=self.take_profit))
-            #     # context.symbol_contexts[quote.symbol].position = True
-            # elif quote.close < ema and buy_signal:
-            #     if len(open_positions) != 0:
-            #         position = open_positions[0]
-            #         if position.order.direction is Direction.SHORT:
-            #             context.closePosition(position)
-            #     else:
-            #         logging.debug("Opening position on quote: %s" % (quote,))
-            #         context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, take_profit=self.take_profit))
+                        if len(open_positions) == 0:
+                            context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stop_loss, take_profit=self.take_profit))
 
