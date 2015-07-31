@@ -44,27 +44,27 @@ class NakedReversalAlgo(Framework):
 
         if len(symbol_context.quotes) > self.space_to_left:  # i.e. we have enough data
 
-            if quote.start_time.time() > datetime.time(21, 0) or quote.start_time.time() < datetime.time(7, 0):
-                # not normal EURUSD active period
-                return
-            if quote.start_time.weekday() >= 5:
-                # it's a weekend
-                return
-            if quote.start_time.weekday() == 4 and quote.start_time.time() > datetime.time(16, 0):
-                # no positions after 16:00 on Friday
-                return
+            # if quote.start_time.time() > datetime.time(21, 0) or quote.start_time.time() < datetime.time(7, 0):
+            #     # not normal EURUSD active period
+            #     return
+            # if quote.start_time.weekday() >= 5:
+            #     # it's a weekend
+            #     return
+            # if quote.start_time.weekday() == 4 and quote.start_time.time() > datetime.time(16, 0):
+            #     # no positions after 16:00 on Friday
+            #     return
 
             if symbol_context.close <= symbol_context.closes[-2] and symbol_context.open >= symbol_context.opens[-2]:
                 # we have an engulfing body
                 if symbol_context.open < symbol_context.close:
                     # buying oppertunity
-                    # since this is 2 candle set up, find the lowes of the current an previous
+                    # since this is 2 candle set up, find the lowest of the current an previous
                     low = min(symbol_context.low, symbol_context.lows[-2])
                     if low < min(list(symbol_context.lows)[:-3]):
                         context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stop_loss, take_profit=self.take_profit))
                 else:
                     # selling oppertunity
-                    high = min(symbol_context.high, symbol_context.highs[-2])
+                    high = max(symbol_context.high, symbol_context.highs[-2])
                     if high > max(list(symbol_context.highs)[:-3]):
                         context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stop_loss, take_profit=self.take_profit))
 
