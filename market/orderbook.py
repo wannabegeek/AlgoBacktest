@@ -16,24 +16,24 @@ class OrderBook(object):
         self.order_router.addPositionObserver(self._position_status_update)
         self.orders = {}
         self.positions = {}
-        self.orderObservers = {}
-        self.positionObservers = {}
+        self.order_observers = {}
+        self.position_observers = {}
 
     def addOrderStatusObserver(self, context, callback):
-        if context in self.orderObservers:
-            self.orderObservers[context].append(callback)
+        if context in self.order_observers:
+            self.order_observers[context].append(callback)
         else:
-            self.orderObservers[context] = [callback, ]
+            self.order_observers[context] = [callback, ]
 
     def addPositionStatusObserver(self, context, callback):
-        if context in self.positionObservers:
-            self.positionObservers[context].append(callback)
+        if context in self.position_observers:
+            self.position_observers[context].append(callback)
         else:
-            self.positionObservers[context] = [callback, ]
+            self.position_observers[context] = [callback, ]
 
     def _order_status_update(self, order, previousState):
         try:
-            callbacks = self.orderObservers[order.context]
+            callbacks = self.order_observers[order.context]
             for callback in callbacks:
                 callback(order, previousState)
         except KeyError:
@@ -54,11 +54,11 @@ class OrderBook(object):
     def register_position(self, position):
         pass
 
-    def _position_status_update(self, position, previousState):
+    def _position_status_update(self, position, previous_state):
         try:
-            callbacks = self.positionObservers[position.order.context]
+            callbacks = self.position_observers[position.order.context]
             for callback in callbacks:
-                callback(position, previousState)
+                callback(position, previous_state)
         except KeyError:
             # there isn't an observer
             pass
@@ -78,12 +78,11 @@ class OrderBook(object):
             self.order_router.place_order(order)
         else:
             logging.error("Risk limits breached rejecting request")
-            callbacks = self.orderObservers[context]
-            previousState = order.state
+            callbacks = self.order_observers[context]
+            previous_state = order.state
             order.state = State.REJECTED
             for callback in callbacks:
-                callback(order, previousState)
-
+                callback(order, previous_state)
 
     def modify_order(self, order):
         # modify order on market
@@ -94,13 +93,12 @@ class OrderBook(object):
             self.order_router.modify_order(order)
         else:
             logging.error("Risk limits breached rejecting request")
-            callbacks = self.orderObservers[context]
-            previousState = order.state
+            callbacks = self.order_observers[context]
+            previous_state = order.state
             order.state = State.REJECTED
             for callback in callbacks:
-                callback(order, previousState)
+                callback(order, previous_state)
             order.state = State.WORKING
-
 
     def cancel_order(self, order):
         # cancel order on market
@@ -110,7 +108,6 @@ class OrderBook(object):
 
     def close_position(self, position):
         self.order_router.close_position(position)
-
 
     def _check_risk_limits(self, container, order):
         # do container specific checks
@@ -125,21 +122,21 @@ class BacktestOrderbook(OrderBook):
 
     def __init__(self, order_router):
         super(BacktestOrderbook, self).__init__(order_router)
-        self.containerPositions = []
+        self.container_positions = []
 
     def register_position(self, position):
-        self.containerPositions.append(position)
+        self.container_positions.append(position)
 
     def __str__(self):
-        total_positions = len(list(filter(lambda x: not x.is_open(), self.containerPositions)))
+        total_positions = len(list(filter(lambda x: not x.is_open(), self.container_positions)))
 
-        closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.points_delta(), x.position_time()), filter(lambda x: not x.is_open(), self.containerPositions)))
-        open = list(map(lambda x: "%s" % (x), filter(lambda x: x.is_open(), self.containerPositions)))
-        winning = list(filter(lambda x: x.points_delta() > 0.0, filter(lambda x: not x.is_open(), self.containerPositions)))
+        closed = list(map(lambda x: "%s  --> %.2fpts (%s)" % (x, x.points_delta(), x.position_time()), filter(lambda x: not x.is_open(), self.container_positions)))
+        open = list(map(lambda x: "%s" % (x), filter(lambda x: x.is_open(), self.container_positions)))
+        winning = list(filter(lambda x: x.points_delta() > 0.0, filter(lambda x: not x.is_open(), self.container_positions)))
 
         return "Completed:\n%s\nOpen:\n%s\nWinning Ratio: %.2f%%\nTotal Pts: %.2f" % ("\n".join(closed),
                                                                    "\n".join(open),
                                                                    (len(winning)/total_positions * 100),
-                                                                   sum([x.points_delta() for x in filter(lambda x: not x.is_open(), self.containerPositions)]))
+                                                                   sum([x.points_delta() for x in filter(lambda x: not x.is_open(), self.container_positions)]))
 
     __repr__ = __str__

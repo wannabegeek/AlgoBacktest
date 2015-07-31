@@ -92,7 +92,7 @@ class Broker(OrderRouter, DataProvider):
 
     def _fill_order(self, order, tick):
         previousState = order.state
-        #Create position and notify client (ordersStatusObservers & positionObservers)
+        #Create position and notify client (ordersStatusObservers & position_observers)
         order.state = State.FILLED
         self.orders.remove(order)
         #TODO we should filter the observers to the observers related to the position/order
@@ -140,7 +140,7 @@ class Broker(OrderRouter, DataProvider):
     def _close_position(self, position, tick, reason):
         previousState = position.status
         position.close(tick, reason)
-        #Notify the client (positionObservers)
+        #Notify the client (position_observers)
         self.positions.remove(position)
         #TODO we should filter the observers to the observers related to the position/order
         [f(position, previousState) for f in self.positionObservers]
