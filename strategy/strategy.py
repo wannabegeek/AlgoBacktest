@@ -14,29 +14,48 @@ class Framework(object):
         self.currentContext = None
         pass
 
-    def warmup_period(self):
-        return 0
+    def quote_cache_size(self):
+        """
+        This is the number of quotes required to be cached for the algorithm.
+        This is useful for algorithms calculating results on previous period data. e.g. EMA requires data
+        from the previous periods to calculate the current value.
+        :return: The number of periods required for caching
+        """
+        return 1
 
-    def analysis_symbols(self):
-        return self.portfolio_symbols()
+    def initialise_context(self, context):
+        """
+        This method can be used to initialise any context data objects or do any initialisation before
+        the algorithm processing is started.
+        The frame work calls this method before any market data updates
+        """
+        pass
 
     @abstractmethod
     def identifier(self):
         pass
 
     @abstractmethod
-    def portfolio_symbols(self):
+    def analysis_symbols(self):
+        """
+        This is a list of symbols which are used in this algorithm.
+        :return: Array of Symbols used in this algorithm
+        """
         pass
 
     @abstractmethod
     def period(self):
+        """
+        This is the interval required for processing backdata.
+        :return: Interval for the backdata
+        """
         pass
 
-    def initialiseContext(self, context):
-        pass;
-
     @abstractmethod
-    def evaluateTickUpdate(self, context, quote):
+    def evaluate_tick_update(self, context, quote):
+        """
+        This method is called for every market data tick update on the requested symbols.
+        """
         pass
 
     def __hash__(self):
@@ -57,10 +76,10 @@ class Context(object):
 
         self.working_capital = working_capital
         self.order_book = order_book
-        self.symbolContexts = {}
+        self.symbol_contexts = {}
         for symbol in symbols:
             context = SymbolContext(symbol, history_size)
-            self.symbolContexts[symbol] = context
+            self.symbol_contexts[symbol] = context
 
         self.orders = []
         self.positions = []
@@ -73,13 +92,13 @@ class Context(object):
         This is for internal use.
         :param quote: The quote to add
         """
-        context = self.symbolContexts[quote.symbol]
+        context = self.symbol_contexts[quote.symbol]
         context.add_quote(quote)
         if self.start_time is None:
             self.start_time = quote.start_time
 
-    def symbolData(self, symbol):
-        return self.symbolContexts[symbol]
+    def symbol_data(self, symbol):
+        return self.symbol_contexts[symbol]
 
     def place_order(self, order, statusCallback = None):
         """
@@ -138,14 +157,14 @@ class Context(object):
             self.custom_data[key][quote.timestamp] = value
 
 
-    def getOpenPositions(self):
+    def open_positions(self):
         """
         Get a list of all open positions
         :return: List of positions
         """
         return filter(lambda x: x.status == Position.PositionStatus.OPEN, self.positions)
 
-    def getOpenOrders(self):
+    def open_orders(self):
         """
         Get a list of all open positions
         :return: List of positions

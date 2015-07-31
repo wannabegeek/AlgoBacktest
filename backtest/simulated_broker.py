@@ -20,7 +20,7 @@ class Broker(OrderRouter, DataProvider):
             raise TypeError("priceDataProvider must be a subclass of data.data_provider.Provider")
 
         self.priceDataProvider = priceDataProvider
-        self.currentTick = None
+        self.current_tick = None
 
         OrderRouter.__init__(self)
         DataProvider.__init__(self)
@@ -28,7 +28,7 @@ class Broker(OrderRouter, DataProvider):
         self.positions = []
 
     def start(self):
-        self.priceDataProvider.start_publishing(lambda symbol, tick: self._handleTickUpdate(symbol, tick))
+        self.priceDataProvider.start_publishing(lambda symbol, tick: self._handle_tick(symbol, tick))
 
     def place_order(self, order):
         if not isinstance(order, Order):
@@ -41,7 +41,7 @@ class Broker(OrderRouter, DataProvider):
 
         order.state = State.WORKING
         [f(order, State.PENDING_NEW) for f in self.orderStatusObservers]
-        self._evaluate_orders(order, self.currentTick)
+        self._evaluate_orders(order, self.current_tick)
 
     def modify_order(self, order):
         if not isinstance(order, Order):
@@ -53,7 +53,7 @@ class Broker(OrderRouter, DataProvider):
         [f(order, State.PENDING_MODIFY) for f in self.orderStatusObservers]
         if order in self.orders:
             # we shouldn't need to do anything else, since the reference will have been updated
-            self._evaluate_orders(order, self.currentTick)
+            self._evaluate_orders(order, self.current_tick)
         else:
             raise OrderbookException("Order not found")
 
@@ -74,14 +74,14 @@ class Broker(OrderRouter, DataProvider):
         if not isinstance(position, Position):
             raise TypeError('argument "position" must be a Position')
 
-        self._close_position(position, self.currentTick, Position.PositionStatus.CLOSED)
+        self._close_position(position, self.current_tick, Position.PositionStatus.CLOSED)
 
-    def _handleTickUpdate(self, symbol, tick):
+    def _handle_tick(self, symbol, tick):
         try:
             # We need to evaluate if we have any limit orders and stop loss events triggered
             self._process_pending_orders(tick)
             self._evaluate_positions(tick)
-            self.currentTick = tick
+            self.current_tick = tick
             self._notifyObservers(symbol, tick)
         except KeyError as e:
             logging.error("Received data update for symbol we're not subscribed to (%s)" % (symbol,))

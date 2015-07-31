@@ -29,7 +29,7 @@ class NakedTests(unittest.TestCase):
         Symbol.set_info_provider(DummySymbolProvider())
         self.order_router = TestOrderRouter()
         self.algo = NakedReversalAlgo(10, 50, 100)
-        self.context = Context(10000, OrderBook(self.order_router), self.algo.analysis_symbols(), self.algo.warmup_period())
+        self.context = Context(10000, OrderBook(self.order_router), self.algo.analysis_symbols(), self.algo.quote_cache_size())
 
     def testBuyEntry(self):
         symbol = self.algo.analysis_symbols()[0]
@@ -77,7 +77,7 @@ class NakedTests(unittest.TestCase):
 
         for quote in quotes:
             self.context.add_quote(quote)
-            self.algo.evaluateTickUpdate(self.context, quote)
+            self.algo.evaluate_tick_update(self.context, quote)
 
         # self.assertEqual(s1, s2)
         # self.assertEqual(id(s1.__dict__), id(s2.__dict__))

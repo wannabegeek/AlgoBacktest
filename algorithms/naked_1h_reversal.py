@@ -24,25 +24,25 @@ class NakedReversalAlgo(Framework):
     def identifier(self):
         return "Naked 1H Reversal (space_to_left: %s, sl:%s, tp:%s)" % (self.space_to_left, self.stop_loss.points, self.take_profit)
 
-    def warmup_period(self):
+    def quote_cache_size(self):
         return self.space_to_left + 1
 
-    def portfolio_symbols(self):
+    def analysis_symbols(self):
         return [Symbol.get('EURUSD:CUR'), ]
 
     def period(self):
         return MarketDataPeriod.HOUR_1
 
-    def initialiseContext(self, context):
+    def initialise_context(self, context):
         pass
 
-    def evaluateTickUpdate(self, context, quote):
+    def evaluate_tick_update(self, context, quote):
         """
         This method is called for every market data tick update on the requested symbols.
         """
-        symbol_context = context.symbolContexts[quote.symbol]
+        symbol_context = context.symbol_contexts[quote.symbol]
 
-        if len(symbol_context.quotes) > self.warmup_period() - 1:  # i.e. we have enough data
+        if len(symbol_context.quotes) > self.space_to_left:  # i.e. we have enough data
 
             if quote.start_time.time() > datetime.time(21, 0) or quote.start_time.time() < datetime.time(7, 0):
                 # not normal EURUSD active period
@@ -71,7 +71,7 @@ class NakedReversalAlgo(Framework):
             # open_positions = list(context.getOpenPositions())
 
             # if quote.close > ema and sell_signal:
-            #     # if context.symbolContexts[quote.symbol].position is False:
+            #     # if context.symbol_contexts[quote.symbol].position is False:
             #         # create a LONG position
             #     if len(open_positions) != 0:
             #         position = open_positions[0]
@@ -80,7 +80,7 @@ class NakedReversalAlgo(Framework):
             #     else:
             #         logging.debug("Opening position on quote: %s" % (quote,))
             #         context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, take_profit=self.take_profit))
-            #     # context.symbolContexts[quote.symbol].position = True
+            #     # context.symbol_contexts[quote.symbol].position = True
             # elif quote.close < ema and buy_signal:
             #     if len(open_positions) != 0:
             #         position = open_positions[0]

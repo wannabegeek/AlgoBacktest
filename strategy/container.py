@@ -22,9 +22,9 @@ class Container(object):
         self.starting_capital = working_capital
         self.order_book = order_book
         self.data_provider = data_provider
-        self.context = Context(working_capital, self.order_book, self.algo.analysis_symbols(), self.algo.warmup_period())
+        self.context = Context(working_capital, self.order_book, self.algo.analysis_symbols(), self.algo.quote_cache_size())
 
-        self.algo.initialiseContext(self.context)
+        self.algo.initialise_context(self.context)
 
         self.order_book.addOrderStatusObserver(self.context, self.order_status_update)
         self.order_book.addPositionStatusObserver(self.context, self.position_status_observer)
@@ -40,7 +40,7 @@ class Container(object):
         #     raise TypeError("Invalid quote")
 
         self.context.add_quote(quote)
-        self.algo.evaluateTickUpdate(self.context, quote)
+        self.algo.evaluate_tick_update(self.context, quote)
 
     def order_status_update(self, order, previous_state):
         if order.state is State.WORKING and previous_state is State.PENDING_NEW:
