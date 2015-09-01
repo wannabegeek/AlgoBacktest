@@ -3,7 +3,9 @@ from market.order import Direction, Order, Entry, StopLoss
 from strategy.strategy import Framework
 from market.symbol import Symbol
 
-
+#
+# TODO: make sure this only prints on a zone
+#
 class NakedReversalAlgo(Framework):
 
     def __init__(self, space_to_left, stop_loss, take_profit):

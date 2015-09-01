@@ -70,6 +70,11 @@ class Broker(OrderRouter, DataProvider):
         except ValueError:
             raise OrderbookException("Order not found")
 
+    def modify_position(self, position):
+        if not isinstance(position, Position):
+            raise TypeError('argument "position" must be a Position')
+        self._evaluate_positions(self.current_tick)
+
     def close_position(self, position):
         if not isinstance(position, Position):
             raise TypeError('argument "position" must be a Position')

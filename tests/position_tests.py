@@ -2,7 +2,7 @@ from datetime import datetime
 import unittest
 from data.dummy_symbol_provider import DummySymbolProvider
 
-from market.order import Order, Entry, Direction
+from market.order import Order, Entry, Direction, StopLoss
 from market.position import Position
 from market.symbol import Symbol
 from market.price import Tick
@@ -235,3 +235,18 @@ class PositionProfitLossTests(unittest.TestCase):
         position.close(tick)
 
         self.assertAlmostEquals(-2, position.points_delta())
+
+    def testModifiedStopLoss(self):
+        s1 = Symbol.get("TEST")
+        s1.lot_size = 10000
+
+        # LONG
+        order = Order(s1, 1, Entry(Entry.Type.MARKET), Direction.SHORT)
+        tick = Tick(datetime.utcnow(), 1.12239, 1.12245) # spread of 0.6
+        position = Position(order, tick)
+        self.assertIsNone(position.stop_price)
+
+        position.update(stop_loss=StopLoss(StopLoss.Type.FIXED, 2))
+
+        self.assertIsNotNone(position.stop_price)
+        self.assertEqual(1.12265, position.stop_price)
