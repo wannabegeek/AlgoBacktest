@@ -78,11 +78,10 @@ class Position(object):
         else:
             return self.entry_tick.bid - take_profit / self.order.symbol.lot_size
 
-
     def is_open(self):
         return not self.closed
 
-    def close(self, tick, reason = PositionStatus.CLOSED):
+    def close(self, tick, reason=PositionStatus.CLOSED):
         if reason == Position.PositionStatus.TAKE_PROFIT:
             self.exit_price = self.take_profit
         else:
@@ -95,15 +94,17 @@ class Position(object):
         self.closed = True
         self.status = reason
 
-    def points_delta(self):
-        if self.status == Position.PositionStatus.OPEN:
-            raise ValueError("Position is still open")
+    def points_delta(self, target=None):
+        if target is None:
+            if self.status == Position.PositionStatus.OPEN:
+                raise ValueError("Position is still open")
+            target = self.exit_price
 
         price_delta = 0.0
         if self.order.direction == Direction.LONG:
-            price_delta = self.exit_price - self.entry_price
+            price_delta = target - self.entry_price
         else:
-            price_delta = self.entry_price - self.exit_price
+            price_delta = self.entry_price - target
 
         return price_delta * self.order.symbol.lot_size
 

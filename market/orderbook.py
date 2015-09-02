@@ -106,6 +106,9 @@ class OrderBook(object):
         self.order_router.cancel_order(order)
         del(self.orders[order.id])
 
+    def modify_position(self, position):
+        pass
+
     def close_position(self, position):
         self.order_router.close_position(position)
 

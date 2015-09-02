@@ -28,6 +28,9 @@ class StopLoss(object):
         self.type = type
         self.points = points
 
+    def __eq__(self, other):
+        return self.type == other.type and self.points == other.points
+
 class State(Enum):
     PENDING_NEW = 0
     PENDING_MODIFY = 1
