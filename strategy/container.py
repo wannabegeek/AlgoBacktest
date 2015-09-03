@@ -43,9 +43,9 @@ class Container(object):
         self.algo.evaluate_tick_update(self.context, quote)
 
     def order_status_update(self, order, previous_state):
-        if order.state is State.WORKING and previous_state is State.PENDING_NEW:
+        if order.status is State.WORKING and previous_state is State.PENDING_NEW:
             logging.debug("Order accepted =================")
-        elif order.state is State.FILLED and previous_state is State.WORKING:
+        elif order.status is State.FILLED and previous_state is State.WORKING:
             logging.debug("Order filled =================")
 
     def position_status_observer(self, position, previous_state):

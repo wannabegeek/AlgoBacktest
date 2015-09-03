@@ -26,10 +26,17 @@ class NakedReversalAlgo(Framework):
         return [Symbol.get('EURUSD:CUR'), ]
 
     def period(self):
-        return MarketDataPeriod.HOUR_1
+        return MarketDataPeriod.HOUR_4
 
     def initialise_context(self, context):
         pass
+
+
+    def is_opposite(self, current, previous):
+        return (current.close >= current.open and previous.close <= previous.open) or (current.close <= current.open and previous.close >= previous.open)
+
+    def is_body_engulfing(self, current, previous):
+        return max(current.open, current.close) >= max(previous.open, previous.close) and min(current.open, current.close) <= min(previous.open, previous.close)
 
     def evaluate_tick_update(self, context, quote):
         """
@@ -49,21 +56,29 @@ class NakedReversalAlgo(Framework):
             #     # no positions after 16:00 on Friday
             #     return
 
-            if symbol_context.close <= symbol_context.closes[-2] and symbol_context.open >= symbol_context.opens[-2]:
-                open_positions = list(context.open_positions())
+            previous_quote = symbol_context.quotes[-2]
 
-                # we have an engulfing body
-                if symbol_context.open < symbol_context.close:
-                    # buying signal
-                    # since this is 2 candle set up, find the lowest of the current an previous
-                    low = min(symbol_context.low, symbol_context.lows[-2])
-                    if low < min(list(symbol_context.lows)[:-3]):
-                        if len(open_positions) == 0:
-                            context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stop_loss, take_profit=self.take_profit))
-                else:
-                    # selling signal
-                    high = max(symbol_context.high, symbol_context.highs[-2])
-                    if high > max(list(symbol_context.highs)[:-3]):
-                        if len(open_positions) == 0:
-                            context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stop_loss, take_profit=self.take_profit))
-
+            # have we changed direction?
+            if self.is_opposite(quote, previous_quote):
+                # check if this candle engulfs the previous
+                if self.is_body_engulfing(quote, previous_quote):
+                    # are we the largest candle for X periods
+                    # are we thinking about long or short?
+                    if quote.close < quote.open:
+                        # go short
+                        # how far from the low is our close?
+                        # do we have space to left
+                        high = max(quote.high, previous_quote.high)
+                        if high < max(list(symbol_context.highs)[:-3]):
+                            stop_loss = StopLoss(StopLoss.Type.FIXED, (quote.open - quote.high) * quote.symbol.lot_size)
+                            context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.LIMIT, quote.low), Direction.SHORT, stoploss=stop_loss, take_profit=self.take_profit, expire_time=MarketDataPeriod.HOUR_4))
+                    else:
+                        # go long
+                        # how far from the high is our open?
+                        # do we have space to left
+                        low = min(quote.low, previous_quote.low)
+                        if low < min(list(symbol_context.lows)[:-3]):
+                            stop_loss = StopLoss(StopLoss.Type.FIXED, (quote.close - quote.low) * quote.symbol.lot_size)
+                            context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.LIMIT, quote.high), Direction.LONG, stoploss=stop_loss, take_profit=self.take_profit, expire_time=MarketDataPeriod.HOUR_4))
+                # open_positions = list(context.open_positions())
+                # if len(open_positions) == 0:

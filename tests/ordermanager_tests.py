@@ -76,7 +76,7 @@ class OrderManagerTest(unittest.TestCase):
 
         self.assertEqual(0, len(order_manager.orders))
         self.assertEqual(1, len(order_manager.positions))
-        self.assertEqual(State.FILLED, order.state)
+        self.assertEqual(State.FILLED, order.status)
         position = order_manager.positions[0]
         self.assertEqual(Position.PositionStatus.OPEN, position.status)
         self.assertEqual(10.1, position.entry_price)
@@ -109,7 +109,7 @@ class OrderManagerTest(unittest.TestCase):
 
         self.assertEqual(0, len(order_manager.orders))
         self.assertEqual(1, len(order_manager.positions))
-        self.assertEqual(State.FILLED, order.state)
+        self.assertEqual(State.FILLED, order.status)
         position = order_manager.positions[0]
         self.assertEqual(Position.PositionStatus.OPEN, position.status)
         self.assertEqual(12.1, position.entry_price)
@@ -142,7 +142,7 @@ class OrderManagerTest(unittest.TestCase):
 
         self.assertEqual(0, len(order_manager.orders))
         self.assertEqual(0, len(order_manager.positions))
-        self.assertEqual(State.EXPIRED, order.state)
+        self.assertEqual(State.EXPIRED, order.status)
 
     def testStopLossMarketOrder(self):
         symbol = Symbol.get('TEST')
@@ -172,7 +172,7 @@ class OrderManagerTest(unittest.TestCase):
 
         self.assertEqual(0, len(order_manager.orders))
         self.assertEqual(0, len(order_manager.positions))
-        self.assertEqual(State.FILLED, order.state)
+        self.assertEqual(State.FILLED, order.status)
 
         self.assertIsNotNone(self.position)
         self.assertEqual(Position.PositionStatus.STOP_LOSS, self.position.status)
@@ -204,7 +204,7 @@ class OrderManagerTest(unittest.TestCase):
 
         self.assertEqual(0, len(order_manager.orders))
         self.assertEqual(0, len(order_manager.positions))
-        self.assertEqual(State.FILLED, order.state)
+        self.assertEqual(State.FILLED, order.status)
 
         self.assertIsNotNone(self.position)
         self.assertEqual(Position.PositionStatus.TAKE_PROFIT, self.position.status)

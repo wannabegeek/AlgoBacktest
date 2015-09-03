@@ -29,7 +29,7 @@ class Handler(object):
 
     def tick_handler(self, symbol, tick):
         try:
-            self.cursor.execute("INSERT INTO tick_data(symbol_id, timestamp, bid, offer) VALUES(%s, %s, %s, %s)", (symbol.identifier, tick.timestamp, tick.bid, tick.offer))
+            self.cursor.execute("INSERT INTO tick_data2(symbol_id, timestamp, bid, offer) VALUES(%s, %s, %s, %s)", (symbol.identifier, tick.timestamp, tick.bid, tick.offer))
             self.totalTicks += 1
             if self.totalTicks >= 100000:
                 self._db_connection.commit()
