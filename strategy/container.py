@@ -49,9 +49,9 @@ class Container(object):
             logging.debug("Order filled =================")
 
     def position_status_observer(self, position, previous_state):
-        if previous_state is None:
+        if previous_state is None and position not in self.context.positions:
             self.context.positions.append(position)
-        elif not position.is_open():
+        elif not position.is_open() and position in self.context.positions:
             self.context.working_capital += position.points_delta() * position.order.quantity
 
     def __str__(self):

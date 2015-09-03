@@ -12,6 +12,11 @@ class Position(object):
         STOP_LOSS = 2
         TAKE_PROFIT = 3
 
+    class VolatileProperties(object):
+        def __init__(self, stop_price=None, take_profit=None):
+            self.stop_price = stop_price
+            self.take_profit = take_profit
+
     def __init__(self, order, tick):
         if not isinstance(order, Order):
             raise ValueError('argument "order" must be a Order')
@@ -29,27 +34,54 @@ class Position(object):
         self.closed = False
         self.id = uuid.uuid4()
         self.status = Position.PositionStatus.OPEN
+
+        self.version = []
+
+        sl = None
+        tp = None
         if self.order.stoploss is not None:
-            if self.order.direction == Direction.LONG:
-                self.stop_price = tick.bid - self.order.stoploss.points / self.order.symbol.lot_size
-            else:
-                self.stop_price = tick.offer + self.order.stoploss.points / self.order.symbol.lot_size
-        else:
-            self.stop_price = None
-
+            sl = self._calculate_stoploss(self.order.stoploss)
         if self.order.take_profit is not None:
-            if self.order.direction == Direction.LONG:
-                self.take_profit = tick.offer + self.order.take_profit / self.order.symbol.lot_size
-            else:
-                self.take_profit = tick.bid - self.order.take_profit / self.order.symbol.lot_size
-        else:
-            self.take_profit = None
+            tp = self._calculate_take_profit(self.order.take_profit)
 
+        self.latest = Position.VolatileProperties(sl, tp)
+        self.version.append(self.latest)
+
+    def update(self, stop_loss=None, take_profit=None):
+        sl = None
+        tp = None
+        if stop_loss is not None:
+            sl = self._calculate_stoploss(stop_loss)
+        if take_profit is not None:
+            tp = self._calculate_take_profit(take_profit)
+
+        self.latest = Position.VolatileProperties(sl, tp)
+        self.version.append(self.latest)
+
+    @property
+    def take_profit(self):
+        return self.latest.take_profit
+
+    @property
+    def stop_price(self):
+        return self.latest.stop_price
+
+    def _calculate_stoploss(self, stoploss):
+        if self.order.direction == Direction.LONG:
+            return self.entry_tick.bid - stoploss.points / self.order.symbol.lot_size
+        else:
+            return self.entry_tick.offer + stoploss.points / self.order.symbol.lot_size
+
+    def _calculate_take_profit(self, take_profit):
+        if self.order.direction == Direction.LONG:
+            return self.entry_tick.offer + take_profit / self.order.symbol.lot_size
+        else:
+            return self.entry_tick.bid - take_profit / self.order.symbol.lot_size
 
     def is_open(self):
         return not self.closed
 
-    def close(self, tick, reason = PositionStatus.CLOSED):
+    def close(self, tick, reason=PositionStatus.CLOSED):
         if reason == Position.PositionStatus.TAKE_PROFIT:
             self.exit_price = self.take_profit
         else:
@@ -62,15 +94,17 @@ class Position(object):
         self.closed = True
         self.status = reason
 
-    def points_delta(self):
-        if self.status == Position.PositionStatus.OPEN:
-            raise ValueError("Position is still open")
+    def points_delta(self, target=None):
+        if target is None:
+            if self.status == Position.PositionStatus.OPEN:
+                raise ValueError("Position is still open")
+            target = self.exit_price
 
         price_delta = 0.0
         if self.order.direction == Direction.LONG:
-            price_delta = self.exit_price - self.entry_price
+            price_delta = target - self.entry_price
         else:
-            price_delta = self.entry_price - self.exit_price
+            price_delta = self.entry_price - target
 
         return price_delta * self.order.symbol.lot_size
 

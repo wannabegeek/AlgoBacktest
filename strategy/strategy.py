@@ -100,11 +100,10 @@ class Context(object):
     def symbol_data(self, symbol):
         return self.symbol_contexts[symbol]
 
-    def place_order(self, order, statusCallback = None):
+    def place_order(self, order):
         """
         Place an order on the market.
         :param order: The order to add
-        :param statusCallback: Callback function reporting any status changes
         :return: The order placed (same as passed in)
         """
 
@@ -121,12 +120,6 @@ class Context(object):
         :param order: The order to modify
         """
         self.order_book.cancel_order(self, order)
-
-    # def openPosition(self, position):
-    #     if not isinstance(position, Position):
-    #         raise TypeError('position must be an Position object type')
-    #
-    #     self.positions.append(position)
 
     def close_position(self, position, reason = Position.PositionStatus.CLOSED):
         """
@@ -155,7 +148,6 @@ class Context(object):
         except KeyError as e:
             self.custom_data[key] = dict()
             self.custom_data[key][quote.timestamp] = value
-
 
     def open_positions(self):
         """

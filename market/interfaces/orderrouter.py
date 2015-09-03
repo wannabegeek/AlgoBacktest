@@ -27,6 +27,10 @@ class OrderRouter(object):
         pass
 
     @abstractmethod
+    def modify_position(self, position):
+        pass
+
+    @abstractmethod
     def close_position(self, position):
         pass
 
