@@ -12,14 +12,14 @@ class SymbolDataSource(object):
 
 class Symbol(object):
 
-    _symbolDataProvider = None
+    _info_provider = None
     _symbol_cache = {}
 
     @staticmethod
-    def setDataProvider(dataProvider):
-        if not isinstance(dataProvider, SymbolProvider):
-            raise TypeError("dataProvider must be of type SymbolDataProvider")
-        Symbol._symbolDataProvider = dataProvider
+    def set_info_provider(info_provider):
+        if not isinstance(info_provider, SymbolProvider):
+            raise TypeError("info_provider must be of type SymbolDataProvider")
+        Symbol._info_provider = info_provider
 
     @staticmethod
     def get(sid):
@@ -31,13 +31,13 @@ class Symbol(object):
             return symbol
 
     def __init__(self, sid):
-        if self._symbolDataProvider is None:
+        if self._info_provider is None:
             raise RuntimeError("Symbol data provider hasn't been set")
         if sid in Symbol._symbol_cache:
             raise RuntimeError("Symbol %s already exists in the cache" % (sid,))
 
         self.sid = sid
-        data = Symbol._symbolDataProvider.getDataForSymbol(sid)
+        data = Symbol._info_provider.get_symbol_info(sid)
         self.identifier = data[SymbolProviderData.identifier]
         self.name = data[SymbolProviderData.name]
         self.lot_size = data[SymbolProviderData.lot_size]
@@ -89,7 +89,7 @@ class SymbolContext(object):
         :param quote: quote to add
         :return: None
         """
-        self.lastUpdate = quote.last_tick.timestamp
+        self.last_update = quote.last_tick.timestamp
         self.timestamp = quote.start_time
 
         self.price = quote.close

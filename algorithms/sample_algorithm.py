@@ -20,30 +20,21 @@ class Algo(Framework):
     def identifier(self):
         return "SampleStrategy"
 
-    def warmupPeriod(self):
+    def quote_cache_size(self):
         """
-        This is the number of periods required for the algorithm to warm up.
-        i.e. how many periods should be process but not include in the overall performance
+        This is the number of quotes required to be cached for the algorithm.
         This is useful for algorithms calculating results on previous period data. e.g. EMA requires data
         from the previous periods to calculate the current value.
-        :return: The number of periods required for initialisation
+        :return: The number of periods required for caching
         """
         return 26
 
-    def portfolio_symbols(self):
+    def analysis_symbols(self):
         """
-        This is a list of symbols which are used in the portfolio for this algorithm.
+        This is a list of symbols which are used in this algorithm.
         :return: Array of Symbols used in this algorithm
         """
         return [Symbol.get('EURUSD:CUR'), ]
-
-    # def analysis_symbols(self):
-    #     """
-    #     This is a list of symbols which are used for calculations in this algorithm.
-    #     The default implementation of this method just calls self.portfolio_symbols()
-    #     :return: Array of Symbols which the algorithm requires market data for.
-    #     """
-    #     return self.portfolio_symbols()
 
     def period(self):
         """
@@ -52,29 +43,29 @@ class Algo(Framework):
         """
         return MarketDataPeriod.MIN_5
 
-    def initialiseContext(self, context):
+    def initialise_context(self, context):
         """
         This method can be used to initialise any context data objects or do any initialisation before
         the algorithm processing is started.
         The frame work calls this method before any market data updates
         """
         for symbol in self.analysis_symbols():
-            context.symbolContexts[symbol].ema_10 = []
-            context.symbolContexts[symbol].ema_25 = []
-            context.symbolContexts[symbol].rsi_14 = []
-            context.symbolContexts[symbol].position = False
+            context.symbol_contexts[symbol].ema_10 = []
+            context.symbol_contexts[symbol].ema_25 = []
+            context.symbol_contexts[symbol].rsi_14 = []
+            context.symbol_contexts[symbol].position = False
 
-    def evaluateTickUpdate(self, context, quote):
+    def evaluate_tick_update(self, context, quote):
         """
         This method is called for every market data tick update on the requested symbols.
         """
-        symbolContext = context.symbolContexts[quote.symbol]
+        symbol_contexts = context.symbol_contexts[quote.symbol]
 
         # logging.debug("I'm evaluating the data for %s" % (quote, ))
 
-        if len(symbolContext.quotes) > 25:  # i.e. we have enough data
-            quoteTimes = [time.mktime(o.start_time.timetuple()) for o in symbolContext.quotes]
-            closePrices = asarray(symbolContext.closes)
+        if len(symbol_contexts.quotes) > 25:  # i.e. we have enough data
+            quoteTimes = [time.mktime(o.start_time.timetuple()) for o in symbol_contexts.quotes]
+            closePrices = asarray(symbol_contexts.closes)
 
             ema_10 = financial.ema(closePrices[-10:], 10)
             ema_25 = financial.ema(closePrices[-15:], 15)
@@ -86,10 +77,10 @@ class Algo(Framework):
                     # create a LONG position
                     logging.debug("Opening position on quote: %s" % (quote,))
                     context.place_order(Order(quote.symbol, 1, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=StopLoss(StopLoss.Type.FIXED, 20), take_profit=25))
-                    context.symbolContexts[quote.symbol].position = True
+                    context.symbol_contexts[quote.symbol].position = True
             else:
-                if context.symbolContexts[quote.symbol].position is True:
-                    context.symbolContexts[quote.symbol].position = False
+                if context.symbol_contexts[quote.symbol].position is True:
+                    context.symbol_contexts[quote.symbol].position = False
 
             # gradientCount = 2
             # if len(symbolContext.ema_25) >= gradientCount:

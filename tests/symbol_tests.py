@@ -5,7 +5,7 @@ from market.symbol import Symbol
 
 class SymbolTest(unittest.TestCase):
     def setUp(self):
-        Symbol.setDataProvider(DummySymbolProvider())
+        Symbol.set_info_provider(DummySymbolProvider())
 
     def testSymbol(self):
         s1 = Symbol.get("TEST")

@@ -41,7 +41,7 @@ class Handler(object):
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    Symbol.setDataProvider(MySQLSymbolProvider())
+    Symbol.set_info_provider(MySQLSymbolProvider())
 
     parser = argparse.ArgumentParser(description='Parse CSV Tick data into sqlite db.')
     parser.add_argument("-s", "--symbol", dest="symbol", required=True, help="symbol identifier")

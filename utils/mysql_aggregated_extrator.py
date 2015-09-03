@@ -15,9 +15,9 @@ class Extractor(object):
         pickle.dump(quote, self.file_handle)
 
     def run(self):
-        database = {'user': 'blackbox', 'database': 'blackbox', 'host': "localhost"}
-        Symbol.setDataProvider(MySQLSymbolProvider(database))
-        provider = MySQLProvider(database, Symbol.get('EURUSD:CUR'), MarketDataPeriod.DAY.total_seconds())
+        database = {'user': 'blackbox', 'database': 'blackbox', 'host': "192.168.0.8"}
+        Symbol.set_info_provider(MySQLSymbolProvider(database))
+        provider = MySQLProvider(database, Symbol.get('EURUSD:CUR'), MarketDataPeriod.HOUR_1)
 
         self.file_handle = open(r"market_data_d1.pkl", "wb")
         provider.startPublishing(lambda symbol, quote: self.add_quote(quote))

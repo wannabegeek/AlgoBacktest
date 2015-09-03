@@ -55,7 +55,7 @@ def display_results(container):
     have_quote = False
     start_time = container.context.start_time
     end_time = datetime.datetime.min
-    for symbol_context in container.context.symbolContexts.values():
+    for symbol_context in container.context.symbol_contexts.values():
         have_quote = True
         quote = symbol_context.quotes[-1]
         end_time = max(quote.start_time + quote.period, end_time)

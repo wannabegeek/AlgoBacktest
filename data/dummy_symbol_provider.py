@@ -4,6 +4,6 @@ from data.interfaces.symbol_data_provider import SymbolProvider, SymbolProviderD
 
 class DummySymbolProvider(SymbolProvider):
 
-    def getDataForSymbol(self, sid):
+    def get_symbol_info(self, sid):
         return {SymbolProviderData.identifier: 1, SymbolProviderData.name: "Dummy Symbol", SymbolProviderData.asset_class: 1, SymbolProviderData.lot_size: 10000}
 

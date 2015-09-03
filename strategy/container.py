@@ -22,17 +22,17 @@ class Container(object):
         self.starting_capital = working_capital
         self.order_book = order_book
         self.data_provider = data_provider
-        self.context = Context(working_capital, self.order_book, self.algo.analysis_symbols(), self.algo.warmupPeriod())
+        self.context = Context(working_capital, self.order_book, self.algo.analysis_symbols(), self.algo.quote_cache_size())
 
-        self.algo.initialiseContext(self.context)
+        self.algo.initialise_context(self.context)
 
-        self.order_book.addOrderStatusObserver(self.context, self.orderStatusObserver)
-        self.order_book.addPositionStatusObserver(self.context, self.positionStatusObserver)
+        self.order_book.addOrderStatusObserver(self.context, self.order_status_update)
+        self.order_book.addPositionStatusObserver(self.context, self.position_status_observer)
 
         for symbol in self.algo.analysis_symbols():
-            self.data_provider.addPriceObserver(symbol, self.algo.period(), self.handleTickUpdate)
+            self.data_provider.addPriceObserver(symbol, self.algo.period(), self.handle_tick_update)
 
-    def handleTickUpdate(self, symbol, quote):
+    def handle_tick_update(self, symbol, quote):
         """
         This method gets called from the MarketData framework
         """
@@ -40,15 +40,15 @@ class Container(object):
         #     raise TypeError("Invalid quote")
 
         self.context.add_quote(quote)
-        self.algo.evaluateTickUpdate(self.context, quote)
+        self.algo.evaluate_tick_update(self.context, quote)
 
-    def orderStatusObserver(self, order, previous_state):
+    def order_status_update(self, order, previous_state):
         if order.state is State.WORKING and previous_state is State.PENDING_NEW:
             logging.debug("Order accepted =================")
         elif order.state is State.FILLED and previous_state is State.WORKING:
             logging.debug("Order filled =================")
 
-    def positionStatusObserver(self, position, previous_state):
+    def position_status_observer(self, position, previous_state):
         if previous_state is None:
             self.context.positions.append(position)
         elif not position.is_open():

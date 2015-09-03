@@ -24,25 +24,25 @@ class Algo(Framework):
     def identifier(self):
         return "5min Pinbar Scalp (ema: %s, sl:%s, tp:%s)" % (self.emaPeriod, self.stopLoss.points, self.takeProfit)
 
-    def warmupPeriod(self):
+    def quote_cache_size(self):
         return self.emaPeriod + 1
 
-    def portfolio_symbols(self):
+    def analysis_symbols(self):
         return [Symbol.get('EURUSD:CUR'), ]
 
     def period(self):
         return MarketDataPeriod.MIN_5
 
-    def initialiseContext(self, context):
+    def initialise_context(self, context):
         for symbol in self.analysis_symbols():
-            context.symbolContexts[symbol].ema = []
-            context.symbolContexts[symbol].positiocn = False
+            context.symbol_contexts[symbol].ema = []
+            context.symbol_contexts[symbol].positiocn = False
 
-    def evaluateTickUpdate(self, context, quote):
+    def evaluate_tick_update(self, context, quote):
         """
         This method is called for every market data tick update on the requested symbols.
         """
-        symbolContext = context.symbolContexts[quote.symbol]
+        symbolContext = context.symbol_contexts[quote.symbol]
 
         # logging.debug("I'm evaluating the data for %s" % (quote, ))
 
@@ -69,10 +69,10 @@ class Algo(Framework):
 
             buy_signal = bar_is_lowest and ((min(symbolContext.open, symbolContext.close) - symbolContext.low) * 1.5) >= (symbolContext.high - symbolContext.low)
             sell_signal = bar_is_highest and ((symbolContext.high - max(symbolContext.open, symbolContext.close)) * 1.5) >= (symbolContext.high - symbolContext.low)
-            open_positions = list(context.getOpenPositions())
+            open_positions = list(context.open_positions())
 
             if quote.close > ema and sell_signal:
-                # if context.symbolContexts[quote.symbol].position is False:
+                # if context.symbol_contexts[quote.symbol].position is False:
                     # create a LONG position
                 if len(open_positions) != 0:
                     position = open_positions[0]
@@ -80,8 +80,8 @@ class Algo(Framework):
                         context.closePosition(position)
                 else:
                     logging.debug("Opening position on quote: %s" % (quote,))
-                    context.placeOrder(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.LONG, stoploss=self.stopLoss, takeProfit=self.takeProfit))
-                # context.symbolContexts[quote.symbol].position = True
+                    context.place_order(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, take_profit=self.takeProfit))
+                # context.symbol_contexts[quote.symbol].position = True
             elif quote.close < ema and buy_signal:
                 if len(open_positions) != 0:
                     position = open_positions[0]

@@ -48,7 +48,7 @@ class OrderManagerTest(unittest.TestCase):
         self.position = position
 
     def setUp(self):
-        Symbol.setDataProvider(DummySymbolProvider())
+        Symbol.set_info_provider(DummySymbolProvider())
         logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
         self.position = None
 

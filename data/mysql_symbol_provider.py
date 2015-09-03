@@ -8,7 +8,7 @@ class MySQLSymbolProvider(SymbolProvider):
         self._db_connection = mysql.connector.connect(**credentials)
         self.cursor = self._db_connection.cursor()
 
-    def getDataForSymbol(self, sid):
+    def get_symbol_info(self, sid):
         self.cursor.callproc('symbol_info', [sid, ])
         for results in self.cursor.stored_results():
             for r in results.fetchall():
