@@ -1,6 +1,8 @@
 import argparse
 import logging
+from algorithms.naked_big_shadow import NakedBigShadow
 from algorithms.scalp_5m_pin_bar import Algo
+from backtest.backtest_orderbook_persist import BacktestOrderbookPersist
 
 from backtest.simulated_broker import Broker
 from market.market_data import MarketData
@@ -28,20 +30,21 @@ def main():
         level = logging.INFO
     elif args.log_level == 'WARN':
         level = logging.WARN
-    logging.basicConfig(format='%(asctime)s [%(levelname)]: %(message)s', level=level)
+    logging.basicConfig(level=level)
 
     config = Config("config.conf")
 
     data_provider = config.data_provider
     venue_connection = Broker(data_provider)
 
-    order_book = OrderBook(venue_connection)
+    orderbook_persist = BacktestOrderbookPersist()
+    order_book = OrderBook(venue_connection, orderbook_persist)
     market_data = MarketData(venue_connection)
 
     containers = []
 #    containers.append(Container(Algo(25, 10, 10), 10000, order_book, market_data))
-#   containers.append(Container(Algo(15, 5, 10), 10000, order_book, market_data))
-    containers.append(Container(Algo(15, 50, 100), 100000, order_book, market_data))
+    containers.append(Container(NakedBigShadow(8, 20, 100), 10000, order_book, market_data))
+    # containers.append(Container(Algo(15, 50, 100), 100000, order_book, market_data))
 
     if args.show_progress is True:
         progress_bar = ProgressBar(data_provider.expected_result_count, label='Backtest')

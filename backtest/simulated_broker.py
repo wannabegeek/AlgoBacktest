@@ -34,22 +34,25 @@ class Broker(OrderRouter, DataProvider):
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
 
-        if order.state is not State.PENDING_NEW:
+        if order.status is not State.PENDING_NEW:
             raise ValueError("Attempting to place a non-pending order")
 
         self.orders.append(order)
 
-        order.state = State.WORKING
+        # We need to update the time on the order, since we are running in simulation mode
+        order.entry_time = self.current_tick.timestamp
+
+        order.status = State.WORKING
         [f(order, State.PENDING_NEW) for f in self.orderStatusObservers]
         self._evaluate_orders(order, self.current_tick)
 
     def modify_order(self, order):
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
-        if order.state is not State.PENDING_MODIFY:
+        if order.status is not State.PENDING_MODIFY:
             raise ValueError("Attempting to modify a non-pending order")
 
-        order.state = State.WORKING
+        order.status = State.WORKING
         [f(order, State.PENDING_MODIFY) for f in self.orderStatusObservers]
         if order in self.orders:
             # we shouldn't need to do anything else, since the reference will have been updated
@@ -60,12 +63,12 @@ class Broker(OrderRouter, DataProvider):
     def cancel_order(self, order):
         if not isinstance(order, Order):
             raise TypeError('argument "order" must be a Order')
-        if order.state is not State.PENDING_CANCEL:
+        if order.status is not State.PENDING_CANCEL:
             raise ValueError("Attempting to cancel a non-pending order")
 
         try:
             self.orders.remove(order)
-            order.state = State.CANCELLED
+            order.status = State.CANCELLED
             [f(order, State.PENDING_CANCEL) for f in self.orderStatusObservers]
         except ValueError:
             raise OrderbookException("Order not found")
@@ -96,9 +99,9 @@ class Broker(OrderRouter, DataProvider):
             self._evaluate_orders(order, tick)
 
     def _fill_order(self, order, tick):
-        previousState = order.state
+        previousState = order.status
         #Create position and notify client (ordersStatusObservers & position_observers)
-        order.state = State.FILLED
+        order.status = State.FILLED
         self.orders.remove(order)
         #TODO we should filter the observers to the observers related to the position/order
         [f(order, previousState) for f in self.orderStatusObservers]
@@ -109,7 +112,7 @@ class Broker(OrderRouter, DataProvider):
         # we're not interested in the order anymore, only the position
 
     def _evaluate_orders(self, order, tick):
-        previousState = order.state
+        previousState = order.status
         # if not isinstance(order, Order):
         #     raise TypeError('argument "order" must be a Order')
         # if not isinstance(tick, Tick):
@@ -120,10 +123,11 @@ class Broker(OrderRouter, DataProvider):
 
         if order.expire_time is not None:
             timeSinceCreation = tick.timestamp - order.entry_time
-            if timeSinceCreation.total_seconds() >= order.expire_time.total_seconds():
-                order.state = State.EXPIRED
+            if timeSinceCreation >= order.expire_time.total_seconds():
+                order.status = State.EXPIRED
                 [f(order, previousState) for f in self.orderStatusObservers]
                 self.orders.remove(order)
+                return
 
         if order.entry.type == Entry.Type.MARKET:
             self._fill_order(order, tick)

@@ -24,7 +24,7 @@ class Position(object):
             raise ValueError('argument "tick" must be a Tick')
 
         self.order = order
-        self.order.state = State.FILLED # mark the order as filled
+        self.order.status = State.FILLED # mark the order as filled
 
         self.entry_tick = tick
         self.entry_price = tick.offer if self.order.direction == Direction.LONG else tick.bid

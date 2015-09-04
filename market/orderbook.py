@@ -6,16 +6,18 @@ from market.position import Position
 
 
 class OrderBook(object):
-    def __init__(self, order_router):
+    def __init__(self, order_router, persistence):
         if not isinstance(order_router, OrderRouter):
             raise TypeError("order_router must be OrderRouter type")
 
         self.order_router = order_router
+        self.persistence = persistence
+
         self.containers = []
         self.order_router.addOrderStatusObserver(self._order_status_update)
         self.order_router.addPositionObserver(self._position_status_update)
-        self.orders = {}
-        self.positions = {}
+        self.orders = self.persistence.recover_open_orders()
+        self.positions = self.persistence.recover_open_positions()
         self.order_observers = {}
         self.position_observers = {}
 
@@ -40,7 +42,8 @@ class OrderBook(object):
             # there isn't an observer
             pass
 
-        if order.state is State.WORKING:
+        self.persistence.update_order(order)
+        if order.status is State.WORKING:
             if previousState is State.PENDING_NEW:
                 logging.debug("Order has been accepted")
             elif previousState is State.PENDING_MODIFY:
@@ -51,8 +54,45 @@ class OrderBook(object):
             # we need to remove the order from the order book since it is complete
             del(self.orders[order.id])
 
-    def register_position(self, position):
-        pass
+    def place_order(self, context, order):
+        self.persistence.add_order(order)
+        # send new order to market
+        order.context = context
+        if self._check_risk_limits(context, order):
+            self.orders[order.id] = order
+            self.order_router.place_order(order)
+        else:
+            logging.error("Risk limits breached rejecting request")
+            callbacks = self.order_observers[context]
+            previous_state = order.status
+            order.status = State.REJECTED
+            self.persistence.update_order(order)
+            for callback in callbacks:
+                callback(order, previous_state)
+
+    def modify_order(self, order):
+        self.persistence.update_order(order)
+        # modify order on market
+        # find the original context
+        context = self.orders[order.id][1]
+        if self._check_risk_limits(context, order):
+            self.order_router.modify_order(order)
+        else:
+            logging.error("Risk limits breached rejecting request")
+            callbacks = self.order_observers[context]
+            previous_state = order.status
+            order.status = State.REJECTED
+            self.persistence.update_order(order)
+            for callback in callbacks:
+                callback(order, previous_state)
+            order.status = State.WORKING
+
+    def cancel_order(self, order):
+        # cancel order on market
+        order.status = State.PENDING_CANCEL
+        self.persistence.update_order(order)
+        self.order_router.cancel_order(order)
+        del(self.orders[order.id])
 
     def _position_status_update(self, position, previous_state):
         try:
@@ -63,53 +103,23 @@ class OrderBook(object):
             # there isn't an observer
             pass
 
-        if position.status is Position.PositionStatus.OPEN:
+        if position.status is Position.PositionStatus.OPEN and previous_state is None:
             self.positions[position.id] = position
-            self.register_position(position)
+            self.persistence.add_position(position);
         elif not position.is_open():
             logging.debug("Position has been closed")
+            self.persistence.update_position(position)
             del(self.positions[position.id])
-
-    def place_order(self, context, order):
-        # send new order to market
-        order.context = context
-        if self._check_risk_limits(context, order):
-            self.orders[order.id] = order
-            self.order_router.place_order(order)
         else:
-            logging.error("Risk limits breached rejecting request")
-            callbacks = self.order_observers[context]
-            previous_state = order.state
-            order.state = State.REJECTED
-            for callback in callbacks:
-                callback(order, previous_state)
-
-    def modify_order(self, order):
-        # modify order on market
-        # find the original context
-        context = self.orders[order.id][1]
-        if self._check_risk_limits(context, order):
-            order.state = State.PENDING_MODIFY
-            self.order_router.modify_order(order)
-        else:
-            logging.error("Risk limits breached rejecting request")
-            callbacks = self.order_observers[context]
-            previous_state = order.state
-            order.state = State.REJECTED
-            for callback in callbacks:
-                callback(order, previous_state)
-            order.state = State.WORKING
-
-    def cancel_order(self, order):
-        # cancel order on market
-        order.state = State.PENDING_CANCEL
-        self.order_router.cancel_order(order)
-        del(self.orders[order.id])
+            self.persistence.update_position(position)
 
     def modify_position(self, position):
+        self.persistence.update_position(position)
+        self.order_router.modify_position(position)
         pass
 
     def close_position(self, position):
+        self.persistence.update_position(position)
         self.order_router.close_position(position)
 
     def _check_risk_limits(self, container, order):
