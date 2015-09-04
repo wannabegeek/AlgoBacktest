@@ -70,7 +70,7 @@ class NakedReversalAlgo(Framework):
                         # do we have space to left
                         high = max(quote.high, previous_quote.high)
                         if high < max(list(symbol_context.highs)[:-3]):
-                            stop_loss = StopLoss(StopLoss.Type.FIXED, (quote.open - quote.high) * quote.symbol.lot_size)
+                            stop_loss = StopLoss(StopLoss.Type.FIXED, (abs(quote.close - quote.high) * (quote.symbol.lot_size + 1)) + 5)
                             context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.LIMIT, quote.low), Direction.SHORT, stoploss=stop_loss, take_profit=self.take_profit, expire_time=MarketDataPeriod.HOUR_4))
                     else:
                         # go long
@@ -78,7 +78,7 @@ class NakedReversalAlgo(Framework):
                         # do we have space to left
                         low = min(quote.low, previous_quote.low)
                         if low < min(list(symbol_context.lows)[:-3]):
-                            stop_loss = StopLoss(StopLoss.Type.FIXED, (quote.close - quote.low) * quote.symbol.lot_size)
+                            stop_loss = StopLoss(StopLoss.Type.FIXED, (abs(quote.close - quote.low) * (quote.symbol.lot_size + 1)) + 5)
                             context.place_order(Order(quote.symbol, 10, Entry(Entry.Type.LIMIT, quote.high), Direction.LONG, stoploss=stop_loss, take_profit=self.take_profit, expire_time=MarketDataPeriod.HOUR_4))
                 # open_positions = list(context.open_positions())
                 # if len(open_positions) == 0:
