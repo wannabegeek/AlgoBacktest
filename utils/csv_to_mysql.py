@@ -29,7 +29,7 @@ class Handler(object):
 
     def tick_handler(self, symbol, tick):
         try:
-            self.cursor.execute("INSERT INTO tick_data(symbol_id, timestamp, bid, offer) VALUES(%s, %s, %s, %s)", (symbol.identifier, tick.timestamp, tick.bid, tick.offer))
+            self.cursor.execute("INSERT INTO tick_data2(symbol_id, timestamp, bid, offer) VALUES(%s, %s, %s, %s)", (symbol.identifier, tick.timestamp.timestamp(), tick.bid, tick.offer))
             self.totalTicks += 1
             if self.totalTicks >= 100000:
                 self._db_connection.commit()
@@ -41,7 +41,8 @@ class Handler(object):
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    Symbol.set_info_provider(MySQLSymbolProvider())
+    database = {'user': 'blackbox', 'database': 'blackbox', 'host': "192.168.0.8"};
+    Symbol.set_info_provider(MySQLSymbolProvider(database))
 
     parser = argparse.ArgumentParser(description='Parse CSV Tick data into sqlite db.')
     parser.add_argument("-s", "--symbol", dest="symbol", required=True, help="symbol identifier")
