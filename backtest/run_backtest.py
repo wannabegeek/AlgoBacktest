@@ -1,6 +1,6 @@
 import argparse
 import logging
-from algorithms.naked_1h_reversal import NakedReversalAlgo
+from algorithms.naked_big_shadow import NakedBigShadow
 from algorithms.scalp_5m_pin_bar import Algo
 from backtest.backtest_orderbook_persist import BacktestOrderbookPersist
 
@@ -43,7 +43,7 @@ def main():
 
     containers = []
 #    containers.append(Container(Algo(25, 10, 10), 10000, order_book, market_data))
-    containers.append(Container(NakedReversalAlgo(8, 20, 100), 10000, order_book, market_data))
+    containers.append(Container(NakedBigShadow(8, 20, 100), 10000, order_book, market_data))
     # containers.append(Container(Algo(15, 50, 100), 100000, order_book, market_data))
 
     if args.show_progress is True:

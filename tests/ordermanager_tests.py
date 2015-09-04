@@ -58,11 +58,11 @@ class OrderManagerTest(unittest.TestCase):
         start_time = datetime.datetime(2015, 7, 7, 12)
         # symbol = algo.analysis_symbols()[0]
         ticks = []
-        ticks.append(Tick(start_time, 10.0, 10.1))
+        ticks.append(Tick(start_time.timestamp(), 10.0, 10.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 11.0, 11.1))
+        ticks.append(Tick(start_time.timestamp(), 11.0, 11.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 12.0, 12.1))
+        ticks.append(Tick(start_time.timestamp(), 12.0, 12.1))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
@@ -87,15 +87,15 @@ class OrderManagerTest(unittest.TestCase):
         start_time = datetime.datetime(2015, 7, 7, 12)
         # symbol = algo.analysis_symbols()[0]
         ticks = []
-        ticks.append(Tick(start_time, 10.0, 10.1))
+        ticks.append(Tick(start_time.timestamp(), 10.0, 10.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 11.0, 11.1))
+        ticks.append(Tick(start_time.timestamp(), 11.0, 11.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 12.0, 12.1))
+        ticks.append(Tick(start_time.timestamp(), 12.0, 12.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 12.3, 12.4))
+        ticks.append(Tick(start_time.timestamp(), 12.3, 12.4))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 12.8, 12.9))
+        ticks.append(Tick(start_time.timestamp(), 12.8, 12.9))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
@@ -121,15 +121,15 @@ class OrderManagerTest(unittest.TestCase):
 
         # symbol = algo.analysis_symbols()[0]
         ticks = []
-        ticks.append(Tick(start_time, 10.0, 10.1))
+        ticks.append(Tick(start_time.timestamp(), 10.0, 10.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 11.0, 11.1))
+        ticks.append(Tick(start_time.timestamp(), 11.0, 11.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 12.0, 12.1))
+        ticks.append(Tick(start_time.timestamp(), 12.0, 12.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 12.3, 12.4))
+        ticks.append(Tick(start_time.timestamp(), 12.3, 12.4))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 12.8, 12.9))
+        ticks.append(Tick(start_time.timestamp(), 12.8, 12.9))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
@@ -151,13 +151,13 @@ class OrderManagerTest(unittest.TestCase):
         start_time = datetime.datetime(2015, 7, 7, 12)
         # symbol = algo.analysis_symbols()[0]
         ticks = []
-        ticks.append(Tick(start_time, 10.0, 10.1))
+        ticks.append(Tick(start_time.timestamp(), 10.0, 10.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 11.0, 11.1))
+        ticks.append(Tick(start_time.timestamp(), 11.0, 11.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 10.0, 10.1))
+        ticks.append(Tick(start_time.timestamp(), 10.0, 10.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 8.0, 8.1))
+        ticks.append(Tick(start_time.timestamp(), 8.0, 8.1))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
@@ -185,11 +185,11 @@ class OrderManagerTest(unittest.TestCase):
         start_time = datetime.datetime(2015, 7, 7, 12)
         # symbol = algo.analysis_symbols()[0]
         ticks = []
-        ticks.append(Tick(start_time, 10.0, 10.1))
+        ticks.append(Tick(start_time.timestamp(), 10.0, 10.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 11.0, 11.1))
+        ticks.append(Tick(start_time.timestamp(), 11.0, 11.1))
         start_time = start_time + MarketDataPeriod.MIN_1
-        ticks.append(Tick(start_time, 13.0, 13.1))
+        ticks.append(Tick(start_time.timestamp(), 13.0, 13.1))
 
         dataProvider = SimulatedDataProvider(symbol, ticks)
         order_manager = Broker(dataProvider)
