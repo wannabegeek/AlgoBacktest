@@ -246,7 +246,7 @@ class PositionProfitLossTests(unittest.TestCase):
         position = Position(order, tick)
         self.assertIsNone(position.stop_price)
 
-        position.update(stop_loss=StopLoss(StopLoss.Type.FIXED, 2))
+        position.update(stoploss=StopLoss(StopLoss.Type.FIXED, 2))
 
         self.assertIsNotNone(position.stop_price)
         self.assertEqual(1.12265, position.stop_price)

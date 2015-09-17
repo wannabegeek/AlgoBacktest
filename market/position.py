@@ -47,11 +47,11 @@ class Position(object):
         self.latest = Position.VolatileProperties(sl, tp)
         self.version.append(self.latest)
 
-    def update(self, stop_loss=None, take_profit=None):
-        sl = None
-        tp = None
-        if stop_loss is not None:
-            sl = self._calculate_stoploss(stop_loss)
+    def update(self, stoploss=None, take_profit=None):
+        sl = self.latest.stop_price
+        tp = self.latest.take_profit
+        if stoploss is not None:
+            sl = self._calculate_stoploss(stoploss)
         if take_profit is not None:
             tp = self._calculate_take_profit(take_profit)
 

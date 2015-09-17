@@ -43,11 +43,15 @@ class NakedBigShadow(Framework):
         if direction is Direction.LONG:
             close = quote.high - quote.close
             range = quote.high - quote.low
+            if close == 0:
+                return True # the close was at the high
             ratio = close / range
             return ratio <= 0.25
         else:
             close = quote.close - quote.low
             range = quote.high - quote.low
+            if close == 0:
+                return True # the close was at the low
             ratio = close / range
             return ratio <= 0.25
 

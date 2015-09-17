@@ -7,7 +7,7 @@ from backtest.backtest_orderbook_persist import BacktestOrderbookPersist
 from backtest.simulated_broker import Broker
 from market.market_data import MarketData
 from market.orderbook import OrderBook
-from results.email import display_results
+from results.mongo_results import display_results
 from strategy.container import Container
 from utils.config import Config
 from utils.progress_bar import ProgressBar
