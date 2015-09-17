@@ -11,6 +11,7 @@ from results.email import display_results
 from strategy.container import Container
 from utils.config import Config
 from utils.progress_bar import ProgressBar
+from market.market_data import MarketDataPeriod
 
 
 def main():
@@ -43,7 +44,13 @@ def main():
 
     containers = []
 #    containers.append(Container(Algo(25, 10, 10), 10000, order_book, market_data))
-    containers.append(Container(NakedBigShadow(8, 20, 100), 10000, order_book, market_data))
+    containers.append(Container(NakedBigShadow(7, 10, 50, MarketDataPeriod.HOUR_4), 10000, order_book, market_data))
+    containers.append(Container(NakedBigShadow(7, 10, 50, MarketDataPeriod.DAY), 10000, order_book, market_data))
+    containers.append(Container(NakedBigShadow(7, 10, 60, MarketDataPeriod.DAY), 10000, order_book, market_data))
+    containers.append(Container(NakedBigShadow(7, 10, 70, MarketDataPeriod.DAY), 10000, order_book, market_data))
+    containers.append(Container(NakedBigShadow(7, 10, 80, MarketDataPeriod.DAY), 10000, order_book, market_data))
+    containers.append(Container(NakedBigShadow(7, 10, 90, MarketDataPeriod.DAY), 10000, order_book, market_data))
+    containers.append(Container(NakedBigShadow(7, 10, 100, MarketDataPeriod.DAY), 10000, order_book, market_data))
     # containers.append(Container(Algo(15, 50, 100), 100000, order_book, market_data))
 
     if args.show_progress is True:

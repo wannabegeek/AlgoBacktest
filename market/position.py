@@ -48,8 +48,8 @@ class Position(object):
         self.version.append(self.latest)
 
     def update(self, stop_loss=None, take_profit=None):
-        sl = None
-        tp = None
+        sl = self.stop_price
+        tp = self.take_profit
         if stop_loss is not None:
             sl = self._calculate_stoploss(stop_loss)
         if take_profit is not None:
