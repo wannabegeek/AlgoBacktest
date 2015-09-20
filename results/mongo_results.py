@@ -41,7 +41,7 @@ def display_results(container):
         algo_data["winning_ratio"] = (len(winning)/total_positions * 100)
         algo_data["total_pts"] = sum([x.points_delta() for x in closed_positions])
 
-    result = collection.insert_one(algo_data)
+    result = collection.insert(algo_data)
 
 
 
@@ -49,7 +49,7 @@ def display_results(container):
         for position in container.context.positions:
             position_data = {
                 "_id": position.id,
-                "algo_id": result.inserted_id,
+                "algo_id": result,
                 "direction": position.order.direction.value,
                 "qty": position.order.quantity,
                 "is_open": position.is_open(),
@@ -62,4 +62,4 @@ def display_results(container):
                 position_data["exit_ts"] = position.exit_tick.timestamp * 1000
                 position_data["exit_px"] = position.exit_tick.offer if position.order.direction == Direction.LONG else position.exit_tick.bid
 
-            db.backtest_positions.insert_one(position_data)
+            db.backtest_positions.insert(position_data)
