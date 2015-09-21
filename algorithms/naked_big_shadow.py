@@ -113,7 +113,7 @@ class NakedBigShadow(Framework):
                                     stop_loss = StopLoss(StopLoss.Type.FIXED, stop_points)
                                     qty = self.calculate_position_size(context, stop_points)
                                     if qty > 0:
-                                        context.place_order(Order(quote.symbol, qty, Entry(Entry.Type.LIMIT, quote.low + 5), Direction.SHORT, stoploss=stop_loss, take_profit=self.take_profit, expire_time=self.time_period))
+                                        context.place_order(Order(quote.symbol, qty, Entry(Entry.Type.LIMIT, quote.low - 5), Direction.SHORT, stoploss=stop_loss, take_profit=self.take_profit, expire_time=self.time_period))
                         else: # go long
                             if self.is_strong_candle(quote, Direction.LONG):
                                 if self.has_space_to_left_of_low(quote, previous_quote, list(symbol_context.lows)[:-1], self.space_to_left):
