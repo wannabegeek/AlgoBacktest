@@ -20,7 +20,10 @@ class NakedBigShadow(Framework):
         pass
 
     def identifier(self):
-        return "Naked 1H Reversal (space_to_left: %s, lbc:%s, period:%s, tp:%s)" % (self.space_to_left, self.largest_body_count, self.time_period, self.take_profit)
+        return "Naked Big Shadow"
+
+    def secondary_identifier(self):
+        return "space_to_left: %s, lbc:%s, period:%s, tp:%s" % (self.space_to_left, self.largest_body_count, self.time_period, self.take_profit)
 
     def quote_cache_size(self):
         return max(self.space_to_left, self.largest_body_count) + 1

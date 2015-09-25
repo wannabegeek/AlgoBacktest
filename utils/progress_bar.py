@@ -21,20 +21,23 @@ class ProgressBar(object):
     def complete(self):
         sys.stdout.write("\n")
         if self.estimated_time is True:
-            sys.stdout.write("Completed in %s\n" % (datetime.datetime.utcnow() - self.start_time,))
+            sys.stdout.write("Completed in %s\n" % (datetime.timedelta(seconds=(datetime.datetime.utcnow() - self.start_time).seconds),))
         sys.stdout.flush()
 
     def _display(self, value):
         percent = float(value) / self.max
-        hashes = '#' * int(round(percent * self.width))
-        spaces = ' ' * (self.width - len(hashes))
+        hashes = '=' * int(round(percent * self.width))
+        spaces = '-' * (self.width - len(hashes))
 
         if self.estimated_time is True and self.start_time is not None and percent != 0.0:
-            remaining = (datetime.datetime.utcnow() - self.start_time) / percent
-            sys.stdout.write("\r{0}: [{1}] {2}% - remaining: {3}".format(self.label, hashes + spaces, int(round(percent * 100)), remaining))
+            estimated = (datetime.datetime.utcnow() - self.start_time) / percent
+            elapsed = datetime.timedelta(seconds=(datetime.datetime.utcnow() - self.start_time).seconds)
+            remaining = datetime.timedelta(seconds=(estimated - elapsed).seconds)
+            sys.stdout.write("\r{0}: [{1}] {2:3d}% - elapsed: {3} remaining: {4}".format(self.label, hashes + spaces, int(round(percent * 100)), elapsed, remaining))
             sys.stdout.flush()
         else:
-            sys.stdout.write("\r{0}: [{1}] {2}%".format(self.label, hashes + spaces, int(round(percent * 100))))
+            elapsed = datetime.timedelta(seconds=0)
+            sys.stdout.write("\r{0}: [{1}] {2:3d}% - elapsed: {3} remaining: unknown".format(self.label, hashes + spaces, int(round(percent * 100)), elapsed))
             sys.stdout.flush()
 
 if __name__ == '__main__':

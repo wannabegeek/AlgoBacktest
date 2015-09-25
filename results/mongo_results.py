@@ -6,9 +6,13 @@ from market.order import Direction
 
 locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')
 
-def calculate_capital(self, change):
-    self.capital += change
-    return self.capital
+class Capital(object):
+    def __init__(self, initial):
+        self.capital = initial
+
+    def calculate(self, position):
+        self.capital += float(position.equity())
+        return {"timestamp" : position.exit_tick.timestamp , "capital" : self.capital}
 
 def display_results(container):
     client = MongoClient('192.168.0.8', 27017)
@@ -20,19 +24,20 @@ def display_results(container):
     # create summary
     result = db.backtest_results.insert({
         "name": container.algo.identifier(),
+        "subname": container.algo.secondary_identifier(),
         "change": percent_change,
     })
 
     # now for the main algo details
     closed_positions = sorted(filter(lambda x: not x.is_open(), container.context.positions), key=lambda x: x.exit_tick.timestamp)
 
-    timestamps = [o.exit_tick.timestamp for o in closed_positions]
-    algorithm_performance = [calculate_capital(float(o.equity())) for o in closed_positions]
-    performance = dict(zip(timestamps, algorithm_performance))
+    capital = Capital(container.starting_capital)
+    performance = [capital.calculate(position) for position in closed_positions]
 
     algo_data = {
         "algo_id": result,
         "name": container.algo.identifier(),
+        "subname": container.algo.secondary_identifier(),
         "positions": total_positions,
         "starting_capital": container.starting_capital,
         "current_capital": container.context.working_capital,
@@ -81,7 +86,7 @@ def display_results(container):
 
             if not position.is_open():
                 position_data["points"] = position.points_delta()
-                position_data["p/l"] = position.equity()
+                position_data["pl"] = position.equity()
                 position_data["exit_ts"] = position.exit_tick.timestamp * 1000
                 position_data["exit_px"] = position.exit_tick.offer if position.order.direction == Direction.LONG else position.exit_tick.bid
 
