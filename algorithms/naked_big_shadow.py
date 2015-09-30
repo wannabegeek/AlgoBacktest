@@ -15,6 +15,8 @@ class NakedBigShadow(Framework):
         self.take_profit = take_profit
         self.time_period = period
 
+        self.pct_risk = 0.02  # risk ratio in 100ths of a %
+
         self.space_to_left = space_to_left
         self.largest_body_count = largest_body_count
         pass
@@ -58,20 +60,26 @@ class NakedBigShadow(Framework):
                 return ratio <= 0.25
         return False
 
-    def is_largest(self, quote, history, periods):
+    def is_largest(self, quote, history):
         current_range = abs(quote.open - quote.close)
-        for q in history[:-periods]:
+        for q in history:
             if current_range < abs(q.open - q.close):
                 return False
         return True
 
-    def has_space_to_left_of_high(self, quote, previous_quote, history, periods):
+    def has_space_to_left_of_high(self, quote, previous_quote, history):
         high = max(quote.high, previous_quote.high)
-        return high >= max(list(history)[:-periods])
+        for q in history:
+            if high < q.high:
+                return False
+        return True
 
-    def has_space_to_left_of_low(self, quote, previous_quote, history, periods):
+    def has_space_to_left_of_low(self, quote, previous_quote, history):
         low = min(quote.low, previous_quote.low)
-        return low >= min(list(history)[:-periods])
+        for q in history:
+            if low > q.low:
+                return False
+        return True
 
     def should_make_zero_risk(self, position, quote):
         # if we are 75% of the way to our profit target, move the stop loss to 0
@@ -79,8 +87,8 @@ class NakedBigShadow(Framework):
         return points_delta >= position.take_profit / 1.5
 
     def calculate_position_size(self, context, stop_loss):
-        # we only want to risk 2% of our capital
-        risk = context.working_capital * 0.02
+        # we only want to risk a small amount of our capital
+        risk = context.working_capital * self.pct_risk
         return int(math.floor(risk / stop_loss))
         
     def evaluate_tick_update(self, context, quote):
@@ -107,19 +115,20 @@ class NakedBigShadow(Framework):
             if self.is_opposite(quote, previous_quote):
                 # check if this candle engulfs the previous
                 if self.is_body_engulfing(quote, previous_quote):
-                    if self.is_largest(quote, list(symbol_context.quotes)[:-1], self.largest_body_count):
+                    historic_periods = list(symbol_context.quotes)[:-1]
+                    if self.is_largest(quote, historic_periods[-self.largest_body_count:]):
                         # are we thinking about long or short?
-                        if quote.close < quote.open: # go short
+                        if quote.close < quote.open:  # go short
                             if self.is_strong_candle(quote, Direction.SHORT):
-                                if self.has_space_to_left_of_high(quote, previous_quote, list(symbol_context.highs)[:-1], self.space_to_left):
+                                if self.has_space_to_left_of_high(quote, previous_quote, historic_periods[-self.space_to_left:-1]):
                                     stop_points = (abs(quote.close - quote.high) * (quote.symbol.lot_size + 1)) + 5
                                     stop_loss = StopLoss(StopLoss.Type.FIXED, stop_points)
                                     qty = self.calculate_position_size(context, stop_points)
                                     if qty > 0:
                                         context.place_order(Order(quote.symbol, qty, Entry(Entry.Type.LIMIT, quote.low - 5), Direction.SHORT, stoploss=stop_loss, take_profit=self.take_profit, expire_time=self.time_period))
-                        else: # go long
+                        else:  # go long
                             if self.is_strong_candle(quote, Direction.LONG):
-                                if self.has_space_to_left_of_low(quote, previous_quote, list(symbol_context.lows)[:-1], self.space_to_left):
+                                if self.has_space_to_left_of_low(quote, previous_quote, historic_periods[-self.space_to_left:-1]):
                                     stop_points = (abs(quote.close - quote.low) * (quote.symbol.lot_size + 1)) + 5
                                     stop_loss = StopLoss(StopLoss.Type.FIXED, stop_points)
                                     qty = self.calculate_position_size(context, stop_points)

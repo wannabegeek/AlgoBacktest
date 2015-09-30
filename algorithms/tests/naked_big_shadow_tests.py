@@ -46,7 +46,7 @@ class NakedTests(unittest.TestCase):
     def setUp(self):
         Symbol.set_info_provider(DummySymbolProvider())
         self.order_router = TestOrderRouter()
-        self.algo = NakedBigShadow(10, 50, 100)
+        self.algo = NakedBigShadow(10, 50, 100, MarketDataPeriod.HOUR_1)
         self.context = Context(10000, OrderBook(self.order_router, BacktestOrderbookPersist()), self.algo.analysis_symbols(), self.algo.quote_cache_size())
 
     def testStrongCandleBear(self):
@@ -93,7 +93,7 @@ class NakedTests(unittest.TestCase):
 
         self.assertFalse(self.algo.is_strong_candle(quote, Direction.LONG))
 
-    def tesBodyEngulfing(self):
+    def testBodyEngulfing(self):
         start_time = datetime.datetime(2015, 7, 26, 12, 0, 0)
         symbol = self.algo.analysis_symbols()[0]
 
@@ -111,8 +111,46 @@ class NakedTests(unittest.TestCase):
         quote2.add_tick(Tick(start_time.timestamp(), t[2], t[2]))
         quote2.add_tick(Tick(start_time.timestamp(), t[3], t[3]))
 
-        self.assertTrue(self.algo.is_body_engulfing(quote, quote2))
-        self.assertFalse(self.algo.is_body_engulfing(quote2, quote))
+        self.assertFalse(self.algo.is_body_engulfing(quote, quote2))
+        self.assertTrue(self.algo.is_body_engulfing(quote2, quote))
+
+    def testLargestCandle(self):
+        start_time = datetime.datetime(2015, 7, 26, 12, 0, 0)
+        symbol = self.algo.analysis_symbols()[0]
+
+        history = []
+        t = (0.6, 0.8, 0.2, 0.4)
+        tick = Tick(start_time.timestamp(), t[0], t[0])
+        quote = Quote(symbol, start_time, MarketDataPeriod.HOUR_1, tick)
+        quote.add_tick(Tick(start_time.timestamp(), t[1], t[1]))
+        quote.add_tick(Tick(start_time.timestamp(), t[2], t[2]))
+        quote.add_tick(Tick(start_time.timestamp(), t[3], t[3]))
+        history.append(quote)
+
+        t = (0.7, 0.9, 0.1, 0.3)
+        tick = Tick(start_time.timestamp(), t[0], t[0])
+        quote = Quote(symbol, start_time, MarketDataPeriod.HOUR_1, tick)
+        quote.add_tick(Tick(start_time.timestamp(), t[1], t[1]))
+        quote.add_tick(Tick(start_time.timestamp(), t[2], t[2]))
+        quote.add_tick(Tick(start_time.timestamp(), t[3], t[3]))
+        history.append(quote)
+
+        t = (0.8, 1.0, 0.0, 0.2)
+        tick = Tick(start_time.timestamp(), t[0], t[0])
+        quote = Quote(symbol, start_time, MarketDataPeriod.HOUR_1, tick)
+        quote.add_tick(Tick(start_time.timestamp(), t[1], t[1]))
+        quote.add_tick(Tick(start_time.timestamp(), t[2], t[2]))
+        quote.add_tick(Tick(start_time.timestamp(), t[3], t[3]))
+
+        self.assertTrue(self.algo.is_largest(quote, history))
+
+        t = (0.7, 0.8, 0.0, 0.31)
+        tick = Tick(start_time.timestamp(), t[0], t[0])
+        quote = Quote(symbol, start_time, MarketDataPeriod.HOUR_1, tick)
+        quote.add_tick(Tick(start_time.timestamp(), t[1], t[1]))
+        quote.add_tick(Tick(start_time.timestamp(), t[2], t[2]))
+        quote.add_tick(Tick(start_time.timestamp(), t[3], t[3]))
+        self.assertFalse(self.algo.is_largest(quote, history))
 
 #     def testEngulfingWithoutSpaceBuyEntry(self):
 #         symbol = self.algo.analysis_symbols()[0]
