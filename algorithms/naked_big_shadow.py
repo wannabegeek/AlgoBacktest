@@ -82,7 +82,12 @@ class NakedBigShadow(Framework):
         return True
 
     def should_make_zero_risk(self, position, quote):
-        # if we are 75% of the way to our profit target, move the stop loss to 0
+        # if we are 50% of the way to our profit target, move the stop loss to 0
+        points_delta = position.points_delta(quote.close)
+        return points_delta >= position.take_profit / 2.0
+
+    def should_guarantee_profit(self, position, quote):
+        # if we are 75% of the way to our profit target, move the stop loss
         points_delta = position.points_delta(quote.close)
         return points_delta >= position.take_profit / 1.5
 
@@ -137,6 +142,9 @@ class NakedBigShadow(Framework):
 
                 open_positions = list(context.open_positions())
                 for position in open_positions:
-                    if self.should_make_zero_risk(position, quote):
+                    # TODO: check if our stop_price is already >= entry_price
+                    if self.should_guarantee_profit(position, quote):
+                        position.update(stop_loss=StopLoss(StopLoss.Type.FIXED, position.take_profit / -2.0))
+                    elif self.should_make_zero_risk(position, quote):
                         position.update(stop_loss=StopLoss(StopLoss.Type.FIXED, 0.0))
 
