@@ -39,7 +39,7 @@ class Container(object):
         # if quote is None or not isinstance(quote, Quote):
         #     raise TypeError("Invalid quote")
 
-        self.algo.evaluate_tick_update(self.context, quote)
+        self.algo.evaluate_quote_update(self.context, quote)
         self.context.add_quote(quote)
 
     def order_status_update(self, order, previous_state):

@@ -21,13 +21,6 @@ def display_results(container):
     total_positions = len(list(filter(lambda x: not x.is_open(), container.context.positions)))
     percent_change = ((container.context.working_capital - container.starting_capital) / container.starting_capital) * 100.0
 
-    # create summary
-    result = db.backtest_results.insert({
-        "name": container.algo.identifier(),
-        "subname": container.algo.secondary_identifier(),
-        "change": percent_change,
-    })
-
     # now for the main algo details
     closed_positions = sorted(filter(lambda x: not x.is_open(), container.context.positions), key=lambda x: x.exit_tick.timestamp)
 
@@ -35,7 +28,7 @@ def display_results(container):
     performance = [capital.calculate(position) for position in closed_positions]
 
     algo_data = {
-        "algo_id": result,
+        "time": datetime.datetime.today(),
         "name": container.algo.identifier(),
         "subname": container.algo.secondary_identifier(),
         "positions": total_positions,

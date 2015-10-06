@@ -55,7 +55,7 @@ class Algo(Framework):
             context.symbol_contexts[symbol].rsi_14 = []
             context.symbol_contexts[symbol].position = False
 
-    def evaluate_tick_update(self, context, quote):
+    def evaluate_quote_update(self, context, quote):
         """
         This method is called for every market data tick update on the requested symbols.
         """

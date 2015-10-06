@@ -31,7 +31,7 @@ class NakedBigShadow(Framework):
         return max(self.space_to_left, self.largest_body_count) + 1
 
     def analysis_symbols(self):
-        return [Symbol.get('EURUSD:CUR'), ]
+        return [(self.time_period, Symbol.get('EURUSD:CUR')), (MarketDataPeriod.MIN_5, Symbol.get('EURUSD:CUR'))]
 
     def period(self):
         return self.time_period
@@ -96,7 +96,7 @@ class NakedBigShadow(Framework):
         risk = context.working_capital * self.pct_risk
         return int(math.floor(risk / stop_loss))
         
-    def evaluate_tick_update(self, context, quote):
+    def evaluate_quote_update(self, context, quote):
         """
         This method is called for every market data tick update on the requested symbols.
         """
