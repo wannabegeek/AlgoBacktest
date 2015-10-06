@@ -4,7 +4,7 @@ import logging
 from market.order import State
 from market.orderbook import OrderBook
 from market.position import Position
-from market.symbol import SymbolContext
+from market.symbol import QuoteContext
 
 
 class Framework(object):
@@ -38,16 +38,8 @@ class Framework(object):
     @abstractmethod
     def analysis_symbols(self):
         """
-        This is a list of symbols which are used in this algorithm.
-        :return: Array of Symbols used in this algorithm
-        """
-        pass
-
-    @abstractmethod
-    def period(self):
-        """
-        This is the interval required for processing backdata.
-        :return: Interval for the backdata
+        This is a list of symbols & periods which are used in this algorithm.
+        :return: Array of period & Symbol tuples used in this algorithm
         """
         pass
 
@@ -63,7 +55,7 @@ class Framework(object):
 
 
 class Context(object):
-    def __init__(self, working_capital, order_book, symbols, history_size):
+    def __init__(self, working_capital, order_book, market_data, history_size):
         """
         Constructor
         This is for internal use.
@@ -76,10 +68,11 @@ class Context(object):
 
         self.working_capital = working_capital
         self.order_book = order_book
-        self.symbol_contexts = {}
-        for symbol in symbols:
-            context = SymbolContext(symbol, history_size)
-            self.symbol_contexts[symbol] = context
+        self.quote_contexts = {}
+
+        for (symbol, period, callback) in market_data:
+            context = QuoteContext(symbol, period, history_size)
+            self.quote_contexts[(symbol, period)] = context
 
         self.orders = []
         self.positions = []
@@ -92,13 +85,16 @@ class Context(object):
         This is for internal use.
         :param quote: The quote to add
         """
-        context = self.symbol_contexts[quote.symbol]
+        context = self.get_quote_context(quote)
         context.add_quote(quote)
         if self.start_time is None:
             self.start_time = quote.start_time
 
-    def symbol_data(self, symbol):
-        return self.symbol_contexts[symbol]
+    def get_quote_context(self, quote):
+        return self.quote_contexts[(quote.symbol, quote.period)]
+
+    def get_quote_context_by_symbol(self, symbol, period):
+        return self.quote_contexts[(symbol, period)]
 
     def place_order(self, order):
         """

@@ -72,7 +72,7 @@ class Algo(Framework):
             open_positions = list(context.open_positions())
 
             if quote.close > ema and sell_signal:
-                # if context.symbol_contexts[quote.symbol].position is False:
+                # if context.quote_contexts[quote.symbol].position is False:
                     # create a LONG position
                 if len(open_positions) != 0:
                     position = open_positions[0]
@@ -81,7 +81,7 @@ class Algo(Framework):
                 else:
                     logging.debug("Opening position on quote: %s" % (quote,))
                     context.place_order(Order(quote.symbol, 50, Entry(Entry.Type.MARKET), Direction.SHORT, stoploss=self.stopLoss, take_profit=self.takeProfit))
-                # context.symbol_contexts[quote.symbol].position = True
+                # context.quote_contexts[quote.symbol].position = True
             elif quote.close < ema and buy_signal:
                 if len(open_positions) != 0:
                     position = open_positions[0]

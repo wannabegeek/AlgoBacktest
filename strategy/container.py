@@ -1,12 +1,10 @@
+from functools import partial
 import logging
 
 from market.market_data import MarketData
 from market.order import State
 from market.orderbook import OrderBook
-from market.position import Position
-from market.price import Quote
 from strategy.strategy import Framework, Context
-from market.symbol import Symbol
 
 
 class Container(object):
@@ -29,17 +27,17 @@ class Container(object):
         self.order_book.addOrderStatusObserver(self.context, self.order_status_update)
         self.order_book.addPositionStatusObserver(self.context, self.position_status_observer)
 
-        for symbol in self.algo.analysis_symbols():
-            self.data_provider.addPriceObserver(symbol, self.algo.period(), self.handle_tick_update)
+        for (symbol, period, callback) in self.algo.analysis_symbols():
+            self.data_provider.addPriceObserver(symbol, period, partial(self.handle_tick_update, callback))
 
-    def handle_tick_update(self, symbol, quote):
+    def handle_tick_update(self, callback, symbol, quote):
         """
         This method gets called from the MarketData framework
         """
         # if quote is None or not isinstance(quote, Quote):
         #     raise TypeError("Invalid quote")
 
-        self.algo.evaluate_quote_update(self.context, quote)
+        callback(self.context, quote)
         self.context.add_quote(quote)
 
     def order_status_update(self, order, previous_state):

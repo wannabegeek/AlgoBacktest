@@ -34,14 +34,7 @@ class Algo(Framework):
         This is a list of symbols which are used in this algorithm.
         :return: Array of Symbols used in this algorithm
         """
-        return [Symbol.get('EURUSD:CUR'), ]
-
-    def period(self):
-        """
-        This is the interval required for processing backdata.
-        :return: Interval for the backdata
-        """
-        return MarketDataPeriod.MIN_5
+        return [(Symbol.get('EURUSD:CUR'), MarketDataPeriod.MIN_5, self.evaluate_quote_update), ]
 
     def initialise_context(self, context):
         """
@@ -49,11 +42,11 @@ class Algo(Framework):
         the algorithm processing is started.
         The frame work calls this method before any market data updates
         """
-        for symbol in self.analysis_symbols():
-            context.symbol_contexts[symbol].ema_10 = []
-            context.symbol_contexts[symbol].ema_25 = []
-            context.symbol_contexts[symbol].rsi_14 = []
-            context.symbol_contexts[symbol].position = False
+        for (symbol, period, callback) in self.analysis_symbols():
+            context.get_quote_context_by_symbol(symbol, period).ema_10 = []
+            context.get_quote_context_by_symbol(symbol, period).ema_25 = []
+            context.get_quote_context_by_symbol(symbol, period).rsi_14 = []
+            context.get_quote_context_by_symbol(symbol, period).position = False
 
     def evaluate_quote_update(self, context, quote):
         """

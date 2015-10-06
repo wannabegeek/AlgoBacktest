@@ -43,7 +43,7 @@ class SQLiteProvider(Provider):
     def start_publishing(self, callback):
         self.cursor.execute("SELECT timestamp, bid, offer FROM tick_data WHERE symbol = ? AND timestamp >= ? and timestamp <= ? ORDER BY timestamp", (self.symbol.sid, self.startDate, self.endDate))
         for tick in self.cursor:
-            callback(self.symbol, Tick(tick[0], tick[1], tick[2]))
+            callback(self.symbol, Tick(tick[0].timestamp(), tick[1], tick[2]))
             self.progress_count += 1
             if self.progress_callback is not None:
                 if self.progress_count % self._callback_interval == 0:

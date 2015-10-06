@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from market.symbol import SymbolContext
+from market.symbol import QuoteContext
 
 
 def gradient(x, y):
@@ -24,14 +24,14 @@ def gradient(x, y):
 
 def sma(context, periods):
     ''' average '''
-    if not isinstance(context, SymbolContext):
+    if not isinstance(context, QuoteContext):
         raise TypeError("context must be of type 'SymbolContext'")
 
     values = np.asarray([x.close for x in context.quotes()[-min(periods, len(context.quotes())):]])
     return np.mean(values)
 
 def ema(context, periods):
-    if not isinstance(context, SymbolContext):
+    if not isinstance(context, QuoteContext):
         raise TypeError("context must be of type 'SymbolContext'")
 
     adjPeriod = min(periods, len(context.quotes()))
@@ -46,7 +46,7 @@ def ema(context, periods):
 
 def stddev(context, periods):
     ''' Standard Deviation '''
-    if not isinstance(context, SymbolContext):
+    if not isinstance(context, QuoteContext):
         raise TypeError("context must be of type 'SymbolContext'")
 
     values = np.asarray([x.close for x in context.quotes()[-min(periods, len(context.quotes())):]])
@@ -54,7 +54,7 @@ def stddev(context, periods):
 
 def vwap(context, periods):
     ''' Volume Weighted Average Price '''
-    if not isinstance(context, SymbolContext):
+    if not isinstance(context, QuoteContext):
         raise TypeError("context must be of type 'SymbolContext'")
 
     v1 = sum([x.close * x.volume for x in context.quotes()[-min(periods, len(context.quotes())):]])

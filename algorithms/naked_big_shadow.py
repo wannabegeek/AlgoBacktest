@@ -31,10 +31,10 @@ class NakedBigShadow(Framework):
         return max(self.space_to_left, self.largest_body_count) + 1
 
     def analysis_symbols(self):
-        return [(self.time_period, Symbol.get('EURUSD:CUR')), (MarketDataPeriod.MIN_5, Symbol.get('EURUSD:CUR'))]
-
-    def period(self):
-        return self.time_period
+        return [
+            (Symbol.get('EURUSD:CUR'), self.time_period, self.evaluate_quote_update),
+            (Symbol.get('EURUSD:CUR'), MarketDataPeriod.MIN_5, self.evaluate_risk)
+        ]
 
     def initialise_context(self, context):
         pass
@@ -95,12 +95,22 @@ class NakedBigShadow(Framework):
         # we only want to risk a small amount of our capital
         risk = context.working_capital * self.pct_risk
         return int(math.floor(risk / stop_loss))
-        
+
+
+    def evaluate_risk(self, context, quote):
+        open_positions = list(context.open_positions())
+        for position in open_positions:
+            # TODO: check if our stop_price is already >= entry_price
+            if self.should_guarantee_profit(position, quote):
+                position.update(stop_loss=StopLoss(StopLoss.Type.FIXED, position.take_profit / -2.0))
+            elif self.should_make_zero_risk(position, quote):
+                position.update(stop_loss=StopLoss(StopLoss.Type.FIXED, 0.0))
+
     def evaluate_quote_update(self, context, quote):
         """
         This method is called for every market data tick update on the requested symbols.
         """
-        symbol_context = context.symbol_contexts[quote.symbol]
+        symbol_context = context.get_quote_context(quote)
 
         if len(symbol_context.quotes) > self.space_to_left:  # i.e. we have enough data
 
@@ -139,12 +149,4 @@ class NakedBigShadow(Framework):
                                     qty = self.calculate_position_size(context, stop_points)
                                     if qty > 0:
                                         context.place_order(Order(quote.symbol, qty, Entry(Entry.Type.LIMIT, quote.high + 5), Direction.LONG, stoploss=stop_loss, take_profit=self.take_profit, expire_time=self.time_period))
-
-                open_positions = list(context.open_positions())
-                for position in open_positions:
-                    # TODO: check if our stop_price is already >= entry_price
-                    if self.should_guarantee_profit(position, quote):
-                        position.update(stop_loss=StopLoss(StopLoss.Type.FIXED, position.take_profit / -2.0))
-                    elif self.should_make_zero_risk(position, quote):
-                        position.update(stop_loss=StopLoss(StopLoss.Type.FIXED, 0.0))
 

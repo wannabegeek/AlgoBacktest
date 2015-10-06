@@ -59,15 +59,16 @@ class Symbol(object):
     __repr__ = __str__
 
 
-class SymbolContext(object):
+class QuoteContext(object):
     """
     Context for a symbol contained within a StategyContext
     This holds symbol data and all the historical prices used for analysis
 
     You can also store and access custom variables using the [] accessor/mutator
     """
-    def __init__(self, symbol, history_size):
+    def __init__(self, symbol, period, history_size):
         self.symbol = symbol
+        self.period = period
         self.last_update = None
 
         self.timestamp = None
